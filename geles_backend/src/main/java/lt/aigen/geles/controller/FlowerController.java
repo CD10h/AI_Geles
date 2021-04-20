@@ -5,8 +5,13 @@ import lt.aigen.geles.repositories.FlowerRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
+import java.util.concurrent.Flow;
+
+import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
 @RequestMapping("/flowers")
@@ -26,4 +31,13 @@ public class FlowerController {
     public ResponseEntity<Flower> getFlower(@PathVariable Long id) {
         return flowerRepository.findById(id).map(ResponseEntity::ok).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+
+    @PostMapping("/")
+    public ResponseEntity<Flower> postFlower(@RequestBody @Valid Flower flower)
+    {
+        var createdFlower = flowerRepository.save(flower);
+        return ResponseEntity.ok(createdFlower);
+    }
+
+   
 }
