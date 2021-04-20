@@ -5,6 +5,7 @@ import lombok.Setter;
 import javax.validation.constraints.*;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Getter @Setter
@@ -25,15 +26,15 @@ public class Flower {
     private String photo;
 
     //@NotNull
-    private Integer daysToExpire;
+    private Date expiryDate;
 
-    public Flower(Long id, String name, Double price, String description, String photo, Integer daysToExpire) {
+    public Flower(Long id, String name, Double price, String description, String photo, Date expiryDate) {
         this.id = id;
         this.name = name;
         this.price = price;
         this.description = description;
         this.photo = photo;
-        this.daysToExpire = daysToExpire;
+        this.expiryDate = expiryDate;
     }
 
     public Flower() {
