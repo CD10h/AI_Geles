@@ -1,16 +1,40 @@
 package lt.aigen.geles.models;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
+import lombok.Getter;
+import lombok.Setter;
+import javax.validation.constraints.*;
+
+import javax.persistence.*;
 
 @Entity
+@Getter @Setter
 public class Flower {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    @NotBlank
     private String name;
+
+    //@NotNull
+    private Double price;
+
+    //@NotNull
+    private String description;
+
+    private String photo;
+
+    //@NotNull
+    private Integer daysToExpire;
+
+    public Flower(Long id, String name, Double price, String description, String photo, Integer daysToExpire) {
+        this.id = id;
+        this.name = name;
+        this.price = price;
+        this.description = description;
+        this.photo = photo;
+        this.daysToExpire = daysToExpire;
+    }
 
     public Flower() {
 
@@ -18,22 +42,6 @@ public class Flower {
 
     public Flower(Long id, String name) {
         this.id = id;
-        this.name = name;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
         this.name = name;
     }
 }
