@@ -26,4 +26,17 @@ public class FlowerController {
     public ResponseEntity<Flower> getFlower(@PathVariable Long id) {
         return flowerRepository.findById(id).map(ResponseEntity::ok).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
+
+    @PutMapping("/update/{id}")
+    ResponseEntity<Flower> updateFlower(@RequestBody Flower newFlower, @PathVariable Long id) {
+        if (!id.equals(newFlower.getId())){
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        if (flowerRepository.findById(id).equals(Optional.empty())){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        return new ResponseEntity<>(flowerRepository.save(newFlower), HttpStatus.OK);
+    }
 }
