@@ -35,18 +35,6 @@ public class FlowerController {
         return new ResponseEntity<>(createdFlower, HttpStatus.CREATED);
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Flower> putFlower(@PathVariable Long id, @Valid @RequestBody Flower flowerData) {
-        var foundFlowerOpt = flowerRepository.findById(id);
-        if (foundFlowerOpt.isEmpty())
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-
-        var foundFlower = foundFlowerOpt.get();
-        flowerData.setId(foundFlower.getId());
-        flowerRepository.save(flowerData);
-        return new ResponseEntity<>(foundFlower, HttpStatus.OK);
-    }
-
     @DeleteMapping("/{id}")
     public ResponseEntity<Flower> deleteFLower(@PathVariable Long id) {
         if (flowerRepository.findById(id).isEmpty())
