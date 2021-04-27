@@ -30,7 +30,8 @@ public class FlowerController {
 
     @PostMapping("/")
     public ResponseEntity<Flower> postFlower(@Valid @RequestBody Flower newFlower) {
-        flowerRepository.save(newFlower);
-        return ResponseEntity.ok;
+
+        var createdFlower = flowerRepository.save(newFlower);
+        return new ResponseEntity<>(createdFlower, HttpStatus.CREATED);
     }
 }
