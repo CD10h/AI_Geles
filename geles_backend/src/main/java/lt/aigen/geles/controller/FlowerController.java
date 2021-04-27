@@ -50,4 +50,12 @@ public class FlowerController {
         flowerRepository.save(foundFlower);
         return new ResponseEntity<>(foundFlower, HttpStatus.OK);
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Flower> deleteFLower(@PathVariable Long id) {
+        if (flowerRepository.findById(id).isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        flowerRepository.deleteById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
 }
