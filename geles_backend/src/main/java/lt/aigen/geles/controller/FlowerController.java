@@ -42,12 +42,8 @@ public class FlowerController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
 
         var foundFlower = foundFlowerOpt.get();
-        foundFlower.setName(flowerData.getName());
-        foundFlower.setDescription(flowerData.getDescription());
-        foundFlower.setPrice(flowerData.getPrice());
-        foundFlower.setDaysToExpire(flowerData.getDaysToExpire());
-        foundFlower.setPhoto(flowerData.getPhoto());
-        flowerRepository.save(foundFlower);
+        flowerData.setId(foundFlower.getId());
+        flowerRepository.save(flowerData);
         return new ResponseEntity<>(foundFlower, HttpStatus.OK);
     }
 
