@@ -14,8 +14,6 @@ public interface FlowerRepository extends CrudRepository<Flower, Long> {
     @Query("from Flower f where f.name like %:name%")
     List<Flower> findAllByName(String name);
 
-    @Query("from Flower f where f.expiryDate <= :searchDate")
+    @Query("from Flower f where current_date + f.daysToExpire <= :searchDate")
     List<Flower> findExpiredBeforeDate(@Param("searchDate") Date searchDate);
-
-
 }

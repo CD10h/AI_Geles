@@ -26,15 +26,15 @@ public class Flower {
     private String photo;
 
     //@NotNull
-    private Date expiryDate;
+    private Integer daysToExpire;
 
-    public Flower(Long id, String name, Double price, String description, String photo, Date expiryDate) {
+    public Flower(Long id, String name, Double price, String description, String photo, Integer daysToExpire) {
         this.id = id;
         this.name = name;
         this.price = price;
         this.description = description;
         this.photo = photo;
-        this.expiryDate = expiryDate;
+        this.daysToExpire = daysToExpire;
     }
 
     public Flower() {
