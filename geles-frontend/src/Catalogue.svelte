@@ -21,6 +21,9 @@
       />
       <div class="flower-list-item-name">{flower.name}</div>
       <div class="flower-list-item-price">{flower.price} €</div>
+      <p class="flower-list-item-description">
+        {flower.description}
+      </p>
     </div>
   {/each}
 </div>
@@ -51,6 +54,15 @@
   }
 
   .flower-list-item-price {
+  }
+
+  .flower-list-item-description {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 4;
+    -webkit-box-orient: vertical;
+    /* text-align: justify; */
   }
 
   @media (max-width: 1024px) {

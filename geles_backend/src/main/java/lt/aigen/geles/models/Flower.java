@@ -2,6 +2,8 @@ package lt.aigen.geles.models;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
+
 import javax.validation.constraints.*;
 
 import javax.persistence.*;
@@ -19,9 +21,11 @@ public class Flower {
     //@NotNull
     private Double price;
 
-    //@NotNull
+    @NotNull
+    @Type(type="text")
     private String description;
 
+    @Type(type="text")
     private String photo;
 
     //@NotNull
