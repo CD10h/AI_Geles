@@ -1,5 +1,6 @@
 package lt.aigen.geles.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import javax.validation.constraints.*;
@@ -12,6 +13,7 @@ import java.util.Date;
 public class Flower {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
 
     @NotBlank

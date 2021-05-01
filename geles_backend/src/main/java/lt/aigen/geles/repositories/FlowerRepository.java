@@ -11,7 +11,7 @@ import java.util.List;
 
 @Repository
 public interface FlowerRepository extends CrudRepository<Flower, Long> {
-    @Query("from Flower f where f.name like %:name%")
+    @Query("from Flower f where lower(f.name) like concat('%', lower(:name), '%')")
     List<Flower> findAllByName(String name);
 
     @Query("from Flower f where current_date + f.daysToExpire <= :searchDate")
