@@ -1,16 +1,5 @@
-<script context="module">
-  // JSON object structure for response from server
-  export interface Flower {
-    id: number;
-    name: string;
-    price: number;
-    photo?: string;
-    description: string;
-    daysToExpire: number;
-  }
-</script>
-
 <script>
+  import type { Flower } from "./App.svelte";
   import axios from "axios";
   import Input from "./Input.svelte";
 

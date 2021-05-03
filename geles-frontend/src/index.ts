@@ -1,4 +1,8 @@
+import "svelte";
+
 import App from "./App.svelte";
+
+export const server_url = "http://localhost:8080";
 
 var app = new App({
   target: document.body,
