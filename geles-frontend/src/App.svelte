@@ -6,31 +6,44 @@
     price: number;
     photo?: string;
     description: string;
+    daysToExpire: number;
   }
 </script>
 
 <script>
+  import { Router, Link, Route } from "svelte-routing";
   import { server_url } from "./index.ts";
 
+  import AddFlower from "./AddFlower.svelte";
   import Catalogue from "./Catalogue.svelte";
-  import SearchBar from "./SearchBar.svelte";
+  import Search from "./Search.svelte";
+  import { onMount } from "svelte";
 
-  // Variable to hold input string
-  let query = "";
+  export let url = "";
+
   // Variable to hold fetched list
   let flowers: Flower[] = [];
 
-  // Dependencies of this block are calculated by Svelte
-  // Every time `query` changes, this block of code runs
-  $: {
+  // Run code on component mount (once)
+  onMount(() => {
     // Download data from server
-    fetch(`${server_url}/flowers/?q=${query /* dependency */}`)
+    fetch(`${server_url}/flowers/`)
       // Parse as JSON
       .then((response) => response.json())
       // Set `flowers` to the parsed data
       .then((json) => (flowers = json));
-  }
+  });
 </script>
 
-<SearchBar bind:query />
-<Catalogue {flowers} />
+<Router {url}>
+  <nav>
+    <Link to="/">Home</Link>
+    <Link to="/add">Add flower</Link>
+    <Link to="/search">Search</Link>
+  </nav>
+  <div>
+    <Route path="/" component={Catalogue} {flowers} />
+    <Route path="/add" component={AddFlower} />
+    <Route path="/search" component={Search} />
+  </div>
+</Router>

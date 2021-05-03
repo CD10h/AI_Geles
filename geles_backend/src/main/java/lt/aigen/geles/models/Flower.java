@@ -8,6 +8,7 @@ import org.hibernate.annotations.Type;
 import javax.validation.constraints.*;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Getter @Setter
