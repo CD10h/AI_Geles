@@ -1,16 +1,21 @@
 package lt.aigen.geles.models;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.Type;
+
 import javax.validation.constraints.*;
 
 import javax.persistence.*;
+import java.util.Date;
 
 @Entity
 @Getter @Setter
 public class Flower {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
 
     @NotBlank
@@ -19,9 +24,11 @@ public class Flower {
     //@NotNull
     private Double price;
 
-    //@NotNull
+    @NotNull
+    @Type(type="text")
     private String description;
 
+    @Type(type="text")
     private String photo;
 
     //@NotNull
