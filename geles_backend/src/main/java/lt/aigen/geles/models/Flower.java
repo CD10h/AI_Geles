@@ -18,6 +18,10 @@ public class Flower {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "seller_id")
+    private Seller seller;
+
     @NotBlank
     private String name;
 
