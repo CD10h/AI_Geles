@@ -6,9 +6,10 @@ import lt.aigen.geles.repositories.FlowerRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -47,8 +48,17 @@ public class FlowerController {
         }
     }
 
+    @PutMapping("/{id}")
+    ResponseEntity<FlowerDTO> updateFlower(@RequestBody @Validated FlowerDTO flowerDTO, @PathVariable Long id) {
+        if (flowerRepository.findById(id).equals(Optional.empty())){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        var newFlower = convertFromDTO(flowerDTO);
+        newFlower.setId(id);
+        return new ResponseEntity<>(convertToDTO(flowerRepository.save(newFlower)), HttpStatus.OK);
+    }
     @PostMapping("/")
-    public ResponseEntity<FlowerDTO> postFlower(@RequestBody @Valid FlowerDTO flowerDTO) {
+    public ResponseEntity<FlowerDTO> postFlower(@RequestBody @Validated FlowerDTO flowerDTO) {
         var flower = convertFromDTO(flowerDTO);
         flowerRepository.save(flower);
         return ResponseEntity.ok(convertToDTO(flower));
