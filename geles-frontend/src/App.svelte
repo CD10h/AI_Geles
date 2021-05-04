@@ -16,6 +16,7 @@
 
   import AddFlower from "./AddFlower.svelte";
   import Catalogue from "./Catalogue.svelte";
+  import UpdateFlower from "./UpdateFlower.svelte";
   import Search from "./Search.svelte";
   import { onMount } from "svelte";
 
@@ -45,5 +46,6 @@
     <Route path="/" component={Catalogue} {flowers} />
     <Route path="/add" component={AddFlower} />
     <Route path="/search" component={Search} />
+    <Route path="/update/:id" component={UpdateFlower} />
   </div>
 </Router>

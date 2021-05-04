@@ -41,7 +41,7 @@ public class FlowerController {
         newFlower.setId(id);
         return new ResponseEntity<>(flowerRepository.save(newFlower), HttpStatus.OK);
     }
-}
+
     @PostMapping("/")
     public ResponseEntity<Flower> postFlower(@RequestBody @Valid Flower flower)
     {
