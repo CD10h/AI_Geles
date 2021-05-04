@@ -60,6 +60,16 @@ public class FlowerController {
         return ResponseEntity.ok(convertToDTO(flower));
     }
 
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id)
+    {
+        if (!flowerRepository.existsById(id)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        flowerRepository.deleteById(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
     private FlowerDTO convertToDTO(Flower flower) {
         return modelMapper.map(flower, FlowerDTO.class);
     }
