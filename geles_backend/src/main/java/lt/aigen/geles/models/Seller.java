@@ -21,7 +21,7 @@ public class Seller implements Serializable {
     @NotBlank
     private String name;
     @NotBlank
-    private String Address;
+    private String address;
     @NotBlank
     private String information;
 
