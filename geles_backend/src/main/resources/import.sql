@@ -1,3 +1,6 @@
+INSERT INTO users (username, password) VALUES ('emilis', 'password123');
+INSERT INTO users (username, password) VALUES ('titas', 'ihavethebiggay');
+INSERT INTO users (username, password) VALUES ('simonas', 'aWJ%e4F&C3DS');
 insert into seller (name, address, information) VALUES ('Petras', 'Vilniaus g. 10', 'Atsiliepiame į skambučius nuo 07-17:00. tel. 860000000');
 insert into seller (name, address, information) VALUES ('Antanina', 'Kauno g. 10', 'Atsiliepiame į skambučius nuo 07-17:00. tel. 860000000');
 insert into seller (name, address, information) VALUES ('Bogdan', 'Trakų g. 10', 'Atsiliepiame į skambučius nuo 07-17:00. tel. 860000000; Tik online');
