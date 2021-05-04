@@ -12,7 +12,9 @@ import javax.persistence.*;
 @Entity
 @Getter
 @Setter
-@Table(name = "users")
+@Table(name = "users", uniqueConstraints =
+@UniqueConstraint(name = "UNIQUE_USERNAME", columnNames = {"username"})
+)
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -20,15 +22,15 @@ public class User {
     private Long id;
 
     @NotBlank
-    @Min(4)
+    @Size(min = 4, max=32)
     private String username;
 
     @NotBlank
-    @Min(8)
+    @Size(min = 8, max=64)
     private String password;
 
     // Profile picture
-    @Type(type="text")
+    @Type(type = "text")
     private String photo;
 
     public User(Long id, String username, String password, String photo) {
