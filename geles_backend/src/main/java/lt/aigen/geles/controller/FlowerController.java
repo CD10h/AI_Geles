@@ -18,7 +18,6 @@ import java.util.stream.Collectors;
 @RequestMapping("/flowers")
 public class FlowerController {
     FlowerRepository flowerRepository;
-
     ModelMapper modelMapper;
 
     public FlowerController(FlowerRepository flowerRepository, ModelMapper modelMapper) {
@@ -41,7 +40,6 @@ public class FlowerController {
         if (flower.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         } else {
-            var s = flower.get().getSeller();
             return ResponseEntity.ok(convertToDTO(flower.get()));
         }
     }
