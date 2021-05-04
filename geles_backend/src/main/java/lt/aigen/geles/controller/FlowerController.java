@@ -10,9 +10,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.util.List;
 import java.util.Optional;
-import java.util.concurrent.Flow;
-
-import static org.springframework.http.ResponseEntity.ok;
 
 @RestController
 @RequestMapping("/flowers")
@@ -48,6 +45,4 @@ public class FlowerController {
         var createdFlower = flowerRepository.save(flower);
         return ResponseEntity.ok(createdFlower);
     }
-
-   
 }
