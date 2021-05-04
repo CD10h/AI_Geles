@@ -12,28 +12,13 @@
 
 <script>
   import { Router, Link, Route } from "svelte-routing";
-  import { server_url } from "./index.ts";
 
   import AddFlower from "./AddFlower.svelte";
-  import Catalogue from "./Catalogue.svelte";
-  import UpdateFlower from "./UpdateFlower.svelte";
+  import Home from "./Home.svelte";
   import Search from "./Search.svelte";
-  import { onMount } from "svelte";
+  import UpdateFlower from "./UpdateFlower.svelte";
 
   export let url = "";
-
-  // Variable to hold fetched list
-  let flowers: Flower[] = [];
-
-  // Run code on component mount (once)
-  onMount(() => {
-    // Download data from server
-    fetch(`${server_url}/flowers/`)
-      // Parse as JSON
-      .then((response) => response.json())
-      // Set `flowers` to the parsed data
-      .then((json) => (flowers = json));
-  });
 </script>
 
 <Router {url}>
@@ -43,7 +28,7 @@
     <Link to="/search">Search</Link>
   </nav>
   <div>
-    <Route path="/" component={Catalogue} {flowers} />
+    <Route path="/" component={Home} />
     <Route path="/add" component={AddFlower} />
     <Route path="/search" component={Search} />
     <Route path="/update/:id" component={UpdateFlower} />

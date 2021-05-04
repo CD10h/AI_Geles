@@ -1,8 +1,7 @@
 <script>
   import type { Flower } from "./App.svelte";
-  import { server_url } from "./index.ts";
+  import { server_url } from "./index";
 
-  import AddFlower from "./AddFlower.svelte";
   import Catalogue from "./Catalogue.svelte";
   import SearchBar from "./SearchBar.svelte";
 

@@ -2,7 +2,6 @@
   import type { Flower } from "./App.svelte";
   import axios from "axios";
   import Input from "./Input.svelte";
-  import Catalogue from "./Catalogue.svelte";
 
   let flower: Omit<Flower, "id"> = {
     name: "",

@@ -1,12 +1,21 @@
 <script>
-  import { server_url } from "./index.ts";
-  import { Router, Link, Route } from "svelte-routing";
+  import { server_url } from "./index";
+  import { Link } from "svelte-routing";
 
   import type { Flower } from "./App.svelte";
-  import UpdateFlower from "./UpdateFlower.svelte";
+  import axios from "axios";
 
   // Variable to hold fetched list
   export let flowers: Flower[];
+  export let owner: boolean | undefined = false;
+  export let onChange: (() => void) | undefined = undefined;
+
+  async function handleDelete(id: number, name: string) {
+    if (window.confirm(`Ar tikrai norite ištrinti gėlę ${name}?`)) {
+      await axios.delete(`${server_url}/flowers/${id}`);
+      if (onChange) onChange();
+    }
+  }
 </script>
 
 <div class="flower-list">
@@ -26,7 +35,12 @@
       <p class="flower-list-item-description">
         {flower.description}
       </p>
-      <Link to="/update/{flower.id}">Redaguoti</Link>
+      {#if owner}
+        <Link to="/update/{flower.id}">Redaguoti</Link>
+        <button on:click={() => handleDelete(flower.id, flower.name)}
+          >Ištrinti</button
+        >
+      {/if}
     </div>
   {/each}
 </div>
