@@ -1,7 +1,9 @@
 <script>
   import { server_url } from "./index.ts";
+  import { Router, Link, Route } from "svelte-routing";
 
   import type { Flower } from "./App.svelte";
+  import UpdateFlower from "./UpdateFlower.svelte";
 
   // Variable to hold fetched list
   export let flowers: Flower[];
@@ -24,6 +26,7 @@
       <p class="flower-list-item-description">
         {flower.description}
       </p>
+      <Link to="/update/{flower.id}">Redaguoti</Link>
     </div>
   {/each}
 </div>

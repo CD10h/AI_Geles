@@ -4,6 +4,7 @@ import lt.aigen.geles.models.Flower;
 import lt.aigen.geles.repositories.FlowerRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
@@ -30,6 +31,15 @@ public class FlowerController {
     @GetMapping("/{id}") // /flowers/10
     public ResponseEntity<Flower> getFlower(@PathVariable Long id) {
         return flowerRepository.findById(id).map(ResponseEntity::ok).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    }
+
+    @PutMapping("/{id}")
+    ResponseEntity<Flower> updateFlower(@RequestBody @Validated Flower newFlower, @PathVariable Long id) {
+        if (flowerRepository.findById(id).equals(Optional.empty())){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        newFlower.setId(id);
+        return new ResponseEntity<>(flowerRepository.save(newFlower), HttpStatus.OK);
     }
 
     @PostMapping("/")
