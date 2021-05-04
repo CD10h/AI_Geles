@@ -1,5 +1,6 @@
 package lt.aigen.geles.models;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
@@ -8,14 +9,19 @@ import org.hibernate.annotations.Type;
 import javax.validation.constraints.*;
 
 import javax.persistence.*;
+import java.io.Serializable;
+import java.util.Date;
 
 @Entity
 @Getter @Setter
-public class Flower {
+public class Flower implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
+
+    @ManyToOne
+    @JoinColumn(name = "seller_id")
+    private Seller seller;
 
     @NotBlank
     private String name;

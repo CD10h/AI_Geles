@@ -1,49 +1,63 @@
 package lt.aigen.geles.controller;
 
+import lt.aigen.geles.models.dto.FlowerDTO;
 import lt.aigen.geles.models.Flower;
 import lt.aigen.geles.repositories.FlowerRepository;
+import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import javax.validation.Valid;
+
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/flowers")
 public class FlowerController {
     FlowerRepository flowerRepository;
+    ModelMapper modelMapper;
 
-    public FlowerController(FlowerRepository flowerRepository) {
+    public FlowerController(FlowerRepository flowerRepository, ModelMapper modelMapper) {
         this.flowerRepository = flowerRepository;
+        this.modelMapper = modelMapper;
     }
 
     @GetMapping("/") // /flowers/?q=gele
-    public List<Flower> getFlowers(@RequestParam Optional<String> q) {
-        return flowerRepository.findAllByName(q.orElse(""));
+    public List<FlowerDTO> getFlowers(@RequestParam Optional<String> q) {
+        return flowerRepository.
+                findAllByName(q.orElse("")).
+                stream().
+                map(this::convertToDTO).
+                collect(Collectors.toList());
     }
 
     @GetMapping("/{id}") // /flowers/10
-    public ResponseEntity<Flower> getFlower(@PathVariable Long id) {
-        return flowerRepository.findById(id).map(ResponseEntity::ok).orElse(new ResponseEntity<>(HttpStatus.NOT_FOUND));
+    public ResponseEntity<FlowerDTO> getFlower(@PathVariable Long id) {
+        var flower = flowerRepository.findById(id);
+        if (flower.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return ResponseEntity.ok(convertToDTO(flower.get()));
+        }
     }
 
     @PutMapping("/{id}")
-    ResponseEntity<Flower> updateFlower(@RequestBody @Validated Flower newFlower, @PathVariable Long id) {
+    ResponseEntity<FlowerDTO> updateFlower(@RequestBody @Validated FlowerDTO flowerDTO, @PathVariable Long id) {
         if (flowerRepository.findById(id).equals(Optional.empty())){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        var newFlower = convertFromDTO(flowerDTO);
         newFlower.setId(id);
-        return new ResponseEntity<>(flowerRepository.save(newFlower), HttpStatus.OK);
+        return new ResponseEntity<>(convertToDTO(flowerRepository.save(newFlower)), HttpStatus.OK);
     }
-
     @PostMapping("/")
-    public ResponseEntity<Flower> postFlower(@RequestBody @Valid Flower flower)
-    {
-        var createdFlower = flowerRepository.save(flower);
-        return ResponseEntity.ok(createdFlower);
+    public ResponseEntity<FlowerDTO> postFlower(@RequestBody @Validated FlowerDTO flowerDTO) {
+        var flower = convertFromDTO(flowerDTO);
+        flowerRepository.save(flower);
+        return ResponseEntity.ok(convertToDTO(flower));
     }
 
     @DeleteMapping("/{id}")
@@ -55,4 +69,13 @@ public class FlowerController {
         flowerRepository.deleteById(id);
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    private FlowerDTO convertToDTO(Flower flower) {
+        return modelMapper.map(flower, FlowerDTO.class);
+    }
+
+    private Flower convertFromDTO(FlowerDTO flowerDTO) {
+        return modelMapper.map(flowerDTO, Flower.class);
+    }
+
 }
