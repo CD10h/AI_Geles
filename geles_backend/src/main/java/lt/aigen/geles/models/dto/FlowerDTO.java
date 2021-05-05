@@ -24,5 +24,6 @@ public class FlowerDTO {
 
     private String photo;
 
+    private boolean isFavorite;
 }
 

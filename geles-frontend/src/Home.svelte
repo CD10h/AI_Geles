@@ -10,7 +10,9 @@
 
   async function getFlowers() {
     // Download data from server
-    const response = await axios.get(`${server_url}/flowers/`);
+    const response = await axios.get(`${server_url}/flowers/`, {
+      withCredentials: true
+    });
     flowers = response.data;
   }
 

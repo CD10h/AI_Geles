@@ -9,7 +9,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -26,12 +25,12 @@ public class FlowerController {
     }
 
     @GetMapping("/") // /flowers/?q=gele
-    public List<FlowerDTO> getFlowers(@RequestParam Optional<String> q) {
+    public List<FlowerDTO> getFlowers(@RequestParam Optional<String> q, @CookieValue("user") String username) {
         return flowerRepository.
-                findAllByName(q.orElse("")).
-                stream().
-                map(this::convertToDTO).
-                collect(Collectors.toList());
+            findAllByNameContainsIgnoreCase(q.orElse("")).
+            stream().
+            map(flower -> convertToDTOWithFavorite(flower, username)).
+            collect(Collectors.toList());
     }
 
     @GetMapping("/{id}") // /flowers/10
@@ -53,6 +52,7 @@ public class FlowerController {
         newFlower.setId(id);
         return new ResponseEntity<>(convertToDTO(flowerRepository.save(newFlower)), HttpStatus.OK);
     }
+
     @PostMapping("/")
     public ResponseEntity<FlowerDTO> postFlower(@RequestBody @Validated FlowerDTO flowerDTO) {
         var flower = convertFromDTO(flowerDTO);
@@ -68,6 +68,12 @@ public class FlowerController {
         }
         flowerRepository.deleteById(id);
         return new ResponseEntity<>(HttpStatus.OK);
+    }
+
+    private FlowerDTO convertToDTOWithFavorite(Flower flower, String username) {
+        var flowerDto = modelMapper.map(flower, FlowerDTO.class);
+        flowerDto.setFavorite(flower.getUserFavorites().stream().anyMatch(user->user.getUsername().equals(username)));
+        return flowerDto;
     }
 
     private FlowerDTO convertToDTO(Flower flower) {
