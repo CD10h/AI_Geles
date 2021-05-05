@@ -20,11 +20,11 @@ public class User {
     private Long id;
 
     @NotBlank
-    @Min(4)
+    @Size(min = 4)
     private String username;
 
     @NotBlank
-    @Min(8)
+    @Size(min = 8)
     private String password;
 
     // Profile picture
