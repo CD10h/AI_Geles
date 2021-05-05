@@ -5,5 +5,7 @@
   "editor.defaultFormatter": "esbenp.prettier-vscode",
   "[svelte]": {
     "editor.defaultFormatter": "svelte.svelte-vscode"
-  }
+  },
+  "prettier.arrowParens": "avoid",
+  "prettier.trailingComma": "none"
 }
