@@ -1,7 +1,5 @@
 package lt.aigen.geles.models;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
@@ -10,7 +8,8 @@ import javax.validation.constraints.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.Date;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Getter @Setter
@@ -38,6 +37,9 @@ public class Flower implements Serializable {
 
     //@NotNull
     private Integer daysToExpire;
+
+    @ManyToMany(mappedBy = "favoriteFlowers")
+    private List<User> userFavorites = new ArrayList<>();
 
     public Flower(Long id, String name, Double price, String description, String photo, Integer daysToExpire) {
         this.id = id;
