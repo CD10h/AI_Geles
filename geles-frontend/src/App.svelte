@@ -19,6 +19,7 @@
   import Register from "./auth/Register.svelte";
   import Search from "./Search.svelte";
   import UpdateFlower from "./UpdateFlower.svelte";
+  import axios from "axios";
 
   export let url = "";
 
@@ -28,6 +29,13 @@
 
   function onLogin() {
     isLoggedIn = true;
+  }
+
+  async function handleLogout() {
+    await axios.post("http://localhost:8080/auth/logout", null, {
+      withCredentials: true
+    });
+    isLoggedIn = false;
   }
 </script>
 
@@ -39,6 +47,9 @@
     {#if !isLoggedIn}
       <Link to="/login">Prisijungti</Link>
       <Link to="/register">Užsiregistruoti</Link>
+    {/if}
+    {#if isLoggedIn}
+      <button on:click={handleLogout}>Atsijungti</button>
     {/if}
   </nav>
   <div>

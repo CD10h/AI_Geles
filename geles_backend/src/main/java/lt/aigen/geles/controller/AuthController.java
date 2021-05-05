@@ -52,4 +52,25 @@ public class AuthController {
 
         return new ResponseEntity<>(HttpStatus.OK);
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(HttpServletResponse response) {
+        // create a cookie
+        Cookie isAuthCookie = new Cookie("auth", "");
+        Cookie userCookie = new Cookie("user", "");
+
+        int expiry = 0;
+        isAuthCookie.setMaxAge(expiry);
+        isAuthCookie.setPath("/");
+
+        userCookie.setMaxAge(expiry);
+        userCookie.setHttpOnly(true);
+        userCookie.setPath("/");
+
+        // add cookie to response
+        response.addCookie(isAuthCookie);
+        response.addCookie(userCookie);
+
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
 }
