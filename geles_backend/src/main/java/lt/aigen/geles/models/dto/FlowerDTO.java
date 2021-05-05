@@ -5,6 +5,7 @@ import lombok.Getter;
 import lombok.Setter;
 
 import javax.persistence.Id;
+import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 
@@ -15,12 +16,20 @@ public class FlowerDTO {
 
     @NotNull
     private Long sellerId;
-    @NotNull
+
+    @NotBlank
     private String name;
 
+    @NotNull
+    @Min(0)
     private Double price;
 
+    @NotBlank
     private String description;
+
+    @NotNull
+    @Min(1)
+    private Integer daysToExpire;
 
     private String photo;
 
