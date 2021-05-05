@@ -35,18 +35,20 @@ public class AuthController {
         }
 
         // create a cookie
-        Cookie cookie = new Cookie("auth", login.getUsername());
+        Cookie isAuthCookie = new Cookie("auth", "true");
+        Cookie userCookie = new Cookie("user", login.getUsername());
 
-        // expires in 7 days
-        cookie.setMaxAge(7 * 24 * 60 * 60);
+        int expiry = 7 * 24 * 60 * 60; // 1 week
+        isAuthCookie.setMaxAge(expiry);
+        isAuthCookie.setPath("/");
 
-        // optional properties
-        cookie.setSecure(true);
-        cookie.setHttpOnly(true);
-        cookie.setPath("/");
+        userCookie.setMaxAge(expiry);
+        userCookie.setHttpOnly(true);
+        userCookie.setPath("/");
 
         // add cookie to response
-        response.addCookie(cookie);
+        response.addCookie(isAuthCookie);
+        response.addCookie(userCookie);
 
         return new ResponseEntity<>(HttpStatus.OK);
     }

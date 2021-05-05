@@ -2,27 +2,33 @@
   import type { Flower } from "./App.svelte";
   import axios from "axios";
   import Input from "./Input.svelte";
+  import { onMount } from "svelte";
 
   let flower: Omit<Flower, "id"> = {
     name: "",
     price: 0,
     description: "",
-    daysToExpire: 0,
+    daysToExpire: 0
   };
 
   export let id: string;
 
   async function handleSubmit() {
-    await axios.put(`http://localhost:8080/flowers/${id}`, flower);
+    await axios.put(`http://localhost:8080/flowers/${id}`, flower, {
+      withCredentials: true
+    });
   }
-  axios
-    .get(`http://localhost:8080/flowers/${id}`)
-    .then((response) => (flower = response.data));
+
+  onMount(() => {
+    axios
+      .get(`http://localhost:8080/flowers/${id}`, { withCredentials: true })
+      .then(response => (flower = response.data));
+  });
 </script>
 
 <h2>Redaguoti gėlę</h2>
 <form
-  on:submit={(e) => {
+  on:submit={e => {
     e.preventDefault();
     handleSubmit();
   }}

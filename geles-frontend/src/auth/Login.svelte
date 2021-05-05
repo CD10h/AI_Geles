@@ -1,29 +1,30 @@
 <script>
-  import axios from "axios";
   import { navigate } from "svelte-routing";
-  import Input from "./Input.svelte";
-  import { isAxiosError } from "./util";
+  import Input from "../Input.svelte";
+  import { isAxiosError } from "../util";
+  import axios from "axios";
 
-  let registerFields = {
+  export let onLogin: () => void;
+
+  let loginFields = {
     username: "",
-    password: "",
+    password: ""
   };
 
-  let errors: string[] = [];
+  let error: string = "";
 
   async function handleSubmit() {
     try {
-      await axios.post("http://localhost:8080/users/", registerFields);
+      await axios.post("http://localhost:8080/auth/login/", loginFields, {
+        withCredentials: true
+      });
+      onLogin();
       navigate("/");
     } catch (e) {
       if (isAxiosError(e)) {
         if (e.response) {
           if (e.response.status === 400) {
-            errors = e.response.data.errors.map(
-              (error) => `${error.field} ${error.defaultMessage}`
-            );
-          } else if (e.response.status === 409) {
-            errors = ["Username already taken"];
+            error = "Neteisingas vartotojo vardas ar slaptažodis";
           }
         }
       }
@@ -31,34 +32,34 @@
   }
 </script>
 
-<h2>Užsiregistruoti</h2>
+<h2>Prisijungti</h2>
 <form
-  on:submit={(e) => {
+  on:submit={e => {
     e.preventDefault();
     handleSubmit();
   }}
 >
   <Input
     label="Vartotojo vardas"
-    bind:value={registerFields.username}
+    bind:value={loginFields.username}
     name="username"
     type="text"
     autocomplete="nickname"
   /><br /><br />
   <Input
     label="Slaptažodis"
-    bind:value={registerFields.password}
+    bind:value={loginFields.password}
     name="password"
     type="password"
-    autocomplete="new-password"
+    autocomplete="current-password"
   /><br /><br />
-  <button>Užsiregistruoti</button>
-  {#each errors as error}
+  <button>Prisijungti</button>
+  {#if error}
     <p class="error">
       <i class="mdi mdi-alert-circle" />
       {error.slice(0, 1).toUpperCase()}{error.slice(1)}
     </p>
-  {/each}
+  {/if}
 </form>
 
 <style>
