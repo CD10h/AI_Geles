@@ -7,17 +7,19 @@
     name: "",
     price: 0,
     description: "",
-    daysToExpire: 0,
+    daysToExpire: 0
   };
 
   async function handleSubmit() {
-    await axios.post("http://localhost:8080/flowers/", flower);
+    await axios.post("http://localhost:8080/flowers/", flower, {
+      withCredentials: true
+    });
   }
 </script>
 
 <h2>Pridėti gėlę</h2>
 <form
-  on:submit={(e) => {
+  on:submit={e => {
     e.preventDefault();
     handleSubmit();
   }}
