@@ -25,12 +25,12 @@ public class FlowerController {
     }
 
     @GetMapping("/") // /flowers/?q=gele
-    public List<FlowerDTO> getFlowers(@RequestParam Optional<String> q, @CookieValue("user") String username) {
-        return flowerRepository.
-            findAllByNameContainsIgnoreCase(q.orElse("")).
-            stream().
-            map(flower -> convertToDTOWithFavorite(flower, username)).
-            collect(Collectors.toList());
+    public List<FlowerDTO> getFlowers(@RequestParam Optional<String> q,
+                                      @CookieValue(value = "user", required = false) String username) {
+        return flowerRepository.findAllByNameContainsIgnoreCase(q.orElse(""))
+            .stream()
+            .map(flower -> convertToDTOWithFavorite(flower, username))
+            .collect(Collectors.toList());
     }
 
     @GetMapping("/{id}") // /flowers/10
@@ -71,7 +71,15 @@ public class FlowerController {
 
     private FlowerDTO convertToDTOWithFavorite(Flower flower, String username) {
         var flowerDto = modelMapper.map(flower, FlowerDTO.class);
-        flowerDto.setFavorite(flower.getUserFavorites().stream().anyMatch(user->user.getUsername().equals(username)));
+        if (username == null) {
+            flowerDto.setFavorite(false);
+        } else {
+            flowerDto.setFavorite(
+                flower.getUserFavorites()
+                    .stream()
+                    .anyMatch(user -> user.getUsername().equals(username))
+            );
+        }
         return flowerDto;
     }
 
