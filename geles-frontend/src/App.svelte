@@ -12,28 +12,31 @@
 
 <script>
   import { Router, Link, Route } from "svelte-routing";
-  import { server_url } from "./index.ts";
 
   import AddFlower from "./AddFlower.svelte";
-  import Catalogue from "./Catalogue.svelte";
-  import UpdateFlower from "./UpdateFlower.svelte";
+  import Home from "./Home.svelte";
+  import Login from "./auth/Login.svelte";
+  import Register from "./auth/Register.svelte";
   import Search from "./Search.svelte";
-  import { onMount } from "svelte";
+  import UpdateFlower from "./UpdateFlower.svelte";
+  import axios from "axios";
 
   export let url = "";
 
-  // Variable to hold fetched list
-  let flowers: Flower[] = [];
+  let isLoggedIn = !!document.cookie
+    .split("; ")
+    .find(cookie => cookie.startsWith("auth"));
 
-  // Run code on component mount (once)
-  onMount(() => {
-    // Download data from server
-    fetch(`${server_url}/flowers/`)
-      // Parse as JSON
-      .then((response) => response.json())
-      // Set `flowers` to the parsed data
-      .then((json) => (flowers = json));
-  });
+  function onLogin() {
+    isLoggedIn = true;
+  }
+
+  async function handleLogout() {
+    await axios.post("http://localhost:8080/auth/logout", null, {
+      withCredentials: true
+    });
+    isLoggedIn = false;
+  }
 </script>
 
 <Router {url}>
@@ -41,11 +44,20 @@
     <Link to="/">Home</Link>
     <Link to="/add">Add flower</Link>
     <Link to="/search">Search</Link>
+    {#if !isLoggedIn}
+      <Link to="/login">Prisijungti</Link>
+      <Link to="/register">Užsiregistruoti</Link>
+    {/if}
+    {#if isLoggedIn}
+      <button on:click={handleLogout}>Atsijungti</button>
+    {/if}
   </nav>
   <div>
-    <Route path="/" component={Catalogue} {flowers} />
+    <Route path="/" component={Home} />
     <Route path="/add" component={AddFlower} />
     <Route path="/search" component={Search} />
     <Route path="/update/:id" component={UpdateFlower} />
+    <Route path="/login" component={Login} {onLogin} />
+    <Route path="/register" component={Register} />
   </div>
 </Router>
