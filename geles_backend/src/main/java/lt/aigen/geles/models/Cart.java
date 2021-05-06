@@ -19,4 +19,12 @@ public class Cart implements Serializable {
 
     @OneToOne(mappedBy = "cart")
     private User user;
+
+    public Cart(){
+
+    }
+
+    public Cart(User user){
+        this.user = user;
+    }
 }

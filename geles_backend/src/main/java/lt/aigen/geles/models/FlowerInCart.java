@@ -24,4 +24,13 @@ public class FlowerInCart implements Serializable {
     private Cart cart;
 
     private Integer amount;
+
+    public FlowerInCart(Flower fl, int am) {
+        this.flower = fl;
+        this.amount = am;
+    }
+
+    public FlowerInCart(){
+
+    }
 }
