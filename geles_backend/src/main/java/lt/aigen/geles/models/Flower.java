@@ -18,14 +18,11 @@ public class Flower implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @ManyToOne
-    @JoinColumn(name = "seller_id")
-    private Seller seller;
-
     @NotBlank
     private String name;
 
-    //@NotNull
+    @NotNull
+    @Min(0)
     private Double price;
 
     @NotNull
@@ -35,7 +32,8 @@ public class Flower implements Serializable {
     @Type(type="text")
     private String photo;
 
-    //@NotNull
+    @NotNull
+    @Min(1)
     private Integer daysToExpire;
 
     @ManyToMany(mappedBy = "favoriteFlowers")

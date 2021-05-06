@@ -45,12 +45,12 @@ public class FlowerController {
 
     @PutMapping("/{id}")
     ResponseEntity<FlowerDTO> updateFlower(@RequestBody @Validated FlowerDTO flowerDTO, @PathVariable Long id) {
-        if (flowerRepository.findById(id).equals(Optional.empty())){
+        if (flowerRepository.findById(id).isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         var newFlower = convertFromDTO(flowerDTO);
         newFlower.setId(id);
-        return new ResponseEntity<>(convertToDTO(flowerRepository.save(newFlower)), HttpStatus.OK);
+        return ResponseEntity.ok(convertToDTO(flowerRepository.save(newFlower)));
     }
 
     @PostMapping("/")
@@ -61,8 +61,7 @@ public class FlowerController {
     }
 
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> delete(@PathVariable Long id)
-    {
+    public ResponseEntity<?> delete(@PathVariable Long id) {
         if (!flowerRepository.existsById(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
