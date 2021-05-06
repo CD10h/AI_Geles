@@ -4,10 +4,10 @@ import lt.aigen.geles.models.Configuration;
 import lt.aigen.geles.models.dto.ConfigurationDTO;
 import lt.aigen.geles.repositories.ConfigurationRepository;
 import org.modelmapper.ModelMapper;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -30,6 +30,18 @@ public class ConfigurationController {
                 .stream()
                 .map(this::convertToDTO)
                 .collect(Collectors.toList());
+    }
+
+
+    @PutMapping("/")
+    public ResponseEntity<ConfigurationDTO> changeConfiguration(@RequestBody @Validated ConfigurationDTO configDTO) {
+        var configOpt = configRepository.findConfigByKey(configDTO.getKey());
+        if (configOpt.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        var config = configOpt.get();
+        config.setValue(configDTO.getValue());
+        configRepository.save(config);
+        return ResponseEntity.ok(convertToDTO(config));
     }
 
     private ConfigurationDTO convertToDTO(Configuration config) {
