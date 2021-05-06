@@ -1,10 +1,11 @@
 <script>
   import type { Flower } from "./App.svelte";
-  import { server_url } from "./index";
+  import { server_url } from "./index.ts";
 
-  import axios from "axios";
+  import AddFlower from "./AddFlower.svelte";
   import Catalogue from "./Catalogue.svelte";
   import SearchBar from "./SearchBar.svelte";
+  import axios from "axios";
 
   interface Filter {
     sort: string;
@@ -26,6 +27,15 @@
   // Variable to hold fetched list
   let flowers: Flower[] = [];
 
+  async function handleSearch() {
+    const response = await axios.get<Flower[]>(
+      `${server_url}/flowers/?q=${query /* dependency */}`
+    );
+    flowers = response.data;
+  }
+
+  // Dependencies of this block are calculated by Svelte
+  // Every time `query` changes, this block of code runs
   $: {
     axios
       .post(`${server_url}/flowers/filter/?q=${query}`, filter)
@@ -56,6 +66,7 @@
         filter.filters[index].value = value;
       }
     } else {
+      handleSearch();
       filter.filters = [...filter.filters, { name, value }];
     }
   }

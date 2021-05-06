@@ -12,6 +12,7 @@
 
 <script>
   import { Router, Link, Route } from "svelte-routing";
+  import { server_url } from "./index.ts";
 
   import AddFlower from "./AddFlower.svelte";
   import Home from "./Home.svelte";
