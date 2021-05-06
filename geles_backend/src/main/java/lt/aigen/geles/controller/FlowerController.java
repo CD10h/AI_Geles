@@ -13,6 +13,10 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.*;
 
 @RestController
@@ -50,24 +54,10 @@ public class FlowerController {
         return ResponseEntity.ok(createdFlower);
     }
 
-    /*
-    {
-    "sort": "price",
-    "sortType": "asc",
-    "filters": [
-        {
-            "name": "minPrice",
-            "value": "0"
-        },
-        {
-            "name": "maxPrice",
-            "value": "15"
-        }
-    ]
-    }*/
     @PostMapping("/filter/")
-    public ResponseEntity<List<Flower>> filterFlowers(@RequestParam String q, @RequestBody @Validated FlowerFilterDTO filters)
-    {
+    public ResponseEntity<List<Flower>> filterFlowers(
+            @RequestParam String q,
+            @RequestBody @Validated FlowerFilterDTO filters) throws ParseException {
         String sort = filters.getSort();
         String sortType = filters.getSortType();
         Pageable paging = PageRequest.of(0, Integer.MAX_VALUE);;
@@ -80,6 +70,7 @@ public class FlowerController {
 
         Double minPrice = 0.0;
         Double maxPrice = Double.MAX_VALUE;
+        Integer daysToExpire = Integer.MAX_VALUE;
 
         if (!filters.getFilters().isEmpty()) {
             for (FiltersDTO filter : filters.getFilters()) {
@@ -89,8 +80,13 @@ public class FlowerController {
                 if (filter.getName().equals("maxPrice")){
                     maxPrice = Double.parseDouble(filter.getValue());
                 }
+                if (filter.getName().equals("minDate")){
+                    daysToExpire = Period.between(LocalDate.now(), LocalDate.parse(filter.getValue())).getDays();
+                }
             }
         }
-        return new ResponseEntity<>(flowerRepository.findAllByPriceBetweenAndNameContainingIgnoreCase(paging, minPrice, maxPrice, q), HttpStatus.OK);
+        return new ResponseEntity<>(
+                flowerRepository.findAllByPriceBetweenAndNameContainingIgnoreCaseAndDaysToExpireLessThanEqual(
+                paging, minPrice, maxPrice, q, daysToExpire), HttpStatus.OK);
     }
 }
