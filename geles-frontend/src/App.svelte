@@ -12,6 +12,7 @@
 
 <script>
   import { Router, Link, Route } from "svelte-routing";
+  import { server_url } from "./index.ts";
 
   import AddFlower from "./AddFlower.svelte";
   import Home from "./Home.svelte";
@@ -41,9 +42,9 @@
 
 <Router {url}>
   <nav>
-    <Link to="/">Home</Link>
-    <Link to="/add">Add flower</Link>
-    <Link to="/search">Search</Link>
+    <Link to="/">Pagrindinis</Link>
+    <Link to="/add">Pridėti gėlę</Link>
+    <Link to="/search">Paieška</Link>
     {#if !isLoggedIn}
       <Link to="/login">Prisijungti</Link>
       <Link to="/register">Užsiregistruoti</Link>

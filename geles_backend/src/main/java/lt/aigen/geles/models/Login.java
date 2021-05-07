@@ -9,9 +9,11 @@ import javax.validation.constraints.*;
 @Setter
 public class Login {
     @NotBlank
+    @Size(min = 4)
     private String username;
 
     @NotBlank
+    @Size(min = 8)
     private String password;
 
     public Login(String username, String password) {

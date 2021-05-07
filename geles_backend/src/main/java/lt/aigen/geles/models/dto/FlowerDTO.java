@@ -14,9 +14,6 @@ public class FlowerDTO {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
 
-    @NotNull
-    private Long sellerId;
-
     @NotBlank
     private String name;
 

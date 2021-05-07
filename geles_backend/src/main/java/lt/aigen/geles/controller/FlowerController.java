@@ -2,7 +2,12 @@ package lt.aigen.geles.controller;
 
 import lt.aigen.geles.models.dto.FlowerDTO;
 import lt.aigen.geles.models.Flower;
+import lt.aigen.geles.models.dto.FiltersDTO;
+import lt.aigen.geles.models.dto.FlowerFilterDTO;
 import lt.aigen.geles.repositories.FlowerRepository;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -85,6 +90,42 @@ public class FlowerController {
 
     private FlowerDTO convertToDTO(Flower flower) {
         return modelMapper.map(flower, FlowerDTO.class);
+    }
+
+    @PostMapping("/filter/")
+    public ResponseEntity<List<Flower>> filterFlowers(
+            @RequestParam String q,
+            @RequestBody @Validated FlowerFilterDTO filters) throws ParseException {
+        String sort = filters.getSort();
+        String sortType = filters.getSortType();
+        Pageable paging = PageRequest.of(0, Integer.MAX_VALUE);;
+
+        if (sortType.equals("asc")){
+            paging = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(sort).ascending());
+        } else if (sortType.equals("desc")) {
+            paging = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(sort).descending());
+        }
+
+        Double minPrice = 0.0;
+        Double maxPrice = Double.MAX_VALUE;
+        Integer daysToExpire = Integer.MAX_VALUE;
+
+        if (!filters.getFilters().isEmpty()) {
+            for (FiltersDTO filter : filters.getFilters()) {
+                if (filter.getName().equals("minPrice")){
+                    minPrice = Double.parseDouble(filter.getValue());
+                }
+                if (filter.getName().equals("maxPrice")){
+                    maxPrice = Double.parseDouble(filter.getValue());
+                }
+                if (filter.getName().equals("minDate")){
+                    daysToExpire = Period.between(LocalDate.now(), LocalDate.parse(filter.getValue())).getDays();
+                }
+            }
+        }
+        return new ResponseEntity<>(
+                flowerRepository.findAllByPriceBetweenAndNameContainingIgnoreCaseAndDaysToExpireLessThanEqual(
+                paging, minPrice, maxPrice, q, daysToExpire), HttpStatus.OK);
     }
 
     private Flower convertFromDTO(FlowerDTO flowerDTO) {
