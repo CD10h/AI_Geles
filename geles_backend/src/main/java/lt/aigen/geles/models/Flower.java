@@ -14,7 +14,8 @@ import java.util.List;
 
 @Entity
 @Getter @Setter
-@NamedNativeQuery(name = "Flower.findAllFavoriteFlowersWithQuery", query = "select f.id, f.name, f.price, f.description, f.days_to_expire, f.photo, coalesce(u.username = :username, false) as favorite\n from flower f left join user_flower uf on f.id = uf.flower_id left join users u on u.id = uf.user_id where lower(f.name) like lower(concat('%', :query, '%'))", resultSetMapping = "mapFlowersWithFavorite")
+@NamedNativeQuery(name = "Flower.findAllFavoriteFlowersWithQuery",
+        query = "select f.id, f.name, f.price, f.description, f.days_to_expire, f.photo, bool_or(coalesce(u.username = :username, false)) as favorite from flower f left join user_flower uf on f.id = uf.flower_id left join users u on u.id = uf.user_id where lower(f.name) like lower(concat('%', :query, '%')) group by 1", resultSetMapping = "mapFlowersWithFavorite")
 @SqlResultSetMapping(name="mapFlowersWithFavorite", classes = {
     @ConstructorResult(
         targetClass = FlowerDTO.class,
