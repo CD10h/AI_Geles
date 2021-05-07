@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 
-import javax.persistence.Id;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
@@ -31,5 +30,19 @@ public class FlowerDTO {
     private String photo;
 
     private boolean isFavorite;
+
+    public FlowerDTO() {
+
+    }
+
+    public FlowerDTO(Object id, Object name, Object price, Object description, Object daysToExpire, Object photo, Object isFavorite) {
+        this.id = (Long)id;
+        this.name = (String)name;
+        this.price = (Double)price;
+        this.description = (String)description;
+        this.daysToExpire = (Integer)daysToExpire;
+        this.photo = (String)photo;
+        this.isFavorite = (boolean)isFavorite;
+    }
 }
 

@@ -1,6 +1,7 @@
 INSERT INTO users (username, password) VALUES ('emilis', 'password123');
-INSERT INTO users (username, password) VALUES ('titas', 'ihavethebiggay');
-INSERT INTO users (username, password) VALUES ('simonas', 'aWJ%e4F&C3DS');
+INSERT INTO users (username, password) VALUES ('titas', '12345678');
+INSERT INTO users (username, password) VALUES ('simonas', '12345678');
+INSERT INTO users (username, password) VALUES ('justas', '12345678');
 INSERT INTO flower (name, price, photo, description, days_to_expire) VALUES ('Frezija', 4.8, 'flowers/frezija.jfif', 'Vilkdalginių (Iridaceae) šeimos daugiamečių svogūninių augalų gentis. Kilusi iš Kapo regiono pievų (Pietų Afrikos Respublika), dabar auginamos visame pasaulyje kaip dekoratyvinės gėlės.',  7);
 INSERT INTO flower (name, price, photo, description,  days_to_expire) VALUES ('Gerbera', 1.68, 'flowers/gerbera.jfif', 'Astrinių (Asteraceae) šeimos augalų gentis. Natūraliai auga Pietų Amerikoje, Afrikoje, Madagaskare ir tropikinėje Azijoje.',  4);
 INSERT INTO flower (name, price, photo, description,  days_to_expire) VALUES ('Gvazdikas', 4.56, 'flowers/gvazdikas.jfif', 'Gvazdikinių (Caryophyllaceae) šeimos augalų gentis, kuriai priklauso žoliniai augalai bei krūmokšniai. Jų stiebai turi sustorėjusius bamblius. Lapai siauri, linijiški arba lancetiški. Žiedai sukrauti žiedynuose. Vaisius – vienalizdė dėžutė, kuri atsidaro 4 sąvaromis. Daugiausia daugiamečiai augalai, keletas rūšių vienmečių ir dvimečių.',  5);
@@ -16,3 +17,15 @@ INSERT INTO configuration (key, value) VALUES ('seller.address', 'Didelė gatvė
 INSERT INTO configuration (key, value) VALUES ('seller.name', 'Bogdan');
 INSERT INTO configuration (key, value) VALUES ('seller.contact', 'mail@example.com, tel: 860000000');
 INSERT INTO configuration (key, value) VALUES ('admin.contact', 'admin@geles.org');
+INSERT INTO user_flower (user_id, flower_id) VALUES (1, 5);
+INSERT INTO user_flower (user_id, flower_id) VALUES (1, 6);
+INSERT INTO user_flower (user_id, flower_id) VALUES (1, 10);
+INSERT INTO user_flower (user_id, flower_id) VALUES (2, 4);
+INSERT INTO user_flower (user_id, flower_id) VALUES (2, 7);
+INSERT INTO user_flower (user_id, flower_id) VALUES (2, 10);
+INSERT INTO user_flower (user_id, flower_id) VALUES (3, 11);
+INSERT INTO user_flower (user_id, flower_id) VALUES (3, 7);
+INSERT INTO user_flower (user_id, flower_id) VALUES (3, 3);
+INSERT INTO user_flower (user_id, flower_id) VALUES (4, 3);
+INSERT INTO user_flower (user_id, flower_id) VALUES (4, 6);
+INSERT INTO user_flower (user_id, flower_id) VALUES (4, 7);

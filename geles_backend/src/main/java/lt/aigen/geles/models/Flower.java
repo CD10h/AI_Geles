@@ -2,6 +2,7 @@ package lt.aigen.geles.models;
 
 import lombok.Getter;
 import lombok.Setter;
+import lt.aigen.geles.models.dto.FlowerDTO;
 import org.hibernate.annotations.Type;
 
 import javax.validation.constraints.*;
@@ -13,6 +14,21 @@ import java.util.List;
 
 @Entity
 @Getter @Setter
+@NamedNativeQuery(name = "Flower.findAllFavoriteFlowersWithQuery", query = "select f.id, f.name, f.price, f.description, f.days_to_expire, f.photo, coalesce(u.username = :username, false) as favorite\n from flower f left join user_flower uf on f.id = uf.flower_id left join users u on u.id = uf.user_id where lower(f.name) like lower(concat('%', :query, '%'))", resultSetMapping = "mapFlowersWithFavorite")
+@SqlResultSetMapping(name="mapFlowersWithFavorite", classes = {
+    @ConstructorResult(
+        targetClass = FlowerDTO.class,
+        columns = {
+            @ColumnResult(name="id", type=Long.class),
+            @ColumnResult(name="name"),
+            @ColumnResult(name="price"),
+            @ColumnResult(name="description"),
+            @ColumnResult(name="days_to_expire"),
+            @ColumnResult(name="photo"),
+            @ColumnResult(name="favorite")
+        }
+    )
+})
 public class Flower implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
