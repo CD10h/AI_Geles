@@ -14,6 +14,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
+import java.time.Period;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -95,7 +97,7 @@ public class FlowerController {
     @PostMapping("/filter/")
     public ResponseEntity<List<Flower>> filterFlowers(
             @RequestParam String q,
-            @RequestBody @Validated FlowerFilterDTO filters) throws ParseException {
+            @RequestBody @Validated FlowerFilterDTO filters) {
         String sort = filters.getSort();
         String sortType = filters.getSortType();
         Pageable paging = PageRequest.of(0, Integer.MAX_VALUE);;
