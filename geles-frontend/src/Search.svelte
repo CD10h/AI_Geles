@@ -27,19 +27,27 @@
   // Variable to hold fetched list
   let flowers: Flower[] = [];
 
-  async function handleSearch() {
-    const response = await axios.get<Flower[]>(
-      `${server_url}/flowers/?q=${query /* dependency */}`
-    );
-    flowers = response.data;
-  }
-
   // Dependencies of this block are calculated by Svelte
   // Every time `query` changes, this block of code runs
   $: {
-    axios
-      .post(`${server_url}/flowers/filter/?q=${query}`, filter)
-      .then(response => (flowers = response.data));
+    let minPrice = filter.filters.findIndex(
+      filter => filter.name === "minPrice"
+    );
+    let maxPrice = filter.filters.findIndex(
+      filter => filter.name === "maxPrice"
+    );
+
+    if (minPrice != -1 && maxPrice != -1) {
+      if (+filter.filters[minPrice].value <= +filter.filters[maxPrice].value) {
+        axios
+          .post(`${server_url}/flowers/filter/?q=${query}`, filter)
+          .then(response => (flowers = response.data));
+      }
+    } else {
+      axios
+        .post(`${server_url}/flowers/filter/?q=${query}`, filter)
+        .then(response => (flowers = response.data));
+    }
   }
 
   interface SortableField {
@@ -66,7 +74,6 @@
         filter.filters[index].value = value;
       }
     } else {
-      handleSearch();
       filter.filters = [...filter.filters, { name, value }];
     }
   }
