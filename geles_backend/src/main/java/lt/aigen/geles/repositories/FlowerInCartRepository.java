@@ -10,6 +10,6 @@ import java.util.List;
 
 @Repository
 public interface FlowerInCartRepository extends JpaRepository<FlowerInCart, Long> {
-    @Query("from FlowerInCart f where f.cart = :cartId")
-    List<FlowerInCart> findAllByName(Integer cartId);
+    @Query("from FlowerInCart f where f.cart.id = :cartId")
+    List<FlowerInCart> findAllByName(Long cartId);
 }

@@ -3,17 +3,17 @@ package lt.aigen.geles.controller;
 import lt.aigen.geles.models.Cart;
 import lt.aigen.geles.models.Flower;
 import lt.aigen.geles.models.FlowerInCart;
-import lt.aigen.geles.models.dto.CartDTO;
-import lt.aigen.geles.models.dto.FlowerDTO;
 import lt.aigen.geles.models.dto.FlowerInCartDTO;
 import lt.aigen.geles.repositories.CartRepository;
 import lt.aigen.geles.repositories.FlowerInCartRepository;
+import lt.aigen.geles.repositories.FlowerRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -22,17 +22,21 @@ import java.util.stream.Collectors;
 @RequestMapping("/carts/flowers")
 public class FlowerInCartController {
     FlowerInCartRepository flowerInCartRepository;
+    FlowerRepository flowerRepository;
+    CartRepository cartRepository;
     ModelMapper modelMapper;
 
-    public FlowerInCartController(FlowerInCartRepository flowerInCartRepository, ModelMapper modelMapper) {
+    public FlowerInCartController(FlowerInCartRepository flowerInCartRepository, FlowerRepository flowerRepository, CartRepository cartRepository, ModelMapper modelMapper) {
         this.flowerInCartRepository = flowerInCartRepository;
+        this.flowerRepository = flowerRepository;
+        this.cartRepository = cartRepository;
         this.modelMapper = modelMapper;
     }
 
-    @GetMapping("/")
-    public List<FlowerInCartDTO> getFlowersInCart(@RequestParam Optional<Integer> id) {
+    @GetMapping("/{id}")
+    public List<FlowerInCartDTO> getFlowersInCart(@PathVariable long id) {
         return flowerInCartRepository.
-                findAllByName(id.orElse(0)).
+                findAllByName(id).
                 stream().
                 map(this::convertToDTO).
                 collect(Collectors.toList());
@@ -40,8 +44,25 @@ public class FlowerInCartController {
 
     @PostMapping("/")
     public ResponseEntity<FlowerInCartDTO> postFlowerInCart(@RequestBody @Validated FlowerInCartDTO flowerInCartDTO) {
+        long flower_id = flowerInCartDTO.getFlowerId();
+        long cart_id = flowerInCartDTO.getCartId();
         var flowerInCart = convertFromDTO(flowerInCartDTO);
+
+        Optional<Flower> flower = flowerRepository.findById(flower_id);
+        if(flower.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        flowerInCart.setFlower(flower.get());
+
+        Optional<Cart> cart = cartRepository.findById(cart_id);
+        if(cart.isEmpty()){
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        flowerInCart.setCart(cart.get());
+
         flowerInCartRepository.save(flowerInCart);
+        //flowerInCart.setFlower(null);
+        //flowerInCart.setCart(null);
         return ResponseEntity.ok(convertToDTO(flowerInCart));
     }
 
