@@ -16,7 +16,6 @@ import java.util.List;
 @Setter
 @Table(name = "Orders")
 public class Order implements Serializable {
-    OrderStatus orderStatus;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -33,6 +32,10 @@ public class Order implements Serializable {
     @JoinColumn(name = "USER_ID")
     private User user;
 
+    @NotNull
+    OrderStatus orderStatus;
+
+
     @PrePersist
     protected void onCreate() {
         createdDate = new Date();
@@ -45,7 +48,7 @@ public class Order implements Serializable {
                 .reduce(0.0, Double::sum);
     }
 
-    private enum OrderStatus {
+    public enum OrderStatus {
         UNPAID,
         PAID,
         DELIVERED
