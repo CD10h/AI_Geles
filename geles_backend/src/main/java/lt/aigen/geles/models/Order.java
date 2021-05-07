@@ -8,6 +8,7 @@ import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
 import java.time.LocalDate;
+import java.util.Date;
 
 @Entity
 @Getter @Setter
@@ -22,7 +23,7 @@ public class Order implements Serializable {
     private String contactPhone;
 
     @JsonFormat(pattern = "yyyy-mm-dd")
-    private LocalDate createdDate;
+    private Date createdDate;
 
     OrderStatus orderStatus;
 
