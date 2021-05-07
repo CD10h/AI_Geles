@@ -21,6 +21,6 @@ public interface FlowerRepository extends JpaRepository<Flower, Long> {
     @Query("from Flower f where current_date + f.daysToExpire <= :searchDate")
     List<Flower> findExpiredBeforeDate(@Param("searchDate") Date searchDate);
 
-    List<Flower> findAllByPriceBetweenAndNameContainingIgnoreCaseAndDaysToExpireLessThanEqual (
+    List<Flower> findAllByPriceBetweenAndNameContainingIgnoreCaseAndDaysToExpireGreaterThanEqual (
             Pageable pageable, Double minPrice, Double maxPrice, String name, Integer daysToExpire);
 }

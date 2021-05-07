@@ -100,7 +100,7 @@ public class FlowerController {
 
         Double minPrice = 0.0;
         Double maxPrice = Double.MAX_VALUE;
-        Integer daysToExpire = Integer.MAX_VALUE;
+        Integer daysToExpire = 0;
 
         if (!filters.getFilters().isEmpty()) {
             for (FiltersDTO filter : filters.getFilters()) {
@@ -116,7 +116,7 @@ public class FlowerController {
             }
         }
         return new ResponseEntity<>(
-                flowerRepository.findAllByPriceBetweenAndNameContainingIgnoreCaseAndDaysToExpireLessThanEqual(
+                flowerRepository.findAllByPriceBetweenAndNameContainingIgnoreCaseAndDaysToExpireGreaterThanEqual(
                 paging, minPrice, maxPrice, q, daysToExpire), HttpStatus.OK);
     }
 
