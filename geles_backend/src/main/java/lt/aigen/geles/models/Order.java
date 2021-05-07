@@ -7,13 +7,16 @@ import lombok.Setter;
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
 import java.io.Serializable;
-import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.List;
 
 @Entity
-@Getter @Setter
+@Getter
+@Setter
 @Table(name = "Orders")
 public class Order implements Serializable {
+    OrderStatus orderStatus;
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -21,24 +24,30 @@ public class Order implements Serializable {
     private String address;
     @NotNull
     private String contactPhone;
-
     @JsonFormat(pattern = "yyyy-mm-dd")
     private Date createdDate;
+    @OneToMany(mappedBy = "order")
+    private List<FlowerInOrder> orderProducts = new ArrayList<>();
 
-    OrderStatus orderStatus;
-
-    @ManyToOne(fetch=FetchType.LAZY)
-    @JoinColumn(name="USER_ID")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "USER_ID")
     private User user;
+
+    @PrePersist
+    protected void onCreate() {
+        createdDate = new Date();
+    }
+
+    @Transient
+    public Double getTotalOrderPrice() {
+        return getOrderProducts().stream()
+                .map(FlowerInOrder::getTotalPrice)
+                .reduce(0.0, Double::sum);
+    }
 
     private enum OrderStatus {
         UNPAID,
         PAID,
         DELIVERED
-    }
-
-    @PrePersist
-    protected void onCreate() {
-        createdDate = new Date();
     }
 }
