@@ -2,27 +2,52 @@
   import type { Flower } from "./App.svelte";
   import axios from "axios";
   import Input from "./Input.svelte";
+  import { onMount } from "svelte";
+  import { isAxiosError } from "./util";
+  import { navigate } from "svelte-routing";
 
   let flower: Omit<Flower, "id"> = {
     name: "",
     price: 0,
     description: "",
-    daysToExpire: 0,
+    daysToExpire: 0
   };
 
   export let id: string;
 
+  let errors: string[] = [];
+
   async function handleSubmit() {
-    await axios.put(`http://localhost:8080/flowers/${id}`, flower);
+    try {
+      await axios.put(`http://localhost:8080/flowers/${id}`, flower, {
+        withCredentials: true
+      });
+      navigate("/");
+    } catch (e) {
+      if (isAxiosError(e)) {
+        if (e.response) {
+          if (e.response.status === 400) {
+            errors = e.response.data.errors.map(
+              error => `${error.field} ${error.defaultMessage}`
+            );
+          } else if (e.response.status === 500) {
+            errors = [`Internal server error: ${e.response.data.message}`];
+          }
+        }
+      }
+    }
   }
-  axios
-    .get(`http://localhost:8080/flowers/${id}`)
-    .then((response) => (flower = response.data));
+
+  onMount(() => {
+    axios
+      .get(`http://localhost:8080/flowers/${id}`, { withCredentials: true })
+      .then(response => (flower = response.data));
+  });
 </script>
 
 <h2>Redaguoti gėlę</h2>
 <form
-  on:submit={(e) => {
+  on:submit={e => {
     e.preventDefault();
     handleSubmit();
   }}
@@ -55,4 +80,23 @@
     name="expirydate"
   /><br /><br />
   <button>Redaguoti</button>
+  {#each errors as error}
+    <p class="error">
+      <i class="mdi mdi-alert-circle" />
+      {error.slice(0, 1).toUpperCase()}{error.slice(1)}
+    </p>
+  {/each}
 </form>
+
+<style>
+  .error {
+    color: red;
+    display: flex;
+    align-items: center;
+  }
+
+  .error .mdi {
+    font-size: 24px;
+    margin-right: 8px;
+  }
+</style>
