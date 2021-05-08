@@ -49,15 +49,14 @@ public class OrdersController {
         order.setOrderStatus(Order.OrderStatus.UNPAID);
         order.setOrderProducts(null);
         order.setUser(user.get());
-        order = orderRepository.save(order);
+        orderRepository.save(order);
 
         for (var f : orderDTO.getOrderFlowers()) {
             var flowerInOrder = convertFromDTO(f);
             flowerInOrder.setOrder(order);
             flowersInOrder.add(flowerInOrder);
         }
-
-        flowersInOrder = flowerInOrderRepository.saveAll(flowersInOrder);
+        flowerInOrderRepository.saveAll(flowersInOrder);
         order.setOrderProducts(flowersInOrder); //so it adds it to DTO
 
         return new ResponseEntity<>(convertToDTO(order), HttpStatus.CREATED);
