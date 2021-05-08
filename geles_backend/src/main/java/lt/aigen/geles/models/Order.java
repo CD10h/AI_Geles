@@ -1,6 +1,7 @@
 package lt.aigen.geles.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -51,6 +52,10 @@ public class Order implements Serializable {
     public enum OrderStatus {
         UNPAID,
         PAID,
-        DELIVERED
+        DELIVERED;
+        @JsonValue
+        public int toValue() {
+            return ordinal();
+        }
     }
 }

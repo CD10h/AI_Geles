@@ -5,6 +5,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import lt.aigen.geles.models.FlowerInOrder;
+import lt.aigen.geles.models.Order;
 import lt.aigen.geles.models.User;
 
 import javax.persistence.FetchType;
@@ -43,5 +44,5 @@ public class OrderDTO {
     private Long userId;
 
     @NotNull
-    private String orderStatus;
+    private Order.OrderStatus orderStatus;
 }
