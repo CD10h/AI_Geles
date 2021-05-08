@@ -17,6 +17,7 @@ INSERT INTO configuration (key, value) VALUES ('seller.address', 'Didelė gatvė
 INSERT INTO configuration (key, value) VALUES ('seller.name', 'Bogdan');
 INSERT INTO configuration (key, value) VALUES ('seller.contact', 'mail@example.com, tel: 860000000');
 INSERT INTO configuration (key, value) VALUES ('admin.contact', 'admin@geles.org');
+INSERT INTO configuration (key, value) VALUES ('requestLoggingEnabled', 'true');
 INSERT INTO user_flower (user_id, flower_id) VALUES (1, 5);
 INSERT INTO user_flower (user_id, flower_id) VALUES (1, 6);
 INSERT INTO user_flower (user_id, flower_id) VALUES (1, 10);
