@@ -25,7 +25,6 @@ public class DevConfiguration implements WebMvcConfigurer {
     public ModelMapper modelMapper() {
         ModelMapper modelMapper = new ModelMapper();
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
-        modelMapper.typeMap(Order.class, OrderDTO.class).addMapping(Order::getTotalOrderPrice, OrderDTO::setTotalOrderPrice);
         return modelMapper;
     }
 }

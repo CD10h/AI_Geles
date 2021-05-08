@@ -22,7 +22,7 @@ public class OrderDTO {
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     private Long id;
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
-    @JsonFormat(pattern = "yyyy-mm-dd")
+    @JsonFormat(pattern = "yyyy-MM-dd")
     private Date createdDate;
 
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
@@ -37,6 +37,8 @@ public class OrderDTO {
 
 
     private List<FlowerInOrderDTO> orderFlowers;
+
+    @JsonProperty(access = JsonProperty.Access.READ_ONLY)
     @NotNull
     private Long userId;
 
