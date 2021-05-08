@@ -4,6 +4,7 @@
 
   import type { Flower } from "./App.svelte";
   import axios from "axios";
+  import { isLoggedIn } from "./isLoggedIn";
 
   // Variable to hold fetched list
   export let flowers: Flower[];
@@ -44,16 +45,18 @@
         src={`${server_url}/static/${flower.photo}`}
         alt={flower.name}
       />
-      <div
-        class="flower-list-item-favorite"
-        on:click={() => handleFavoriteChange(flower)}
-      >
-        {#if flower.favorite}
-          <i class="mdi mdi-heart" />
-        {:else}
-          <i class="mdi mdi-heart-outline" />
-        {/if}
-      </div>
+      {#if $isLoggedIn}
+        <div
+          class="flower-list-item-favorite"
+          on:click={() => handleFavoriteChange(flower)}
+        >
+          {#if flower.favorite}
+            <i class="mdi mdi-heart" />
+          {:else}
+            <i class="mdi mdi-heart-outline" />
+          {/if}
+        </div>
+      {/if}
       <div class="flower-list-item-name">{flower.name}</div>
       <div class="flower-list-item-price">{flower.price} €</div>
       <p class="flower-list-item-description">

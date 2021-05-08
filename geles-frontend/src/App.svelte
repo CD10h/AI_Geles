@@ -22,22 +22,19 @@
   import UpdateFlower from "./UpdateFlower.svelte";
   import axios from "axios";
   import FavoriteFlowers from "./FavoriteFlowers.svelte";
+  import { isLoggedIn } from "./isLoggedIn";
 
   export let url = "";
 
-  let isLoggedIn = !!document.cookie
-    .split("; ")
-    .find(cookie => cookie.startsWith("auth"));
-
   function onLogin() {
-    isLoggedIn = true;
+    isLoggedIn.set(true);
   }
 
   async function handleLogout() {
     await axios.post("/auth/logout", null, {
       withCredentials: true
     });
-    isLoggedIn = false;
+    isLoggedIn.set(false);
   }
 </script>
 
@@ -46,11 +43,10 @@
     <Link to="/">Pagrindinis</Link>
     <Link to="/add">Pridėti gėlę</Link>
     <Link to="/search">Paieška</Link>
-    {#if !isLoggedIn}
+    {#if !$isLoggedIn}
       <Link to="/login">Prisijungti</Link>
       <Link to="/register">Užsiregistruoti</Link>
-    {/if}
-    {#if isLoggedIn}
+    {:else}
       <Link to="/flowers/favorite">Mėgstamiausios gėlės</Link>
       <button on:click={handleLogout}>Atsijungti</button>
     {/if}
