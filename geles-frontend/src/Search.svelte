@@ -86,6 +86,14 @@
       dateValue = "";
     }
   }
+
+  async function onFavoriteChange(flower: Flower) {
+    const index = flowers.findIndex(_flower => _flower.id === flower.id);
+    if (index === -1) {
+      return;
+    }
+    flowers = [...flowers.slice(0, index), flower, ...flowers.slice(index + 1)];
+  }
 </script>
 
 <SearchBar bind:query />
@@ -129,7 +137,7 @@
   <br />
 </div>
 
-<Catalogue {flowers} />
+<Catalogue {flowers} {onFavoriteChange} />
 
 <!-- <div class="filter">
   <input type="range" id="volume" name="volume" min="0" max="11" />

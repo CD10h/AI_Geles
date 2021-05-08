@@ -7,6 +7,7 @@
     photo?: string;
     description: string;
     daysToExpire: number;
+    favorite: boolean;
   }
 </script>
 
