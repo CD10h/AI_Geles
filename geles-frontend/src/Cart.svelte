@@ -3,42 +3,51 @@
   import { onMount } from "svelte";
   import { server_url } from "./index";
   import axios from "axios";
-  import { select_multiple_value } from "svelte/internal";
 
   export let flowers: Flower[] = [];
 
-  // Variable to hold fetched list
+  interface Cart {
+    id: number;
+    flowersInCart: [];
+  }
+
   let flowersInCart: FlowerInCart[] = [];
 
-  // TEMPORARY HARDCODED ID, REPLACE WITH ACTUAL FUNCTION
-  let id = 1;
+  let cart = {
+    id: 0,
+    flowersInCart: flowersInCart
+  };
 
   async function getFlowersInCart() {
     // Download data from server
-    const response = await axios.get(`${server_url}/carts/flowers/${id}`);
-    flowersInCart = response.data;
+    const response = await axios.get(`${server_url}/carts/flowers/${cart.id}`);
+    cart.flowersInCart = response.data;
   }
 
   function handleDelete(fl: FlowerInCart) {
-    let index = flowersInCart.indexOf(fl);
+    let index = cart.flowersInCart.indexOf(fl);
     if (index !== -1) {
-      flowersInCart.splice(index, 1);
-      flowersInCart = flowersInCart;
+      cart.flowersInCart.splice(index, 1);
+      cart.flowersInCart = cart.flowersInCart;
     }
   }
 
   async function handleUpdate() {
-    let cart = {
-      id: id,
-      flowersInCart: flowersInCart
-    };
-    const response = await axios.put(`${server_url}/carts/${id}`, cart);
-    flowersInCart = response.data.flowersInCart;
+    const response = await axios.put(`${server_url}/carts/${cart.id}`, cart);
+    cart.flowersInCart = response.data.flowersInCart;
+  }
+
+  async function getCartId() {
+    const response = await axios.get<Cart>(`${server_url}/users/cart/`, {
+      withCredentials: true
+    });
+    cart = response.data;
+    getFlowersInCart();
   }
 
   // Run code on component mount (once)
   onMount(() => {
-    getFlowersInCart();
+    getCartId();
   });
 </script>
 
@@ -50,7 +59,7 @@
       <th>Vnt. kaina</th>
       <th>Suma</th>
     </tr>
-    {#each flowersInCart as flowerInCart (flowerInCart.id)}
+    {#each cart.flowersInCart as flowerInCart (flowerInCart.id)}
       <tr>
         <th
           >{flowers.find(flower => flower.id === flowerInCart.flowerId)
