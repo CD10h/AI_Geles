@@ -1,5 +1,7 @@
 package lt.aigen.geles;
 
+import lt.aigen.geles.models.Order;
+import lt.aigen.geles.models.dto.OrderDTO;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
 import org.springframework.context.annotation.Bean;
