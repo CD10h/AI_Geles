@@ -54,10 +54,12 @@ public class OrdersController {
         for (var f : orderDTO.getOrderFlowers()) {
             var flowerInOrder = convertFromDTO(f);
             flowerInOrder.setOrder(order);
-            flowerInOrder = flowerInOrderRepository.save(flowerInOrder);
             flowersInOrder.add(flowerInOrder);
         }
+
+        flowersInOrder = flowerInOrderRepository.saveAll(flowersInOrder);
         order.setOrderProducts(flowersInOrder); //so it adds it to DTO
+
         return new ResponseEntity<>(convertToDTO(order), HttpStatus.CREATED);
     }
 
