@@ -38,12 +38,12 @@
     if (minPrice != -1 && maxPrice != -1) {
       if (+filter.filters[minPrice].value <= +filter.filters[maxPrice].value) {
         axios
-          .post("/flowers/filter/?q=${query}", filter)
+          .post(`/flowers/filter/?q=${query}`, filter)
           .then(response => (flowers = response.data));
       }
     } else {
       axios
-        .post("/flowers/filter/?q=${query}", filter)
+        .post(`/flowers/filter/?q=${query}`, filter)
         .then(response => (flowers = response.data));
     }
   }
