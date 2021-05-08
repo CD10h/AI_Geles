@@ -1,11 +1,13 @@
+import axios from "axios";
 import "svelte";
 
 import App from "./App.svelte";
 
 export const server_url = "http://localhost:8080";
+axios.defaults.baseURL = server_url;
 
 var app = new App({
-  target: document.body,
+  target: document.body
 });
 
 export default app;

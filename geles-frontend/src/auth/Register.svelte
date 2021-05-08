@@ -13,7 +13,7 @@
 
   async function handleSubmit() {
     try {
-      await axios.post("http://localhost:8080/users/", registerFields);
+      await axios.post("/users/", registerFields);
       navigate("/");
     } catch (e) {
       if (isAxiosError(e)) {

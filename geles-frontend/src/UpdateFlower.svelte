@@ -1,10 +1,11 @@
 <script>
   import type { Flower } from "./App.svelte";
-  import axios from "axios";
-  import Input from "./Input.svelte";
-  import { onMount } from "svelte";
   import { isAxiosError } from "./util";
   import { navigate } from "svelte-routing";
+  import { onMount } from "svelte";
+  import axios from "axios";
+
+  import Input from "./Input.svelte";
 
   let flower: Omit<Flower, "id"> = {
     name: "",
@@ -19,7 +20,7 @@
 
   async function handleSubmit() {
     try {
-      await axios.put(`http://localhost:8080/flowers/${id}`, flower, {
+      await axios.put(`/flowers/${id}`, flower, {
         withCredentials: true
       });
       navigate("/");
@@ -40,7 +41,7 @@
 
   onMount(() => {
     axios
-      .get(`http://localhost:8080/flowers/${id}`, { withCredentials: true })
+      .get(`/flowers/${id}`, { withCredentials: true })
       .then(response => (flower = response.data));
   });
 </script>

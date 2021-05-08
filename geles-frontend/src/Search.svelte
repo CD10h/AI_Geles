@@ -1,11 +1,9 @@
 <script>
   import type { Flower } from "./App.svelte";
-  import { server_url } from "./index.ts";
+  import axios from "axios";
 
-  import AddFlower from "./AddFlower.svelte";
   import Catalogue from "./Catalogue.svelte";
   import SearchBar from "./SearchBar.svelte";
-  import axios from "axios";
 
   interface Filter {
     sort: string;
@@ -40,12 +38,12 @@
     if (minPrice != -1 && maxPrice != -1) {
       if (+filter.filters[minPrice].value <= +filter.filters[maxPrice].value) {
         axios
-          .post(`${server_url}/flowers/filter/?q=${query}`, filter)
+          .post(`/flowers/filter/?q=${query}`, filter)
           .then(response => (flowers = response.data));
       }
     } else {
       axios
-        .post(`${server_url}/flowers/filter/?q=${query}`, filter)
+        .post(`/flowers/filter/?q=${query}`, filter)
         .then(response => (flowers = response.data));
     }
   }
@@ -87,6 +85,14 @@
       ];
       dateValue = "";
     }
+  }
+
+  async function onFavoriteChange(flower: Flower) {
+    const index = flowers.findIndex(_flower => _flower.id === flower.id);
+    if (index === -1) {
+      return;
+    }
+    flowers = [...flowers.slice(0, index), flower, ...flowers.slice(index + 1)];
   }
 </script>
 
@@ -131,7 +137,7 @@
   <br />
 </div>
 
-<Catalogue {flowers} />
+<Catalogue {flowers} {onFavoriteChange} />
 
 <!-- <div class="filter">
   <input type="range" id="volume" name="volume" min="0" max="11" />
