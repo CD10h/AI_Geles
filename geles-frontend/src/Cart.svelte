@@ -9,6 +9,8 @@
 
   // Variable to hold fetched list
   let flowersInCart: FlowerInCart[] = [];
+
+  // TEMPORARY HARDCODED ID, REPLACE WITH ACTUAL FUNCTION
   let id = 1;
 
   async function getFlowersInCart() {
@@ -17,31 +19,63 @@
     flowersInCart = response.data;
   }
 
+  function handleDelete(fl: FlowerInCart) {
+    let index = flowersInCart.indexOf(fl);
+    if (index !== -1) {
+      flowersInCart.splice(index, 1);
+      flowersInCart = flowersInCart;
+    }
+  }
+
+  async function handleUpdate() {
+    let cart = {
+      id: id,
+      flowersInCart: flowersInCart
+    };
+    const response = await axios.put(`${server_url}/carts/${id}`, cart);
+    flowersInCart = response.data.flowersInCart;
+  }
+
   // Run code on component mount (once)
   onMount(() => {
     getFlowersInCart();
   });
-
-  function onChange() {
-    getFlowersInCart();
-  }
 </script>
 
 <div class="flowerincart-list">
   <table>
     <tr>
-      <th>Flower</th>
-      <th>Amount</th>
-      <th>Unit price</th>
-      <th>Total price</th>
+      <th>Gėlė</th>
+      <th>Kiekis</th>
+      <th>Vnt. kaina</th>
+      <th>Suma</th>
     </tr>
     {#each flowersInCart as flowerInCart (flowerInCart.id)}
       <tr>
-        <th>{flowers[flowerInCart.id].name}</th>
-        <th>{flowerInCart.amount}</th>
-        <th>{flowers[flowerInCart.id].price}</th>
-        <th>{flowers[flowerInCart.id].price * flowerInCart.amount}</th>
+        <th
+          >{flowers.find(flower => flower.id === flowerInCart.flowerId)
+            ?.name}</th
+        >
+        <th
+          ><input
+            type="number"
+            bind:value={flowerInCart.amount}
+            min="1"
+            max="100"
+            size="5"
+          /></th
+        >
+        <th
+          >{flowers.find(flower => flower.id === flowerInCart.flowerId)
+            ?.price}</th
+        >
+        <th
+          >{(flowers.find(flower => flower.id === flowerInCart.flowerId)
+            ?.price ?? 0) * flowerInCart.amount}</th
+        >
+        <button on:click={() => handleDelete(flowerInCart)}>Pašalinti</button>
       </tr>
     {/each}
   </table>
+  <button on:click={() => handleUpdate()}>Išsaugoti pakeitimus</button>
 </div>

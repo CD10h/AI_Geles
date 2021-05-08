@@ -2,15 +2,22 @@ package lt.aigen.geles.controller;
 
 import lt.aigen.geles.models.Cart;
 import lt.aigen.geles.models.Flower;
+import lt.aigen.geles.models.FlowerInCart;
+import lt.aigen.geles.models.User;
 import lt.aigen.geles.models.dto.CartDTO;
 import lt.aigen.geles.models.dto.FlowerDTO;
+import lt.aigen.geles.models.dto.FlowerInCartDTO;
 import lt.aigen.geles.repositories.CartRepository;
+import lt.aigen.geles.repositories.FlowerInCartRepository;
+import lt.aigen.geles.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.transaction.Transactional;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -19,10 +26,14 @@ import java.util.stream.Collectors;
 @RequestMapping("/carts")
 public class CartController {
     CartRepository cartRepository;
+    UserRepository userRepository;
+    FlowerInCartRepository flowerInCartRepository;
     ModelMapper modelMapper;
 
-    public CartController(CartRepository cartRepository, ModelMapper modelMapper) {
+    public CartController(CartRepository cartRepository, UserRepository userRepository, FlowerInCartRepository flowerInCartRepository, ModelMapper modelMapper) {
         this.cartRepository = cartRepository;
+        this.userRepository = userRepository;
+        this.flowerInCartRepository = flowerInCartRepository;
         this.modelMapper = modelMapper;
     }
 
@@ -37,16 +48,35 @@ public class CartController {
     }
 
     @PutMapping("/{id}")
+    @Transactional
     ResponseEntity<CartDTO> updateCart(@RequestBody @Validated CartDTO cartDTO, @PathVariable Long id) {
-        if (cartRepository.findById(id).isEmpty()){
+        Optional<Cart> oldCart = cartRepository.findById(id);
+        if(oldCart.isEmpty()){
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        var newCart = convertFromDTO(cartDTO);
-        newCart.setId(id);
-        return new ResponseEntity<>(convertToDTO(cartRepository.save(newCart)), HttpStatus.OK);
+
+        Cart newCart = oldCart.get();
+
+        for(var f: newCart.getFlowersInCart()){
+            flowerInCartRepository.delete(f);
+        }
+
+        List<FlowerInCart> flowersInCart = new ArrayList<>();
+        for (var f : cartDTO.getFlowersInCart()) {
+            FlowerInCart flowerInCart = convertFromDTO(f);
+            flowerInCart.setCart(newCart);
+            flowerInCart = flowerInCartRepository.save(flowerInCart);
+            flowersInCart.add(flowerInCart);
+            System.out.println(flowerInCart);
+        }
+
+        newCart.setFlowersInCart(flowersInCart);
+        return new ResponseEntity<>(convertToDTO(newCart), HttpStatus.OK);
     }
 
     private CartDTO convertToDTO(Cart cart) { return modelMapper.map(cart, CartDTO.class); }
 
     private Cart convertFromDTO(CartDTO cartDTO) { return modelMapper.map(cartDTO, Cart.class); }
+
+    private FlowerInCart convertFromDTO(FlowerInCartDTO flowerInCartDTO) { return modelMapper.map(flowerInCartDTO, FlowerInCart.class); }
 }
