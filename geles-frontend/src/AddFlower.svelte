@@ -1,9 +1,10 @@
 <script>
   import type { Flower } from "./App.svelte";
-  import axios from "axios";
-  import Input from "./Input.svelte";
   import { isAxiosError } from "./util";
   import { navigate } from "svelte-routing";
+  import axios from "axios";
+
+  import Input from "./Input.svelte";
 
   let flower: Omit<Flower, "id"> = {
     name: "",
@@ -16,7 +17,7 @@
 
   async function handleSubmit() {
     try {
-      await axios.post("http://localhost:8080/flowers/", flower, {
+      await axios.post("/flowers/", flower, {
         withCredentials: true
       });
       navigate("/");

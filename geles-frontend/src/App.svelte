@@ -12,7 +12,6 @@
 
 <script>
   import { Router, Link, Route } from "svelte-routing";
-  import { server_url } from "./index.ts";
 
   import AddFlower from "./AddFlower.svelte";
   import Home from "./Home.svelte";
@@ -21,6 +20,7 @@
   import Search from "./Search.svelte";
   import UpdateFlower from "./UpdateFlower.svelte";
   import axios from "axios";
+  import FavoriteFlowers from "./FavoriteFlowers.svelte";
 
   export let url = "";
 
@@ -33,7 +33,7 @@
   }
 
   async function handleLogout() {
-    await axios.post("http://localhost:8080/auth/logout", null, {
+    await axios.post("/auth/logout", null, {
       withCredentials: true
     });
     isLoggedIn = false;
@@ -50,6 +50,7 @@
       <Link to="/register">Užsiregistruoti</Link>
     {/if}
     {#if isLoggedIn}
+      <Link to="/flowers/favorite">Mėgstamiausios gėlės</Link>
       <button on:click={handleLogout}>Atsijungti</button>
     {/if}
   </nav>
@@ -60,5 +61,6 @@
     <Route path="/update/:id" component={UpdateFlower} />
     <Route path="/login" component={Login} {onLogin} />
     <Route path="/register" component={Register} />
+    <Route path="/flowers/favorite" component={FavoriteFlowers} />
   </div>
 </Router>
