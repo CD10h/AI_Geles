@@ -114,7 +114,7 @@ public class FlowerController {
 
         var userOptional = userRepository.findByUsername(username);
         if (userOptional.isEmpty()) {
-            return new ResponseEntity<FlowerDTO>(HttpStatus.BAD_REQUEST);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         var user = userOptional.get();
 
@@ -137,7 +137,7 @@ public class FlowerController {
             @RequestBody @Validated FlowerFilterDTO filters) {
         String sort = filters.getSort();
         String sortType = filters.getSortType();
-        Pageable paging = PageRequest.of(0, Integer.MAX_VALUE);;
+        Pageable paging = PageRequest.of(0, Integer.MAX_VALUE);
 
         if (sortType.equals("asc")){
             paging = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(sort).ascending());
@@ -145,9 +145,9 @@ public class FlowerController {
             paging = PageRequest.of(0, Integer.MAX_VALUE, Sort.by(sort).descending());
         }
 
-        Double minPrice = 0.0;
-        Double maxPrice = Double.MAX_VALUE;
-        Integer daysToExpire = 0;
+        double minPrice = 0.0;
+        double maxPrice = Double.MAX_VALUE;
+        int daysToExpire = 0;
 
         if (!filters.getFilters().isEmpty()) {
             for (FiltersDTO filter : filters.getFilters()) {
