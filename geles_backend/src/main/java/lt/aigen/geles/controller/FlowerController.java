@@ -132,7 +132,7 @@ public class FlowerController {
     }
 
     @PostMapping("/filter/")
-    public ResponseEntity<List<Flower>> filterFlowers(
+    public ResponseEntity<List<FlowerDTO>> filterFlowers(
             @RequestParam String q,
             @RequestBody @Validated FlowerFilterDTO filters) {
         String sort = filters.getSort();
@@ -164,7 +164,10 @@ public class FlowerController {
         }
         return new ResponseEntity<>(
                 flowerRepository.findAllByPriceBetweenAndNameContainingIgnoreCaseAndDaysToExpireGreaterThanEqual(
-                paging, minPrice, maxPrice, q, daysToExpire), HttpStatus.OK);
+                    paging, minPrice, maxPrice, q, daysToExpire
+                ).stream()
+                    .map(this::convertToDTO)
+                    .collect(Collectors.toList()), HttpStatus.OK);
     }
 
     private FlowerDTO convertToDTO(Flower flower) {
