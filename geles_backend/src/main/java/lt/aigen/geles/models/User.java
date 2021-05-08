@@ -9,14 +9,16 @@ import javax.validation.constraints.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.List;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-@Getter
-@Setter
-@Table(name = "users", uniqueConstraints =
-@UniqueConstraint(name = "UNIQUE_USERNAME", columnNames = {"username"})
+@Getter @Setter
+@Table(
+    name = "users",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "UNIQUE_USERNAME", columnNames = {"username"})
+    }
 )
 public class User implements Serializable {
     @Id
@@ -36,14 +38,8 @@ public class User implements Serializable {
     @Type(type = "text")
     private String photo;
 
-    @ManyToMany
-    @JoinTable(
-            name = "user_flower",
-            joinColumns = @JoinColumn(name = "user_id"),
-            inverseJoinColumns = @JoinColumn(name = "flower_id"),
-            uniqueConstraints = @UniqueConstraint(columnNames = {"user_id", "flower_id"})
-    )
-    private List<Flower> favoriteFlowers = new ArrayList<>();
+    @ManyToMany(mappedBy = "userFavorites")
+    private Set<Flower> favoriteFlowers = new HashSet<>();
 
     public User(Long id, String username, String password, String photo) {
         this.id = id;

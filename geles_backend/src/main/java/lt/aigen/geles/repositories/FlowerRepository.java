@@ -16,7 +16,13 @@ public interface FlowerRepository extends JpaRepository<Flower, Long> {
     List<Flower> findAllByNameContainsIgnoreCase(String name);
 
     @Query(nativeQuery=true)
+    List<FlowerDTO> findAllFlowersWithFavoriteWithQuery(String query, String username);
+
+    @Query(nativeQuery = true)
     List<FlowerDTO> findAllFavoriteFlowersWithQuery(String query, String username);
+
+    @Query(nativeQuery = true)
+    FlowerDTO findFlowerWithFavorite(Long flowerId, Long userId);
 
     @Query("from Flower f where current_date + f.daysToExpire <= :searchDate")
     List<Flower> findExpiredBeforeDate(@Param("searchDate") Date searchDate);
