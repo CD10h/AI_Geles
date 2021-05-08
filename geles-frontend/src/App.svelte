@@ -7,12 +7,12 @@
     photo?: string;
     description: string;
     daysToExpire: number;
+    favorite: boolean;
   }
 </script>
 
 <script>
   import { Router, Link, Route } from "svelte-routing";
-  import { server_url } from "./index.ts";
 
   import AddFlower from "./AddFlower.svelte";
   import Home from "./Home.svelte";
@@ -21,22 +21,20 @@
   import Search from "./Search.svelte";
   import UpdateFlower from "./UpdateFlower.svelte";
   import axios from "axios";
+  import FavoriteFlowers from "./FavoriteFlowers.svelte";
+  import { isLoggedIn } from "./isLoggedIn";
 
   export let url = "";
 
-  let isLoggedIn = !!document.cookie
-    .split("; ")
-    .find(cookie => cookie.startsWith("auth"));
-
   function onLogin() {
-    isLoggedIn = true;
+    isLoggedIn.set(true);
   }
 
   async function handleLogout() {
-    await axios.post("http://localhost:8080/auth/logout", null, {
+    await axios.post("/auth/logout", null, {
       withCredentials: true
     });
-    isLoggedIn = false;
+    isLoggedIn.set(false);
   }
 </script>
 
@@ -45,11 +43,11 @@
     <Link to="/">Pagrindinis</Link>
     <Link to="/add">Pridėti gėlę</Link>
     <Link to="/search">Paieška</Link>
-    {#if !isLoggedIn}
+    {#if !$isLoggedIn}
       <Link to="/login">Prisijungti</Link>
       <Link to="/register">Užsiregistruoti</Link>
-    {/if}
-    {#if isLoggedIn}
+    {:else}
+      <Link to="/flowers/favorite">Mėgstamiausios gėlės</Link>
       <button on:click={handleLogout}>Atsijungti</button>
     {/if}
   </nav>
@@ -60,5 +58,6 @@
     <Route path="/update/:id" component={UpdateFlower} />
     <Route path="/login" component={Login} {onLogin} />
     <Route path="/register" component={Register} />
+    <Route path="/flowers/favorite" component={FavoriteFlowers} />
   </div>
 </Router>

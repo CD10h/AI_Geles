@@ -4,17 +4,32 @@
 
   import type { Flower } from "./App.svelte";
   import axios from "axios";
+  import { isLoggedIn } from "./isLoggedIn";
 
   // Variable to hold fetched list
   export let flowers: Flower[];
   export let owner: boolean | undefined = false;
   export let onChange: (() => void) | undefined = undefined;
+  export let onFavoriteChange:
+    | ((flower: Flower) => void)
+    | undefined = undefined;
 
   async function handleDelete(id: number, name: string) {
     if (window.confirm(`Ar tikrai norite ištrinti gėlę ${name}?`)) {
       await axios.delete(`${server_url}/flowers/${id}`);
       if (onChange) onChange();
     }
+  }
+
+  async function handleFavoriteChange(flower: Flower) {
+    const newFlower = (
+      await axios.put(
+        `${server_url}/flowers/${flower.id}/favorite`,
+        { favorite: !flower.favorite },
+        { withCredentials: true }
+      )
+    ).data;
+    if (onFavoriteChange) onFavoriteChange(newFlower);
   }
 </script>
 
@@ -30,6 +45,18 @@
         src={`${server_url}/static/${flower.photo}`}
         alt={flower.name}
       />
+      {#if $isLoggedIn}
+        <div
+          class="flower-list-item-favorite"
+          on:click={() => handleFavoriteChange(flower)}
+        >
+          {#if flower.favorite}
+            <i class="mdi mdi-heart" />
+          {:else}
+            <i class="mdi mdi-heart-outline" />
+          {/if}
+        </div>
+      {/if}
       <div class="flower-list-item-name">{flower.name}</div>
       <div class="flower-list-item-price">{flower.price} €</div>
       <p class="flower-list-item-description">
@@ -60,6 +87,7 @@
     min-width: 200px;
     max-width: 300px;
     flex-basis: calc(25% - 48px);
+    position: relative;
   }
 
   .flower-list-item-name {
@@ -80,6 +108,25 @@
     -webkit-line-clamp: 4;
     -webkit-box-orient: vertical;
     /* text-align: justify; */
+  }
+
+  .flower-list-item-favorite {
+    background-color: white;
+    border: 1px solid grey;
+    width: 48px;
+    height: 48px;
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    cursor: pointer;
+  }
+
+  .mdi {
+    font-size: 48px;
+    line-height: 1;
+  }
+  .mdi.mdi-heart {
+    color: red;
   }
 
   @media (max-width: 1024px) {

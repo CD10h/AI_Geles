@@ -15,7 +15,7 @@
 
   async function handleSubmit() {
     try {
-      await axios.post("http://localhost:8080/auth/login/", loginFields, {
+      await axios.post("/auth/login/", loginFields, {
         withCredentials: true
       });
       onLogin();

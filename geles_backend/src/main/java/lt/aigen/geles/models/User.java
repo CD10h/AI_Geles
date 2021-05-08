@@ -8,14 +8,19 @@ import org.hibernate.annotations.Type;
 import javax.validation.constraints.*;
 
 import javax.persistence.*;
+import java.io.Serializable;
+import java.util.HashSet;
+import java.util.Set;
 
 @Entity
-@Getter
-@Setter
-@Table(name = "users", uniqueConstraints =
-@UniqueConstraint(name = "UNIQUE_USERNAME", columnNames = {"username"})
+@Getter @Setter
+@Table(
+    name = "users",
+    uniqueConstraints = {
+        @UniqueConstraint(name = "UNIQUE_USERNAME", columnNames = {"username"})
+    }
 )
-public class User {
+public class User implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @JsonProperty(access = JsonProperty.Access.READ_ONLY)
@@ -32,6 +37,9 @@ public class User {
     // Profile picture
     @Type(type = "text")
     private String photo;
+
+    @ManyToMany(mappedBy = "userFavorites")
+    private Set<Flower> favoriteFlowers = new HashSet<>();
 
     public User(Long id, String username, String password, String photo) {
         this.id = id;
