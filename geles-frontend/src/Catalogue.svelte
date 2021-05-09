@@ -88,7 +88,13 @@
         >
       {/if}
       {#if isLoggedIn}
-        <input type="number" bind:value={amount} min="1" max="100" />
+        <input
+          type="number"
+          min="1"
+          max="100"
+          on:input={e => (amount = +e.currentTarget.value)}
+          value="1"
+        />
         <button on:click={() => handleToCart(flower.id, amount)}>+</button>
       {/if}
     </div>

@@ -30,7 +30,7 @@
         ...flowerInCart,
         name: flower.name,
         price: flower.price,
-        sum: (flower.price * flowerInCart.amount).toFixed(2)
+        sum: flower.price * flowerInCart.amount
       };
     });
   }
@@ -55,7 +55,22 @@
 
   async function handleUpdate() {
     const response = await axios.put(`${server_url}/carts/${cart.id}`, cart);
-    cart.flowersInCart = response.data.flowersInCart;
+    cart.flowersInCart = response.data.flowersInCart.map(
+      (flowerInCart: any) => {
+        const flower = flowers.find(
+          flower => flower.id === flowerInCart.flowerId
+        );
+        if (!flower) {
+          return flowerInCart;
+        }
+        return {
+          ...flowerInCart,
+          name: flower.name,
+          price: flower.price,
+          sum: flower.price * flowerInCart.amount
+        };
+      }
+    );
   }
 
   async function getCartId() {
@@ -94,7 +109,7 @@
           /></th
         >
         <th>{flowerInCart.price}</th>
-        <th>{flowerInCart.sum}</th>
+        <th>{flowerInCart.sum?.toFixed(2)}</th>
         <button on:click={() => handleDelete(flowerInCart)}>Pašalinti</button>
       </tr>
     {/each}
