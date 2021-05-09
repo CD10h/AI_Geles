@@ -33,6 +33,9 @@ public class User {
     @Type(type = "text")
     private String photo;
 
+    @OneToOne
+    private Cart cart;
+
     public User(Long id, String username, String password, String photo) {
         this.id = id;
         this.username = username;

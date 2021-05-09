@@ -8,11 +8,19 @@
     description: string;
     daysToExpire: number;
   }
+  export interface FlowerInCart {
+    id: number;
+    amount: number;
+    flowerId: number;
+    cartId: number;
+    sum: number;
+    price: number;
+    name: string;
+  }
 </script>
 
 <script>
   import { Router, Link, Route } from "svelte-routing";
-  import { server_url } from "./index.ts";
 
   import AddFlower from "./AddFlower.svelte";
   import Home from "./Home.svelte";
@@ -20,9 +28,22 @@
   import Register from "./auth/Register.svelte";
   import Search from "./Search.svelte";
   import UpdateFlower from "./UpdateFlower.svelte";
+  import Cart from "./Cart.svelte";
   import axios from "axios";
+  import { onMount } from "svelte";
+  import { server_url } from "./index";
 
   export let url = "";
+
+  interface Cart {
+    id: number;
+    flowersInCart: [];
+  }
+
+  let cart = {
+    id: 0,
+    flowersInCart: []
+  };
 
   let isLoggedIn = !!document.cookie
     .split("; ")
@@ -38,18 +59,39 @@
     });
     isLoggedIn = false;
   }
+
+  async function getCartId() {
+    const response = await axios.get<Cart>(`${server_url}/users/cart/`, {
+      withCredentials: true
+    });
+    cart = response.data;
+  }
+
+  let flowers: Flower[] = [];
+
+  async function getFlowers() {
+    // Download data from server
+    const response = await axios.get(`${server_url}/flowers/`);
+    flowers = response.data;
+  }
+
+  onMount(() => {
+    getCartId();
+    getFlowers();
+  });
 </script>
 
 <Router {url}>
   <nav>
-    <Link to="/">Pagrindinis</Link>
-    <Link to="/add">Pridėti gėlę</Link>
-    <Link to="/search">Paieška</Link>
+    <Link to="/">Home</Link>
+    <Link to="/add">Add flower</Link>
+    <Link to="/search">Search</Link>
     {#if !isLoggedIn}
       <Link to="/login">Prisijungti</Link>
       <Link to="/register">Užsiregistruoti</Link>
     {/if}
     {#if isLoggedIn}
+      <Link to="/cart">Krepšelis</Link>
       <button on:click={handleLogout}>Atsijungti</button>
     {/if}
   </nav>
@@ -60,5 +102,6 @@
     <Route path="/update/:id" component={UpdateFlower} />
     <Route path="/login" component={Login} {onLogin} />
     <Route path="/register" component={Register} />
+    <Route path="/cart" component={Cart} {flowers} />
   </div>
 </Router>

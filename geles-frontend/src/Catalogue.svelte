@@ -1,8 +1,9 @@
 <script>
   import { server_url } from "./index";
   import { Link } from "svelte-routing";
+  import { onMount } from "svelte";
 
-  import type { Flower } from "./App.svelte";
+  import type { Flower, FlowerInCart } from "./App.svelte";
   import axios from "axios";
 
   // Variable to hold fetched list
@@ -10,12 +11,57 @@
   export let owner: boolean | undefined = false;
   export let onChange: (() => void) | undefined = undefined;
 
+  interface Cart {
+    id: number;
+    flowersInCart: [];
+  }
+
+  let cart = {
+    id: 0,
+    flowersInCart: []
+  };
+
+  let amount = 1;
+
+  let flowerInCart: Omit<FlowerInCart, "id"> = {
+    amount: 0,
+    flowerId: 0,
+    cartId: 0,
+    sum: 0,
+    price: 0,
+    name: ""
+  };
+
+  let isLoggedIn = !!document.cookie
+    .split("; ")
+    .find(cookie => cookie.startsWith("auth"));
+
   async function handleDelete(id: number, name: string) {
     if (window.confirm(`Ar tikrai norite ištrinti gėlę ${name}?`)) {
       await axios.delete(`${server_url}/flowers/${id}`);
       if (onChange) onChange();
     }
   }
+
+  async function handleToCart(id: number, amount: number) {
+    //await axios.put(`${server_url}/carts/${id}`);
+    flowerInCart.amount = amount;
+    flowerInCart.flowerId = id;
+    flowerInCart.cartId = cart.id;
+    axios.post(`${server_url}/carts/flowers/`, flowerInCart);
+    if (onChange) onChange();
+  }
+
+  async function getCartId() {
+    const response = await axios.get<Cart>(`${server_url}/users/cart/`, {
+      withCredentials: true
+    });
+    cart = response.data;
+  }
+
+  onMount(() => {
+    getCartId();
+  });
 </script>
 
 <div class="flower-list">
@@ -40,6 +86,16 @@
         <button on:click={() => handleDelete(flower.id, flower.name)}
           >Ištrinti</button
         >
+      {/if}
+      {#if isLoggedIn}
+        <input
+          type="number"
+          min="1"
+          max="100"
+          on:input={e => (amount = +e.currentTarget.value)}
+          value="1"
+        />
+        <button on:click={() => handleToCart(flower.id, amount)}>+</button>
       {/if}
     </div>
   {/each}
