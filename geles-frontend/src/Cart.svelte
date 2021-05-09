@@ -30,7 +30,7 @@
         ...flowerInCart,
         name: flower.name,
         price: flower.price,
-        sum: flower.price * flowerInCart.amount
+        sum: (flower.price * flowerInCart.amount).toFixed(2)
       };
     });
   }

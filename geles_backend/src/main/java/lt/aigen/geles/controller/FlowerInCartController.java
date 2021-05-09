@@ -53,11 +53,12 @@ public class FlowerInCartController {
         for(var f: flowersInCart){
             int amount = flowerInCartDTO.getAmount();
             amount += f.getAmount();
-            if(f.getFlower().getId() == flower_id){
+            if(f.getFlower().getId() == flower_id) {
+                System.out.println(flower_id);
                 flowerInCartDTO.setAmount(amount);
                 flowerInCartRepository.deleteById(f.getId());
+                break;
             }
-            break;
         }
 
         var flowerInCart = convertFromDTO(flowerInCartDTO);
