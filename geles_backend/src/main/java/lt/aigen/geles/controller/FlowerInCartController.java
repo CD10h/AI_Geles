@@ -13,6 +13,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -46,6 +47,19 @@ public class FlowerInCartController {
     public ResponseEntity<FlowerInCartDTO> postFlowerInCart(@RequestBody @Validated FlowerInCartDTO flowerInCartDTO) {
         long flower_id = flowerInCartDTO.getFlowerId();
         long cart_id = flowerInCartDTO.getCartId();
+
+        List<FlowerInCart> flowersInCart = cartRepository.findById(cart_id).get().getFlowersInCart();
+
+        for(var f: flowersInCart){
+            int amount = flowerInCartDTO.getAmount();
+            amount += f.getAmount();
+            if(f.getFlower().getId() == flower_id){
+                flowerInCartDTO.setAmount(amount);
+                flowerInCartRepository.deleteById(f.getId());
+            }
+            break;
+        }
+
         var flowerInCart = convertFromDTO(flowerInCartDTO);
 
         Optional<Flower> flower = flowerRepository.findById(flower_id);

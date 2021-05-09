@@ -26,7 +26,10 @@
   let flowerInCart: Omit<FlowerInCart, "id"> = {
     amount: 0,
     flowerId: 0,
-    cartId: 0
+    cartId: 0,
+    sum: 0,
+    price: 0,
+    name: ""
   };
 
   let isLoggedIn = !!document.cookie

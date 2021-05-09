@@ -8,20 +8,41 @@
 
   interface Cart {
     id: number;
-    flowersInCart: [];
+    flowersInCart: FlowerInCart[];
   }
 
-  let flowersInCart: FlowerInCart[] = [];
-
-  let cart = {
+  let cart: Cart = {
     id: 0,
-    flowersInCart: flowersInCart
+    flowersInCart: []
   };
 
   async function getFlowersInCart() {
     // Download data from server
     const response = await axios.get(`${server_url}/carts/flowers/${cart.id}`);
-    cart.flowersInCart = response.data;
+    cart.flowersInCart = response.data.map((flowerInCart: any) => {
+      const flower = flowers.find(
+        flower => flower.id === flowerInCart.flowerId
+      );
+      if (!flower) {
+        return flowerInCart;
+      }
+      return {
+        ...flowerInCart,
+        name: flower.name,
+        price: flower.price,
+        sum: flower.price * flowerInCart.amount
+      };
+    });
+  }
+
+  function updateSum(flower: FlowerInCart, newAmount: string) {
+    const index = cart.flowersInCart.findIndex(
+      flowerInCart => flowerInCart.id === flower.id
+    );
+    if (index === -1) {
+      return;
+    }
+    cart.flowersInCart[index].sum = flower.price * +newAmount;
   }
 
   function handleDelete(fl: FlowerInCart) {
@@ -61,10 +82,7 @@
     </tr>
     {#each cart.flowersInCart as flowerInCart (flowerInCart.id)}
       <tr>
-        <th
-          >{flowers.find(flower => flower.id === flowerInCart.flowerId)
-            ?.name}</th
-        >
+        <th>{flowerInCart.name}</th>
         <th
           ><input
             type="number"
@@ -72,16 +90,11 @@
             min="1"
             max="100"
             size="5"
+            on:input={e => updateSum(flowerInCart, e.currentTarget.value)}
           /></th
         >
-        <th
-          >{flowers.find(flower => flower.id === flowerInCart.flowerId)
-            ?.price}</th
-        >
-        <th
-          >{(flowers.find(flower => flower.id === flowerInCart.flowerId)
-            ?.price ?? 0) * flowerInCart.amount}</th
-        >
+        <th>{flowerInCart.price}</th>
+        <th>{flowerInCart.sum}</th>
         <button on:click={() => handleDelete(flowerInCart)}>Pašalinti</button>
       </tr>
     {/each}

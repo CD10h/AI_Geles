@@ -13,6 +13,9 @@
     amount: number;
     flowerId: number;
     cartId: number;
+    sum: number;
+    price: number;
+    name: string;
   }
 </script>
 
