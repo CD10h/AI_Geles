@@ -30,31 +30,23 @@ public class RequestLoggerInterceptor implements HandlerInterceptor {
 
     @Override
     public void afterCompletion(
-            HttpServletRequest request, HttpServletResponse response,
-            Object handler, Exception ex) {
-        Boolean loggingEnabled = configurationRepository.findConfigByKey("requestLoggingEnabled").map(configuration -> {
-            if (configuration.getValue().equals("true")){
-                return true;
-            }
-            return false;
-        }).orElse(false);
+        HttpServletRequest request, HttpServletResponse response,
+        Object handler, Exception ex) {
 
-        if (loggingEnabled) {
-            String username = null;
-            try {
-                for (Cookie cookie : request.getCookies()) {
-                    if (cookie.getName().equals("user")){
-                        username = cookie.getValue();
-                        break;
-                    }
+        String username = null;
+        try {
+            for (Cookie cookie : request.getCookies()) {
+                if (cookie.getName().equals("user")){
+                    username = cookie.getValue();
+                    break;
                 }
-            } catch (NullPointerException e) {
             }
+        } catch (NullPointerException e) {
+        }
 
-            if (username != null) {
-                requestLogRepository.save(new RequestLog(username, requestDate,
-                    request.getRequestURL().toString(), request.getMethod()));
-            }
+        if (username != null) {
+            requestLogRepository.save(new RequestLog(username, requestDate,
+                request.getRequestURL().toString(), request.getMethod()));
         }
     }
 }
