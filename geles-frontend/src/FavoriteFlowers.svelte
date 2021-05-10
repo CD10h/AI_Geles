@@ -12,7 +12,7 @@
     const response = await axios.get("/flowers/?favorite=true", {
       withCredentials: true
     });
-    flowers = response.data;
+    flowers = response.data.map(flower => ({ ...flower, favorite: true }));
   }
 
   async function onFavoriteChange(flower: Flower) {

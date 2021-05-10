@@ -4,8 +4,6 @@
   import { server_url } from "./index";
   import axios from "axios";
 
-  export let flowers: Flower[] = [];
-
   interface Cart {
     id: number;
     flowersInCart: FlowerInCart[];
@@ -16,10 +14,30 @@
     flowersInCart: []
   };
 
+  let flowers: Flower[] = [];
+
+  async function getCartId() {
+    const response = await axios.get<Cart>("/users/cart/", {
+      withCredentials: true
+    });
+    cart = response.data;
+    getFlowersInCart();
+  }
+
+  async function getFlowers() {
+    // Download data from server
+    const response = await axios.get("/flowers/");
+    flowers = response.data;
+  }
+
   async function getFlowersInCart() {
     // Download data from server
-    const response = await axios.get(`${server_url}/carts/flowers/${cart.id}`);
-    cart.flowersInCart = response.data.map((flowerInCart: any) => {
+    const response = await axios.get(`/carts/flowers/${cart.id}`);
+    cart.flowersInCart = mapFlowersInCart(response.data);
+  }
+
+  function mapFlowersInCart(data: any) {
+    return data.map((flowerInCart: any) => {
       const flower = flowers.find(
         flower => flower.id === flowerInCart.flowerId
       );
@@ -55,35 +73,12 @@
 
   async function handleUpdate() {
     const response = await axios.put(`${server_url}/carts/${cart.id}`, cart);
-    cart.flowersInCart = response.data.flowersInCart.map(
-      (flowerInCart: any) => {
-        const flower = flowers.find(
-          flower => flower.id === flowerInCart.flowerId
-        );
-        if (!flower) {
-          return flowerInCart;
-        }
-        return {
-          ...flowerInCart,
-          name: flower.name,
-          price: flower.price,
-          sum: flower.price * flowerInCart.amount
-        };
-      }
-    );
-  }
-
-  async function getCartId() {
-    const response = await axios.get<Cart>(`${server_url}/users/cart/`, {
-      withCredentials: true
-    });
-    cart = response.data;
-    getFlowersInCart();
+    cart.flowersInCart = mapFlowersInCart(response.data);
   }
 
   // Run code on component mount (once)
   onMount(() => {
-    getCartId();
+    getFlowers().then(() => getCartId());
   });
 </script>
 
