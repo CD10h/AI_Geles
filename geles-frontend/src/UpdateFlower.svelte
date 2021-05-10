@@ -1,5 +1,4 @@
 <script>
-  import type { Flower } from "./App.svelte";
   import { isAxiosError } from "./util";
   import { navigate } from "svelte-routing";
   import { onMount } from "svelte";
@@ -7,7 +6,7 @@
 
   import Input from "./Input.svelte";
 
-  let flower: Omit<Flower, "id"> = {
+  let flower: Omit<Flower, "id" | "favorite"> = {
     name: "",
     price: 0,
     description: "",

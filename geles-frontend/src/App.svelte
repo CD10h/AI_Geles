@@ -1,26 +1,3 @@
-<script context="module">
-  // JSON object structure for response from server
-  export interface Flower {
-    id: number;
-    name: string;
-    price: number;
-    photo?: string;
-    description: string;
-    daysToExpire: number;
-    favorite: boolean;
-  }
-
-  export interface FlowerInCart {
-    id: number;
-    amount: number;
-    flowerId: number;
-    cartId: number;
-    sum: number;
-    price: number;
-    name: string;
-  }
-</script>
-
 <script>
   import { isLoggedIn } from "./isLoggedIn";
   import { Router, Link, Route } from "svelte-routing";

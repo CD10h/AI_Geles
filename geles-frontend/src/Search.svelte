@@ -1,9 +1,10 @@
 <script>
-  import type { Flower } from "./App.svelte";
   import axios from "axios";
+  import { onMount } from "svelte";
 
   import Catalogue from "./Catalogue.svelte";
   import SearchBar from "./SearchBar.svelte";
+  import { mapFlowersToWithFavorite } from "./util/flower";
 
   interface Filter {
     sort: string;
@@ -24,6 +25,7 @@
   let query = "";
   // Variable to hold fetched list
   let flowers: Flower[] = [];
+  let favoriteFlowers: number[];
 
   // Dependencies of this block are calculated by Svelte
   // Every time `query` changes, this block of code runs
@@ -38,13 +40,18 @@
     if (minPrice != -1 && maxPrice != -1) {
       if (+filter.filters[minPrice].value <= +filter.filters[maxPrice].value) {
         axios
-          .post(`/flowers/filter/?q=${query}`, filter)
-          .then(response => (flowers = response.data));
+          .post<Omit<Flower, "favorite">[]>(
+            `/flowers/filter/?q=${query}`,
+            filter
+          )
+          .then(response => {
+            flowers = mapFlowersToWithFavorite(response.data, favoriteFlowers);
+          });
       }
     } else {
-      axios
-        .post(`/flowers/filter/?q=${query}`, filter)
-        .then(response => (flowers = response.data));
+      axios.post(`/flowers/filter/?q=${query}`, filter).then(response => {
+        flowers = mapFlowersToWithFavorite(response.data, favoriteFlowers);
+      });
     }
   }
 
@@ -92,8 +99,25 @@
     if (index === -1) {
       return;
     }
-    flowers = [...flowers.slice(0, index), flower, ...flowers.slice(index + 1)];
+    const favoriteResponse = await axios.get<number[]>("/flowers/favorite", {
+      withCredentials: true
+    });
+    flowers = [
+      ...flowers.slice(0, index),
+      { ...flower, favorite: favoriteResponse.data.includes(flower.id) },
+      ...flowers.slice(index + 1)
+    ];
   }
+
+  onMount(() => {
+    axios
+      .get<number[]>("/flowers/favorite", {
+        withCredentials: true
+      })
+      .then(response => {
+        favoriteFlowers = response.data;
+      });
+  });
 </script>
 
 <SearchBar bind:query />

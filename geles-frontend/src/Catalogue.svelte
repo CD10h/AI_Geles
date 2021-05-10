@@ -3,7 +3,6 @@
   import { Link } from "svelte-routing";
   import { onMount } from "svelte";
 
-  import type { Flower } from "./App.svelte";
   import axios from "axios";
   import { isLoggedIn } from "./isLoggedIn";
 
