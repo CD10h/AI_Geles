@@ -36,32 +36,29 @@ public class FlowerController {
     }
 
     @GetMapping("/") // /flowers/?q=gele
-    public List<FlowerDTO> getFlowers(@RequestParam Optional<String> q,
-                                      @RequestParam Optional<String> favorite,
-                                      @CookieValue(value = "user", required = false) String username) {
-        if (username == null) {
-            return getFlowersUnauthenticated(q);
-        } else {
-            if (favorite.isPresent() && favorite.get().equals("true")) {
-                return getFavoriteFlowers(q, username);
+    public ResponseEntity<List<FlowerDTO>> getFlowers(@RequestParam Optional<String> q,
+                                                      @RequestParam Optional<String> favorite,
+                                                      @CookieValue("user") Optional<String> username) {
+        if (favorite.isPresent() && favorite.get().equals("true")) {
+            if (username.isEmpty()) {
+                return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
-            return getFlowersWithFavorite(q, username);
+            System.out.println(flowerRepository.findAllFavoriteFlowers(username.get()));
+            return new ResponseEntity<>(flowerRepository.findAllFavoriteFlowers(username.get()), HttpStatus.OK);
         }
+        return new ResponseEntity<>(flowerRepository.findAllByNameContainsIgnoreCase(q.orElse(""))
+            .stream()
+            .map(this::convertToDTO)
+            .collect(Collectors.toList()), HttpStatus.OK);
     }
 
-    private List<FlowerDTO> getFlowersUnauthenticated(Optional<String> q) {
-        return flowerRepository.findAllByNameContainsIgnoreCase(q.orElse(""))
-                .stream()
-                .map(this::convertToDTO)
-                .collect(Collectors.toList());
-    }
-
-    private List<FlowerDTO> getFlowersWithFavorite(Optional<String> q, String username) {
-        return flowerRepository.findAllFlowersWithFavoriteWithQuery(q.orElse(""), username);
-    }
-
-    private List<FlowerDTO> getFavoriteFlowers(Optional<String> q, String username) {
-        return flowerRepository.findAllFavoriteFlowersWithQuery(q.orElse(""), username);
+    @GetMapping("/favorite")
+    public ResponseEntity<List<Long>> getFavoriteFlowers(@PathVariable Optional<String> q,
+                                                         @CookieValue("user") Optional<String> username) {
+        if (username.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+        return new ResponseEntity<>(flowerRepository.findAllFavoriteFlowerIds(username.get()), HttpStatus.OK);
     }
 
     @GetMapping("/{id}") // /flowers/10
@@ -102,9 +99,9 @@ public class FlowerController {
 
     @PutMapping("/{id}/favorite")
     public ResponseEntity<FlowerDTO> setFlowerAsFavorite(
-            @PathVariable Long id,
-            @CookieValue(name="user") String username,
-            @RequestBody FavoriteDTO favorite
+        @PathVariable Long id,
+        @CookieValue(name="user") String username,
+        @RequestBody FavoriteDTO favorite
     ) {
         var flowerOptional = flowerRepository.findById(id);
         if (flowerOptional.isEmpty()) {
@@ -125,10 +122,7 @@ public class FlowerController {
         }
 
         flowerRepository.save(flower);
-        return new ResponseEntity<>(
-            flowerRepository.findFlowerWithFavorite(flower.getId(), user.getId()),
-            HttpStatus.OK
-        );
+        return new ResponseEntity<>(convertToDTO(flower), HttpStatus.OK);
     }
 
     @PostMapping("/filter/")

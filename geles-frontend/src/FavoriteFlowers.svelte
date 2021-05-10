@@ -1,8 +1,8 @@
 <script>
-  import type { Flower } from "./App.svelte";
   import { onMount } from "svelte";
   import Catalogue from "./Catalogue.svelte";
   import axios from "axios";
+  import { mapFlowerToWithFavorite } from "./util/flower";
 
   // Variable to hold fetched list
   let flowers: Flower[] = [];
@@ -20,7 +20,15 @@
     if (index === -1) {
       return;
     }
-    flowers = [...flowers.slice(0, index), flower, ...flowers.slice(index + 1)];
+
+    const favoriteResponse = await axios.get<number[]>("/flowers/favorite", {
+      withCredentials: true
+    });
+    flowers = [
+      ...flowers.slice(0, index),
+      mapFlowerToWithFavorite(flower, favoriteResponse.data),
+      ...flowers.slice(index + 1)
+    ];
   }
 
   // Run code on component mount (once)

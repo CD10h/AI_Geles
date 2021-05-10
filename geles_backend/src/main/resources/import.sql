@@ -1,7 +1,7 @@
-INSERT INTO cart (id) VALUES (1);
-INSERT INTO cart (id) VALUES (2);
-INSERT INTO cart (id) VALUES (3);
-INSERT INTO cart (id) VALUES (4);
+INSERT INTO cart (id) VALUES (DEFAULT);
+INSERT INTO cart (id) VALUES (DEFAULT);
+INSERT INTO cart (id) VALUES (DEFAULT);
+INSERT INTO cart (id) VALUES (DEFAULT);
 INSERT INTO users (username, password, cart_id) VALUES ('emilis', 'password123', 1);
 INSERT INTO users (username, password, cart_id) VALUES ('titas', '12345678', 2);
 INSERT INTO users (username, password, cart_id) VALUES ('simonas', '12345678', 3);

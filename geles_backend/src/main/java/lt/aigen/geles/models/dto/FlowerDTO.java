@@ -29,20 +29,17 @@ public class FlowerDTO {
 
     private String photo;
 
-    private boolean isFavorite;
-
     public FlowerDTO() {
 
     }
 
-    public FlowerDTO(Object id, Object name, Object price, Object description, Object daysToExpire, Object photo, Object isFavorite) {
+    public FlowerDTO(Object id, Object name, Object price, Object description, Object daysToExpire, Object photo) {
         this.id = (Long)id;
         this.name = (String)name;
         this.price = (Double)price;
         this.description = (String)description;
         this.daysToExpire = (Integer)daysToExpire;
         this.photo = (String)photo;
-        this.isFavorite = (boolean)isFavorite;
     }
 }
 

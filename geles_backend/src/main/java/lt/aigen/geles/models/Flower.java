@@ -14,26 +14,25 @@ import java.util.Set;
 
 @Entity
 @Getter @Setter
-@NamedNativeQuery(name = "Flower.findAllFlowersWithFavoriteWithQuery",
-        query = "select f.id, f.name, f.price, f.description, f.days_to_expire, f.photo, bool_or(coalesce(u.username = :username, false)) as favorite from flower f left join user_flower uf on f.id = uf.flower_id left join users u on u.id = uf.user_id where lower(f.name) like lower(concat('%', :query, '%')) group by 1", resultSetMapping = "mapFlowersWithFavorite")
-@NamedNativeQuery(name = "Flower.findAllFavoriteFlowersWithQuery",
-        query = "select f.id, f.name, f.price, f.description, f.days_to_expire, f.photo, true as favorite from flower f left join user_flower uf on f.id = uf.flower_id left join users u on u.id = uf.user_id where u.username = :username and lower(f.name) like lower(concat('%', :query, '%'))", resultSetMapping = "mapFlowersWithFavorite")
-@NamedNativeQuery(name = "Flower.findFlowerWithFavorite",
-        query = "select f.id, f.name, f.price, f.description, f.days_to_expire, f.photo, bool_or(coalesce(uf.user_id = :userId, false)) as favorite from flower f left join user_flower uf on f.id = uf.flower_id where f.id = :flowerId group by 1", resultSetMapping = "mapFlowersWithFavorite")
-@SqlResultSetMapping(name="mapFlowersWithFavorite", classes = {
-    @ConstructorResult(
-        targetClass = FlowerDTO.class,
-        columns = {
-            @ColumnResult(name="id", type=Long.class),
-            @ColumnResult(name="name"),
-            @ColumnResult(name="price"),
-            @ColumnResult(name="description"),
-            @ColumnResult(name="days_to_expire"),
-            @ColumnResult(name="photo"),
-            @ColumnResult(name="favorite")
-        }
-    )
-})
+@NamedNativeQuery(name = "Flower.findAllFavoriteFlowerIds",
+        query = "select f.id from flower f left join user_flower uf on f.id = uf.flower_id left join users u on u.id = uf.user_id where u.username = :username", resultSetMapping = "mapIdColumnToList")
+@NamedNativeQuery(name = "Flower.findAllFavoriteFlowers",
+        query = "select f.* from flower f left join user_flower uf on f.id = uf.flower_id left join users u on u.id = uf.user_id where u.username = :username", resultSetMapping = "mapToFlower")
+@SqlResultSetMapping(name="mapIdColumnToList",
+        columns = { @ColumnResult(name="id", type=Long.class) }
+)
+@SqlResultSetMapping(name="mapToFlower",
+        classes = @ConstructorResult(
+                targetClass=FlowerDTO.class,
+                columns= {
+                        @ColumnResult(name = "id", type = Long.class),
+                        @ColumnResult(name = "name"),
+                        @ColumnResult(name = "price"),
+                        @ColumnResult(name = "description"),
+                        @ColumnResult(name = "days_to_expire"),
+                        @ColumnResult(name = "photo"),
+                })
+)
 public class Flower implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
