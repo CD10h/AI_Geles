@@ -1,5 +1,4 @@
 <script>
-  import type { Flower, FlowerInCart } from "./App.svelte";
   import { onMount } from "svelte";
   import { server_url } from "./index";
   import axios from "axios";
