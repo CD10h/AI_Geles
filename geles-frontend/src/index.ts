@@ -5,6 +5,7 @@ import App from "./App.svelte";
 
 export const server_url = "http://localhost:8080";
 axios.defaults.baseURL = server_url;
+axios.defaults.withCredentials = true;
 
 var app = new App({
   target: document.body
