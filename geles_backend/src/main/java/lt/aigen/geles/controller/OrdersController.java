@@ -1,5 +1,7 @@
 package lt.aigen.geles.controller;
 
+import lt.aigen.geles.annotations.Authorized;
+import lt.aigen.geles.components.CurrentUser;
 import lt.aigen.geles.models.FlowerInOrder;
 import lt.aigen.geles.models.Order;
 import lt.aigen.geles.models.dto.FlowerInOrderDTO;
@@ -23,32 +25,28 @@ import java.util.stream.Collectors;
 public class OrdersController {
     private final OrderRepository orderRepository;
     private final FlowerInOrderRepository flowerInOrderRepository;
-    private final UserRepository userRepository;
+    private final CurrentUser currentUser;
     private final ModelMapper modelMapper;
 
-    public OrdersController(OrderRepository orderRepository, FlowerInOrderRepository flowerInOrderRepository, UserRepository userRepository, ModelMapper modelMapper) {
+    public OrdersController(OrderRepository orderRepository, FlowerInOrderRepository flowerInOrderRepository, CurrentUser currentUser, ModelMapper modelMapper) {
         this.orderRepository = orderRepository;
         this.flowerInOrderRepository = flowerInOrderRepository;
-        this.userRepository = userRepository;
+        this.currentUser = currentUser;
         this.modelMapper = modelMapper;
         modelMapper.typeMap(Order.class, OrderDTO.class).addMapping((order -> 0.0), OrderDTO::setTotalOrderPrice); //HACK
     }
 
+    @Authorized
     @Transactional
     @PostMapping("/")
-    public ResponseEntity<OrderDTO> create(@RequestBody OrderDTO orderDTO, @CookieValue("user") Optional<String> userName) {
-        if (userName.isEmpty())
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        var user = userRepository.findByUsername(userName.get());
-        if (user.isEmpty())
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-
+    public ResponseEntity<OrderDTO> create(@RequestBody OrderDTO orderDTO) {
+        var user = currentUser.get();
         Order order = convertFromDTO(orderDTO);
         List<FlowerInOrder> flowersInOrder = new ArrayList<>();
 
         order.setOrderStatus(Order.OrderStatus.UNPAID);
         order.setOrderProducts(null);
-        order.setUser(user.get());
+        order.setUser(user);
         orderRepository.save(order);
 
         for (var f : orderDTO.getOrderFlowers()) {
@@ -62,30 +60,24 @@ public class OrdersController {
         return new ResponseEntity<>(convertToDTO(order), HttpStatus.CREATED);
     }
 
-
+    @Authorized
     @GetMapping("/")
-    public ResponseEntity<List<OrderDTO>> getOrders(@CookieValue("user") Optional<String> userName) {
-        if (userName.isEmpty())
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        if (userName.get().equals("admin")) // ;)
+    public ResponseEntity<List<OrderDTO>> getOrders() {
+        var user = currentUser.get();
+
+        if (user.getIsAdmin()) // ;)
             return new ResponseEntity<>(orderRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList()), HttpStatus.OK);
-        var user = userRepository.findByUsername(userName.get());
-        if (user.isEmpty())
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        var orders = orderRepository.findAllByUser(user.get()).stream().map(this::convertToDTO).collect(Collectors.toList());
+
+        var orders = orderRepository.findAllByUser(user).stream().map(this::convertToDTO).collect(Collectors.toList());
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 
+    @Authorized
     @PostMapping("/{id}/pay")
-    public ResponseEntity<OrderDTO> payForOrder(@CookieValue("user") Optional<String> userName, @PathVariable Long id) {
-        if (userName.isEmpty())
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        var user = userRepository.findByUsername(userName.get());
-        if (user.isEmpty())
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-
+    public ResponseEntity<OrderDTO> payForOrder(@PathVariable Long id) {
+        var user = currentUser.get();
         var order = orderRepository.getOne(id);
-        if (!order.getUser().getId().equals(user.get().getId()))
+        if (!order.getUser().getId().equals(user.getId()))
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         if (order.getOrderStatus() != Order.OrderStatus.UNPAID)
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);

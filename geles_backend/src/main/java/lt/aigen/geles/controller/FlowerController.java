@@ -42,8 +42,6 @@ public class FlowerController {
     @GetMapping("/") // /flowers/?q=gele
     public ResponseEntity<List<FlowerDTO>> getFlowers(@RequestParam Optional<String> q,
                                                       @RequestParam Optional<String> favorite) {
-        var uuser = currentUser.get();
-        System.out.println(uuser == null ? " null" : "not null");
         if (favorite.isPresent() && favorite.get().equals("true")) {
             var user = currentUser.get();
             if (user == null) {
@@ -61,11 +59,7 @@ public class FlowerController {
     @Authorized
     @GetMapping("/favorite")
     public ResponseEntity<List<Long>> getFavoriteFlowers(@PathVariable Optional<String> q) {
-        var user = currentUser.get();
-        try {
-            Thread.sleep(10000);
-        } catch (Exception e) {}
-        return new ResponseEntity<>(flowerRepository.findAllFavoriteFlowerIds(user.getUsername()), HttpStatus.OK);
+        return new ResponseEntity<>(flowerRepository.findAllFavoriteFlowerIds(currentUser.get().getUsername()), HttpStatus.OK);
     }
 
     @GetMapping("/{id}") // /flowers/10
