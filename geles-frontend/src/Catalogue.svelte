@@ -72,7 +72,7 @@
     <div class="flower-list-item">
       <img
         class="flower-list-item-photo"
-        src={`${server_url}/static/${flower.photo}`}
+        src={`${server_url}/static/flowers/${flower.photo}`}
         alt={flower.name}
       />
       {#if $isLoggedIn}
