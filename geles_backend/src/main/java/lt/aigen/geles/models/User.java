@@ -10,6 +10,7 @@ import javax.validation.constraints.*;
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -43,6 +44,9 @@ public class User implements Serializable {
 
     @OneToOne
     private Cart cart;
+
+    @OneToMany(mappedBy = "user")
+    private List<CartTemplate> cartTemplates;
 
     public User(Long id, String username, String password, String photo) {
         this.id = id;

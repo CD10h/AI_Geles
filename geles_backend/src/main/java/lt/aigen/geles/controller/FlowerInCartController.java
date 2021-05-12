@@ -62,6 +62,7 @@ public class FlowerInCartController {
         }
 
         var flowerInCart = convertFromDTO(flowerInCartDTO);
+        flowerInCart.setCartTemplate(null);
 
         Optional<Flower> flower = flowerRepository.findById(flower_id);
         if(flower.isEmpty()){

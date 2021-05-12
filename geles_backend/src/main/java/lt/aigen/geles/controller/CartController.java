@@ -65,6 +65,7 @@ public class CartController {
         for (var f : cartDTO.getFlowersInCart()) {
             FlowerInCart flowerInCart = convertFromDTO(f);
             flowerInCart.setCart(newCart);
+            flowerInCart.setCartTemplate(null);
             flowerInCart = flowerInCartRepository.save(flowerInCart);
             flowersInCart.add(flowerInCart);
             System.out.println(flowerInCart);
