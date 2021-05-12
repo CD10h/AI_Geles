@@ -4,6 +4,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
+import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.*;
 
@@ -43,6 +44,9 @@ public class User implements Serializable {
 
     @OneToOne
     private Cart cart;
+
+    @NotBlank
+    private Boolean isAdmin;
 
     public User(Long id, String username, String password, String photo) {
         this.id = id;
