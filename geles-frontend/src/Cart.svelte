@@ -2,11 +2,8 @@
   import { onMount } from "svelte";
   import { server_url } from "./index";
   import axios from "axios";
-
-  interface Cart {
-    id: number;
-    flowersInCart: FlowerInCart[];
-  }
+  import { Link } from "svelte-routing";
+  import { create_in_transition } from "svelte/internal";
 
   let cart: Cart = {
     id: 0,
@@ -65,8 +62,10 @@
   function handleDelete(fl: FlowerInCart) {
     let index = cart.flowersInCart.indexOf(fl);
     if (index !== -1) {
-      cart.flowersInCart.splice(index, 1);
-      cart.flowersInCart = cart.flowersInCart;
+      cart.flowersInCart = [
+        ...cart.flowersInCart.slice(0, index),
+        ...cart.flowersInCart.slice(index + 1)
+      ];
     }
   }
 
@@ -82,31 +81,36 @@
 </script>
 
 <div class="flowerincart-list">
-  <table>
-    <tr>
-      <th>Gėlė</th>
-      <th>Kiekis</th>
-      <th>Vnt. kaina</th>
-      <th>Suma</th>
-    </tr>
-    {#each cart.flowersInCart as flowerInCart (flowerInCart.id)}
+  {#if cart.flowersInCart.length > 0}
+    <table>
       <tr>
-        <th>{flowerInCart.name}</th>
-        <th
-          ><input
-            type="number"
-            bind:value={flowerInCart.amount}
-            min="1"
-            max="100"
-            size="5"
-            on:input={e => updateSum(flowerInCart, e.currentTarget.value)}
-          /></th
-        >
-        <th>{flowerInCart.price}</th>
-        <th>{flowerInCart.sum?.toFixed(2)}</th>
-        <button on:click={() => handleDelete(flowerInCart)}>Pašalinti</button>
+        <th>Gėlė</th>
+        <th>Kiekis</th>
+        <th>Vnt. kaina</th>
+        <th>Suma</th>
       </tr>
-    {/each}
-  </table>
+      {#each cart.flowersInCart as flowerInCart (flowerInCart.id)}
+        <tr>
+          <td>{flowerInCart.name}</td>
+          <td
+            ><input
+              type="number"
+              bind:value={flowerInCart.amount}
+              min="1"
+              max="100"
+              size="5"
+              on:input={e => updateSum(flowerInCart, e.currentTarget.value)}
+            /></td
+          >
+          <td>{flowerInCart.price}</td>
+          <td>{flowerInCart.sum?.toFixed(2)}</td>
+          <button on:click={() => handleDelete(flowerInCart)}>Pašalinti</button>
+        </tr>
+      {/each}
+    </table>
+    <Link to={`/order/${cart.id}`}>Užsakyti</Link>
+  {:else}
+    <p>Krepšelis tuščias!</p>
+  {/if}
   <button on:click={() => handleUpdate()}>Išsaugoti pakeitimus</button>
 </div>
