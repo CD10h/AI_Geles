@@ -28,10 +28,10 @@ public class AuthController {
     {
         var user = userRepository.findByUsername(login.getUsername());
         if (user.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
         if (!user.get().getPassword().equals(login.getPassword())) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
         // create a cookie

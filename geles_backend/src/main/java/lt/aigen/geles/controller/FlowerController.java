@@ -47,7 +47,6 @@ public class FlowerController {
             if (user == null) {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
-            System.out.println(flowerRepository.findAllFavoriteFlowers(user.getUsername()));
             return new ResponseEntity<>(flowerRepository.findAllFavoriteFlowers(user.getUsername()), HttpStatus.OK);
         }
         return new ResponseEntity<>(flowerRepository.findAllByNameContainsIgnoreCase(q.orElse(""))
