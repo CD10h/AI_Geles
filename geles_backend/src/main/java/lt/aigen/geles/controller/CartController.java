@@ -39,7 +39,7 @@ public class CartController {
         this.modelMapper = modelMapper;
     }
 
-
+    @Authorized
     @GetMapping("/{id}") // /carts/10
     public ResponseEntity<CartDTO> getCart(@PathVariable Long id) {
         var cart = cartRepository.findById(id);
@@ -50,6 +50,7 @@ public class CartController {
         }
     }
 
+    @Authorized
     @PutMapping("/{id}")
     @Transactional
     ResponseEntity<CartDTO> updateCart(@RequestBody @Validated CartDTO cartDTO, @PathVariable Long id) {

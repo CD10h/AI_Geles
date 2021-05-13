@@ -56,7 +56,8 @@
         ...flowerInCart,
         name: flower.name,
         price: flower.price,
-        sum: flower.price * flowerInCart.amount
+        sum: flower.price * flowerInCart.amount,
+        photo: flower.photo
       };
     });
   }
@@ -161,15 +162,15 @@
         {#each cart.flowersInCart as flowerInCart (flowerInCart.id)}
           <tr class="flowerincart">
             <div class="imagecontainer">
-              <img
-                class="flower-list-item-photo"
-                src={`${server_url}/static/${
-                  flowers[flowerInCart.flowerId - 1].photo
-                }`}
-                alt={flowerInCart.name}
-                width="80"
-                height="80"
-              />
+              {#if flowerInCart.photo != null}
+                <img
+                  class="flower-list-item-photo"
+                  src={`${server_url}/static/${flowerInCart.photo}`}
+                  alt={flowerInCart.name}
+                  width="80"
+                  height="80"
+                />
+              {/if}
             </div>
             <td>{flowerInCart.name}</td>
             <td>
@@ -307,6 +308,8 @@
   .imagecontainer {
     border-bottom: 2px solid #8ebf42;
     border-top: 2px solid #8ebf42;
+    border-right: 2px solid #8ebf42;
+    border-left: 2px solid #8ebf42;
   }
 
   .outsidecart {
@@ -356,5 +359,9 @@
     border-right: 2px solid #8ebf42;
     border-left: 2px solid #8ebf42;
     border-collapse: collapse;
+  }
+
+  .savetemplatecontainer {
+    margin-top: 20px;
   }
 </style>

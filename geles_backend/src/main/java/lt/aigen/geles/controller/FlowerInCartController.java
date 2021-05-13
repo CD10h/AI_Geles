@@ -35,6 +35,7 @@ public class FlowerInCartController {
         this.modelMapper = modelMapper;
     }
 
+    @Authorized
     @GetMapping("/{id}")
     public List<FlowerInCartDTO> getFlowersInCart(@PathVariable long id) {
         return flowerInCartRepository.
@@ -82,6 +83,7 @@ public class FlowerInCartController {
         return ResponseEntity.ok(convertToDTO(flowerInCart));
     }
 
+    @Authorized
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id)
     {

@@ -1,5 +1,7 @@
 package lt.aigen.geles.controller;
 
+import lt.aigen.geles.annotations.Authorized;
+import lt.aigen.geles.components.CurrentUser;
 import lt.aigen.geles.models.*;
 import lt.aigen.geles.models.dto.CartDTO;
 import lt.aigen.geles.models.dto.CartTemplateDTO;
@@ -25,40 +27,37 @@ import java.util.stream.Collectors;
 @RequestMapping("/templates")
 public class CartTemplateController {
     CartTemplateRepository cartTemplateRepository;
-    UserRepository userRepository;
     FlowerInCartRepository flowerInCartRepository;
     ModelMapper modelMapper;
+    CurrentUser currentUser;
 
-    public CartTemplateController(CartTemplateRepository cartTemplateRepository, UserRepository userRepository, FlowerInCartRepository flowerInCartRepository, ModelMapper modelMapper) {
+    public CartTemplateController(CartTemplateRepository cartTemplateRepository, FlowerInCartRepository flowerInCartRepository, ModelMapper modelMapper, CurrentUser currentUser) {
         this.cartTemplateRepository = cartTemplateRepository;
-        this.userRepository = userRepository;
         this.flowerInCartRepository = flowerInCartRepository;
         this.modelMapper = modelMapper;
+        this.currentUser = currentUser;
     }
 
+    @Authorized
     @GetMapping("/")
     public List<CartTemplateDTO> getCartTemplate(@CookieValue("user") String userCookie) {
-
-        var user = userRepository.findByUsername(userCookie);
-
         return cartTemplateRepository.
-                findAllByUser(user.get().getId()).
+                findAllByUser(currentUser.get().getId()).
                 stream().
                 map(this::convertToDTO).
                 collect(Collectors.toList());
-
     }
 
+    @Authorized
     @Transactional
     @PostMapping("/")
     public ResponseEntity<CartTemplateDTO> postCartTemplate(@RequestBody @Validated CartTemplateDTO cartTemplateDTO, @CookieValue("user") String userCookie){
 
         List<FlowerInCartDTO> flowerInCartDTOs = cartTemplateDTO.getFlowersInCart();
         List<FlowerInCart> flowersInCart = new ArrayList<>();
-        Optional<User> user = userRepository.findByUsername(userCookie);
 
         CartTemplate cartTemplate = convertFromDTO(cartTemplateDTO);
-        cartTemplate.setUser(user.get());
+        cartTemplate.setUser(currentUser.get());
         CartTemplate savedTemplate = cartTemplateRepository.save(cartTemplate);
 
         for(var f: flowerInCartDTOs){
@@ -74,6 +73,7 @@ public class CartTemplateController {
         return new ResponseEntity<>(convertToDTO(cartTemplate), HttpStatus.OK);
     }
 
+    @Authorized
     @Transactional
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id)

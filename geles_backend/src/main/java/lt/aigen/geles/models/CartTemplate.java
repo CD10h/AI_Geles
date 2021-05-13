@@ -21,8 +21,4 @@ public class CartTemplate {
     private User user;
 
     private String name;
-
-    public CartTemplate(){
-
-    }
 }
