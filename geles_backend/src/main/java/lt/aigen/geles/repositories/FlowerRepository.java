@@ -1,6 +1,7 @@
 package lt.aigen.geles.repositories;
 
 import lt.aigen.geles.models.Flower;
+import lt.aigen.geles.models.User;
 import lt.aigen.geles.models.dto.FlowerDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;

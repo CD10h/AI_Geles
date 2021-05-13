@@ -2,12 +2,7 @@
   import { onMount } from "svelte";
   import { server_url } from "./index";
   import axios from "axios";
-  import AddFlower from "./AddFlower.svelte";
-
-  interface Cart {
-    id: number;
-    flowersInCart: FlowerInCart[];
-  }
+  import { Link } from "svelte-routing";
 
   interface CartTemplate {
     id: number;
@@ -79,8 +74,10 @@
   function handleDelete(fl: FlowerInCart) {
     let index = cart.flowersInCart.indexOf(fl);
     if (index !== -1) {
-      cart.flowersInCart.splice(index, 1);
-      cart.flowersInCart = cart.flowersInCart;
+      cart.flowersInCart = [
+        ...cart.flowersInCart.slice(0, index),
+        ...cart.flowersInCart.slice(index + 1)
+      ];
     }
   }
 
@@ -149,48 +146,55 @@
 
 <div class="flowerincart-list">
   <h2>Gėlių krepšelis</h2>
-  <table>
-    <tr>
-      <th colspan="2">Gėlė</th>
-      <th>Kiekis</th>
-      <th>Vnt. kaina</th>
-      <th>Suma</th>
-      <th />
-    </tr>
-    {#each cart.flowersInCart as flowerInCart (flowerInCart.id)}
-      <tr class="flowerincart">
-        <div class="imagecontainer">
-          <img
-            class="flower-list-item-photo"
-            src={`${server_url}/static/${
-              flowers[flowerInCart.flowerId - 1].photo
-            }`}
-            alt={flowerInCart.name}
-            width="80"
-            height="80"
-          />
-        </div>
-        <td>{flowerInCart.name}</td>
-        <td>
-          <input
-            type="number"
-            bind:value={flowerInCart.amount}
-            min="1"
-            max="100"
-            size="5"
-            on:input={e => {
-              updateSum(flowerInCart, e.currentTarget.value);
-            }}
-          />
-        </td>
-        <td class="number">{flowerInCart.price}€</td>
-        <td class="number">{flowerInCart.sum?.toFixed(2)}€</td>
-        <td>
-          <button on:click={() => handleDelete(flowerInCart)}>Pašalinti</button>
-        </td>
+  {#if cart.flowersInCart.length > 0}
+    <table>
+      <tr>
+        <th colspan="2">Gėlė</th>
+        <th>Kiekis</th>
+        <th>Vnt. kaina</th>
+        <th>Suma</th>
+        <th />
       </tr>
-    {/each}
-  </table>
+      {#each cart.flowersInCart as flowerInCart (flowerInCart.id)}
+        <tr class="flowerincart">
+          <div class="imagecontainer">
+            <img
+              class="flower-list-item-photo"
+              src={`${server_url}/static/${
+                flowers[flowerInCart.flowerId - 1].photo
+              }`}
+              alt={flowerInCart.name}
+              width="80"
+              height="80"
+            />
+          </div>
+          <td>{flowerInCart.name}</td>
+          <td>
+            <input
+              type="number"
+              bind:value={flowerInCart.amount}
+              min="1"
+              max="100"
+              size="5"
+              on:input={e => {
+                updateSum(flowerInCart, e.currentTarget.value);
+              }}
+            />
+          </td>
+          <td class="number">{flowerInCart.price}€</td>
+          <td class="number">{flowerInCart.sum?.toFixed(2)}€</td>
+          <td>
+            <button on:click={() => handleDelete(flowerInCart)}
+              >Pašalinti</button
+            >
+          </td>
+        </tr>
+      {/each}
+    </table>
+    <Link to={`/order/${cart.id}`}>Užsakyti</Link>
+  {:else}
+    <p>Krepšelis tuščias!</p>
+  {/if}
   <button class="savebutton" on:click={() => handleUpdate()}
     >Išsaugoti pakeitimus</button
   >
