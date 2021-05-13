@@ -8,6 +8,7 @@ import lt.aigen.geles.models.User;
 import lt.aigen.geles.models.dto.FlowerInOrderDTO;
 import lt.aigen.geles.models.dto.OrderAddDTO;
 import lt.aigen.geles.models.dto.OrderDTO;
+import lt.aigen.geles.models.dto.OrderEditDTO;
 import lt.aigen.geles.repositories.CartRepository;
 import lt.aigen.geles.repositories.FlowerInCartRepository;
 import lt.aigen.geles.repositories.FlowerInOrderRepository;
@@ -83,13 +84,25 @@ public class OrdersController {
     @GetMapping("/")
     public ResponseEntity<List<OrderDTO>> getOrders() {
         var user = currentUser.get();
-
         if (user.getIsAdmin()) // ;)
             return new ResponseEntity<>(orderRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList()), HttpStatus.OK);
-
         var orders = orderRepository.findAllByUser(user).stream().map(this::convertToDTO).collect(Collectors.toList());
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
+
+    @Authorized
+    @GetMapping("/{id}")
+    public ResponseEntity<OrderDTO> getOrder(@PathVariable Long id) {
+        var user = currentUser.get();
+        var orderOpt = orderRepository.findById(id);
+        if (orderOpt.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        var order = orderOpt.get();
+        if ( !user.getIsAdmin() && !doesOrderBelongToUser(order, user))
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        return new ResponseEntity<>(convertToDTO(order), HttpStatus.OK);
+    }
+
 
     @Authorized
     @PostMapping("/{id}/pay")
@@ -123,6 +136,38 @@ public class OrdersController {
         order.setOrderStatus(Order.OrderStatus.CANCELED);
         orderRepository.save(order);
         return new ResponseEntity<>(convertToDTO(order), HttpStatus.OK);
+    }
+
+    @Authorized
+    @PutMapping("/{id}/edit")
+    @Transactional
+    public ResponseEntity<OrderDTO> editOrder(@PathVariable Long id, @RequestBody OrderEditDTO orderEditDTO) {
+        var orderOpt = orderRepository.findById(id);
+        if (orderOpt.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        var order = orderOpt.get();
+        if (!order.getOrderStatus().equals(Order.OrderStatus.UNPAID) &&
+                !order.getOrderStatus().equals(Order.OrderStatus.PAID)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        var flowerInOrderDTOs = orderEditDTO.getOrderFlowers();
+        var newFlowersInOrder = new ArrayList<FlowerInOrder>();
+        var oldFlowersInOrder  = order.getOrderProducts();
+        for (var flowerInOrder :  flowerInOrderDTOs ) {
+            var f = convertFromDTO(flowerInOrder);
+            f.setOrder(order);
+            newFlowersInOrder.add(f);
+        }
+        flowerInOrderRepository.deleteAll(oldFlowersInOrder);
+        flowerInOrderRepository.saveAll(newFlowersInOrder);
+        order.setOrderProducts(newFlowersInOrder);
+        order.setAddress(orderEditDTO.getAddress());
+        order.setContactPhone(orderEditDTO.getContactPhone());
+        order.setOrderStatus(Order.OrderStatus.UNPAID);
+        orderRepository.save(order);
+        return new ResponseEntity<>(convertToDTO(order), HttpStatus.OK);
+
     }
 
     @Authorized(admin = true)
