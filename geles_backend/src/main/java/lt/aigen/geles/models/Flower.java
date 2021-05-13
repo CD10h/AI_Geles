@@ -3,6 +3,7 @@ package lt.aigen.geles.models;
 import lombok.Getter;
 import lombok.Setter;
 import lt.aigen.geles.models.dto.FlowerDTO;
+import lt.aigen.geles.models.dto.FlowerFavoriteAmountDTO;
 import org.hibernate.annotations.Type;
 
 import javax.validation.constraints.*;
@@ -18,6 +19,8 @@ import java.util.Set;
         query = "select f.id from flower f left join user_flower uf on f.id = uf.flower_id left join users u on u.id = uf.user_id where u.username = :username", resultSetMapping = "mapIdColumnToList")
 @NamedNativeQuery(name = "Flower.findAllFavoriteFlowers",
         query = "select f.* from flower f left join user_flower uf on f.id = uf.flower_id left join users u on u.id = uf.user_id where u.username = :username", resultSetMapping = "mapToFlower")
+@NamedNativeQuery(name = "Flower.findAllUsersFavoriteFlowers",
+        query = "select f.*, count(f.id) as amount from flower f join user_flower uf on f.id = uf.flower_id group by f.id", resultSetMapping = "mapToFlowerWithAmount")
 @SqlResultSetMapping(name="mapIdColumnToList",
         columns = { @ColumnResult(name="id", type=Long.class) }
 )
@@ -31,6 +34,19 @@ import java.util.Set;
                         @ColumnResult(name = "description"),
                         @ColumnResult(name = "days_to_expire"),
                         @ColumnResult(name = "photo"),
+                })
+)
+@SqlResultSetMapping(name="mapToFlowerWithAmount",
+        classes = @ConstructorResult(
+                targetClass= FlowerFavoriteAmountDTO.class,
+                columns= {
+                        @ColumnResult(name = "id", type = Long.class),
+                        @ColumnResult(name = "name"),
+                        @ColumnResult(name = "price"),
+                        @ColumnResult(name = "description"),
+                        @ColumnResult(name = "days_to_expire"),
+                        @ColumnResult(name = "photo"),
+                        @ColumnResult(name = "amount", type = Integer.class),
                 })
 )
 public class Flower implements Serializable {
