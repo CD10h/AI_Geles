@@ -82,6 +82,9 @@ public class CartTemplateController {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         Optional<CartTemplate> cartTemplate = cartTemplateRepository.findById(id);
+        if(cartTemplate.get().getUser().getId() != currentUser.get().getId()){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         List<FlowerInCart> flowersInTemplate = cartTemplate.get().getFlowersInCart();
 
         for(var f: flowersInTemplate){

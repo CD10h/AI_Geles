@@ -61,6 +61,10 @@ public class CartController {
 
         Cart newCart = oldCart.get();
 
+        if(newCart.getUser().getId() != currentUser.get().getId()){
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
+
         for(var f: newCart.getFlowersInCart()){
             flowerInCartRepository.delete(f);
         }
