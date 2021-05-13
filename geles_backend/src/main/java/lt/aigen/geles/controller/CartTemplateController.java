@@ -74,6 +74,24 @@ public class CartTemplateController {
         return new ResponseEntity<>(convertToDTO(cartTemplate), HttpStatus.OK);
     }
 
+    @Transactional
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> delete(@PathVariable Long id)
+    {
+        if (!cartTemplateRepository.existsById(id)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Optional<CartTemplate> cartTemplate = cartTemplateRepository.findById(id);
+        List<FlowerInCart> flowersInTemplate = cartTemplate.get().getFlowersInCart();
+
+        for(var f: flowersInTemplate){
+            flowerInCartRepository.delete(f);
+        }
+
+        cartTemplateRepository.deleteById(id);
+        return new ResponseEntity<>(HttpStatus.OK);
+    }
+
 //    @PutMapping("/{id}")
 //    @Transactional
 //    ResponseEntity<CartDTO> updateCart(@RequestBody @Validated CartDTO cartDTO, @PathVariable Long id) {

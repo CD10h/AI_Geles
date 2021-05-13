@@ -2,6 +2,7 @@
   import { onMount } from "svelte";
   import { server_url } from "./index";
   import axios from "axios";
+  import AddFlower from "./AddFlower.svelte";
 
   interface Cart {
     id: number;
@@ -9,6 +10,7 @@
   }
 
   interface CartTemplate {
+    id: number;
     name: string;
     flowersInCart: FlowerInCart[];
   }
@@ -19,11 +21,13 @@
   };
 
   let cartTemplate: CartTemplate = {
+    id: 0,
     name: "",
     flowersInCart: []
   };
 
   let flowers: Flower[] = [];
+  let cartTemplates: CartTemplate[] = [];
 
   async function getCartId() {
     const response = await axios.get<Cart>("/users/cart/", {
@@ -89,22 +93,30 @@
     const response = await axios.get(`${server_url}/templates/`, {
       withCredentials: true
     });
-    cartTemplate = response.data;
+    cartTemplates = response.data.map((cartTemplate: CartTemplate) => {
+      return cartTemplate;
+    });
   }
 
   async function handleSave() {
-    let cartTemplate = {
-      name: "test template",
+    let template = {
+      name: cartTemplate.name,
       flowersInCart: cart.flowersInCart
     };
-    const response = await axios.post(
-      `${server_url}/templates/`,
-      cartTemplate,
-      {
-        withCredentials: true
-      }
-    );
+    const response = await axios.post(`${server_url}/templates/`, template, {
+      withCredentials: true
+    });
     // cart.flowersInCart = mapFlowersInCart(response.data);
+  }
+
+  async function handleLoadTemplate(template: CartTemplate) {
+    cart.flowersInCart =
+      cartTemplates[cartTemplates.indexOf(template)].flowersInCart;
+    await handleUpdate();
+  }
+
+  async function handleDeleteTemplate(template: CartTemplate) {
+    await axios.delete(`${server_url}/templates/${template.id}`);
   }
 
   // Run code on component mount (once)
@@ -161,10 +173,40 @@
   <button class="savebutton" on:click={() => handleUpdate()}
     >Išsaugoti pakeitimus</button
   >
-  <!-- <input class="outsidecart" type="string" bind:value={cartTemplate.name} /> -->
-  <button class="savetemplatebutton" on:click={() => handleSave()}
-    >Išsaugoti krepšelį ateičiai</button
-  >
+  <div class="savetemplatecontainer">
+    <input
+      class="outsidecart"
+      type="string"
+      bind:value={cartTemplate.name}
+      placeholder="Šablono pavadinimas"
+    />
+    <button class="savetemplatebutton" on:click={() => handleSave()}
+      >Išsaugoti krepšelį ateičiai</button
+    >
+  </div>
+  <div class="carttemplate-list">
+    <h2>Išsaugoti krepšeliai</h2>
+    <table>
+      <tr>
+        <th>Krepšelis</th>
+        <th>Gėlių kiekis</th>
+        <th>Suma</th>
+        <th />
+        <th />
+      </tr>
+      {#each cartTemplates as template (template.id)}
+        <tr>
+          <td>{template.id}. {template.name}</td>
+          <td />
+          <td />
+          <button on:click={() => handleLoadTemplate(template)}>Naudoti</button>
+          <button on:click={() => handleDeleteTemplate(template)}
+            >Pašalinti</button
+          >
+        </tr>
+      {/each}
+    </table>
+  </div>
 </div>
 
 <style>
@@ -183,6 +225,11 @@
 
   input {
     background-color: #d9d9d9;
+  }
+
+  .carttemplate-list {
+    position: relative;
+    top: 100px;
   }
 
   tr {
@@ -212,6 +259,9 @@
 
   .outsidecart {
     background-color: white;
+    position: relative;
+    top: 30px;
+    left: 40px;
   }
 
   .savebutton {
@@ -228,8 +278,8 @@
 
   .savetemplatebutton {
     position: relative;
-    left: 40px;
-    top: 20px;
+    left: 50px;
+    top: 30px;
   }
 
   h2 {
