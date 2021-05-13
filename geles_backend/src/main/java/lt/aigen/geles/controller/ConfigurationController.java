@@ -1,5 +1,6 @@
 package lt.aigen.geles.controller;
 
+import lt.aigen.geles.annotations.Authorized;
 import lt.aigen.geles.models.Configuration;
 import lt.aigen.geles.models.dto.ConfigurationDTO;
 import lt.aigen.geles.repositories.ConfigurationRepository;
@@ -33,8 +34,10 @@ public class ConfigurationController {
     }
 
 
+    @Authorized(admin = true)
     @PutMapping("/")
     public ResponseEntity<ConfigurationDTO> changeConfiguration(@RequestBody @Validated ConfigurationDTO configDTO) {
+
         var configOpt = configRepository.findConfigByKey(configDTO.getKey());
         if (configOpt.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

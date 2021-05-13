@@ -1,5 +1,7 @@
 package lt.aigen.geles.controller;
 
+import lt.aigen.geles.annotations.Authorized;
+import lt.aigen.geles.components.CurrentUser;
 import lt.aigen.geles.models.Cart;
 import lt.aigen.geles.models.Flower;
 import lt.aigen.geles.models.FlowerInCart;
@@ -26,16 +28,17 @@ import java.util.stream.Collectors;
 @RequestMapping("/carts")
 public class CartController {
     CartRepository cartRepository;
-    UserRepository userRepository;
+    CurrentUser currentUser;
     FlowerInCartRepository flowerInCartRepository;
     ModelMapper modelMapper;
 
-    public CartController(CartRepository cartRepository, UserRepository userRepository, FlowerInCartRepository flowerInCartRepository, ModelMapper modelMapper) {
+    public CartController(CartRepository cartRepository, CurrentUser currentUser, FlowerInCartRepository flowerInCartRepository, ModelMapper modelMapper) {
         this.cartRepository = cartRepository;
-        this.userRepository = userRepository;
+        this.currentUser = currentUser;
         this.flowerInCartRepository = flowerInCartRepository;
         this.modelMapper = modelMapper;
     }
+
 
     @GetMapping("/{id}") // /carts/10
     public ResponseEntity<CartDTO> getCart(@PathVariable Long id) {
