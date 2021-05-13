@@ -1,5 +1,6 @@
 package lt.aigen.geles.controller;
 
+import lt.aigen.geles.annotations.Authorized;
 import lt.aigen.geles.models.Cart;
 import lt.aigen.geles.models.Flower;
 import lt.aigen.geles.models.FlowerInCart;
@@ -43,6 +44,7 @@ public class FlowerInCartController {
                 collect(Collectors.toList());
     }
 
+    @Authorized
     @PostMapping("/")
     public ResponseEntity<FlowerInCartDTO> postFlowerInCart(@RequestBody @Validated FlowerInCartDTO flowerInCartDTO) {
         long flower_id = flowerInCartDTO.getFlowerId();
@@ -77,8 +79,6 @@ public class FlowerInCartController {
         flowerInCart.setCart(cart.get());
 
         flowerInCartRepository.save(flowerInCart);
-        //flowerInCart.setFlower(null);
-        //flowerInCart.setCart(null);
         return ResponseEntity.ok(convertToDTO(flowerInCart));
     }
 

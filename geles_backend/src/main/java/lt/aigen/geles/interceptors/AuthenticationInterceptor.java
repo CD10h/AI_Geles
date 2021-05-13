@@ -31,9 +31,10 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         boolean isAuthorized;
         String username = null;
         User user = null;
+        if(!(handler instanceof HandlerMethod)) return true;
+        HandlerMethod handlerMethod = (HandlerMethod) handler;
 
         try {
-            HandlerMethod handlerMethod = (HandlerMethod) handler;
             Authorized authAnnotation = handlerMethod.getMethod().getAnnotation(Authorized.class);
 
             needsAdmin = authAnnotation.admin();
