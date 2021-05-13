@@ -4,6 +4,7 @@ import lt.aigen.geles.annotations.Authorized;
 import lt.aigen.geles.components.CurrentUser;
 import lt.aigen.geles.models.FlowerInOrder;
 import lt.aigen.geles.models.Order;
+import lt.aigen.geles.models.User;
 import lt.aigen.geles.models.dto.FlowerInOrderDTO;
 import lt.aigen.geles.models.dto.OrderAddDTO;
 import lt.aigen.geles.models.dto.OrderDTO;
@@ -95,13 +96,26 @@ public class OrdersController {
     public ResponseEntity<OrderDTO> payForOrder(@PathVariable Long id) {
         var user = currentUser.get();
         var order = orderRepository.getOne(id);
-        if (!order.getUser().getId().equals(user.getId()))
+        if (!doesOrderBelongToUser(order, user))
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         if (order.getOrderStatus() != Order.OrderStatus.UNPAID)
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         order.setOrderStatus(Order.OrderStatus.PAID);
-        order = orderRepository.save(order);
-        return new ResponseEntity<>(convertToDTO(order), HttpStatus.OK);
+        orderRepository.save(order);
+        return new ResponseEntity<>(convertToDTO(order),HttpStatus.OK);
+    }
+
+    @PostMapping("/{id}/cancel")
+    public ResponseEntity<OrderDTO> cancelOrder(@PathVariable Long id) {
+        var user = currentUser.get();
+        var order = orderRepository.getOne(id);
+        if (!doesOrderBelongToUser(order, user))
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        if (order.getOrderStatus() == Order.OrderStatus.DELIVERED)
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        order.setOrderStatus(Order.OrderStatus.CANCELED);
+        orderRepository.save(order);
+        return new ResponseEntity<>(convertToDTO(order),HttpStatus.OK);
     }
 
     public OrderDTO convertToDTO(Order order) {
@@ -120,5 +134,10 @@ public class OrdersController {
 
     private FlowerInOrder convertFromDTO(FlowerInOrderDTO flowerInOrderDTO) {
         return modelMapper.map(flowerInOrderDTO, FlowerInOrder.class);
+    }
+
+    private boolean doesOrderBelongToUser(Order order, User user)
+    {
+        return order != null && user != null && order.getUser().getId().equals(user.getId());
     }
 }

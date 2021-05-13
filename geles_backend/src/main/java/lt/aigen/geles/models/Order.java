@@ -52,7 +52,9 @@ public class Order implements Serializable {
     public enum OrderStatus {
         UNPAID,
         PAID,
-        DELIVERED;
+        CONFIRMED,
+        DELIVERED,
+        CANCELED;
         @JsonValue
         public int toValue() {
             return ordinal();
