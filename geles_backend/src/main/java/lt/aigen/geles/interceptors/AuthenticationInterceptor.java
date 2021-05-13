@@ -22,13 +22,13 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
         this.currentUser = currentUser;
     }
 
+
     @Override
     public boolean preHandle(HttpServletRequest request, HttpServletResponse response, Object handler) throws Exception {
-        boolean needsAuthorization = false;
-        boolean isAuthRequired = true;
+        boolean needToCheckAuth = false;
+        boolean isAuthRequired = false;
         boolean needsAdmin = false;
         boolean isAuthorized;
-
         String username = null;
         User user = null;
 
@@ -38,12 +38,11 @@ public class AuthenticationInterceptor implements HandlerInterceptor {
 
             needsAdmin = authAnnotation.admin();
             isAuthRequired = !authAnnotation.optional();
-            needsAuthorization = true;
+            needToCheckAuth = true;
 
-        } catch (NullPointerException ignored) {
-        }
+        } catch (NullPointerException ignored) { }
 
-        if (!needsAuthorization) {
+        if (!needToCheckAuth) {
             return true;
         }
         try {
