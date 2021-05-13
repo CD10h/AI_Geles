@@ -160,7 +160,7 @@
           <th />
         </tr>
         {#each cart.flowersInCart as flowerInCart (flowerInCart.id)}
-          <tr class="flowerincart">
+          <tr>
             <div class="imagecontainer">
               {#if flowerInCart.photo != null}
                 <img
@@ -197,23 +197,24 @@
       </table>
     {:else}
       <p>Krepšelis tuščias!</p>
-      <br />
     {/if}
     <button class="savebutton" on:click={() => handleUpdate()}
       >Išsaugoti pakeitimus</button
     >
-    <Link to={`/order/${cart.id}`}>Užsakyti</Link><br />
-    <div class="savetemplatecontainer">
-      <input
-        class="outsidecart"
-        type="string"
-        bind:value={cartTemplate.name}
-        placeholder="Šablono pavadinimas"
-      />
-      <button class="savetemplatebutton" on:click={() => handleSave()}
-        >Išsaugoti krepšelį ateičiai</button
-      >
-    </div>
+    {#if cart.flowersInCart.length > 0}
+      <Link to={`/order/${cart.id}`}>Užsakyti</Link>
+      <div class="savetemplatecontainer">
+        <input
+          class="outsidecart"
+          type="string"
+          bind:value={cartTemplate.name}
+          placeholder="Šablono pavadinimas"
+        />
+        <button on:click={() => handleSave()}
+          >Išsaugoti krepšelį ateičiai</button
+        >
+      </div>
+    {/if}
   </div>
   <div class="carttemplate-list">
     <h2>Išsaugoti krepšeliai</h2>
@@ -267,64 +268,8 @@
 </div>
 
 <style>
-  .flowerincart {
-    height: 90px;
-  }
-
-  table {
-    border-style: ridge;
-    border-width: 4px;
-    border-color: #8ebf42;
-    background-color: #d9d9d9;
-  }
-
-  input {
-    background-color: #d9d9d9;
-  }
-
-  tr {
-    border-bottom: 2px solid #8ebf42;
-    border-top: 2px solid #8ebf42;
-  }
-
-  td {
-    padding: 10px;
-    text-align: center;
-    border-bottom: 2px solid #8ebf42;
-    border-top: 2px solid #8ebf42;
-  }
-
-  td.number {
-    text-align: right;
-  }
-
-  img {
-    margin: 10px auto 10px;
-    padding-left: 5px;
-    padding-right: 5px;
-    display: block;
-  }
-
-  .imagecontainer {
-    border-bottom: 2px solid #8ebf42;
-    border-top: 2px solid #8ebf42;
-    border-right: 2px solid #8ebf42;
-    border-left: 2px solid #8ebf42;
-  }
-
-  .outsidecart {
-    background-color: white;
-    /* position: relative;
-    top: 30px; */
-  }
-
-  .savebutton {
-    /* position: relative;
-    top: 20px; */
-  }
-
-  .savetemplatebutton {
-    margin-left: 30px;
+  .flowerincart-list {
+    margin-left: 40px;
   }
 
   h2 {
@@ -333,35 +278,56 @@
     font-weight: 400;
   }
 
-  .amount-list {
-    list-style-type: none;
-    margin: 0;
-    padding: 0;
-  }
-
-  .templatename {
-    text-align: left;
-  }
-
-  .flowerincart-list {
-    margin-left: 40px;
-  }
-
-  .flowercart {
-    margin-bottom: 100px;
-  }
-
-  table th,
-  table tr,
-  table td {
-    border-bottom: 2px solid #8ebf42;
-    border-top: 2px solid #8ebf42;
-    border-right: 2px solid #8ebf42;
-    border-left: 2px solid #8ebf42;
+  table,
+  th,
+  td {
+    border: 2px solid #8ebf42;
     border-collapse: collapse;
+  }
+
+  table {
+    background-color: #d9d9d9;
+    border: 4px solid #8ebf42;
+    margin-bottom: 10px;
+  }
+
+  th,
+  td {
+    padding: 4px 8px;
+  }
+
+  td {
+    text-align: center;
+  }
+
+  td.number {
+    text-align: right;
+  }
+
+  td input {
+    background-color: white;
+  }
+
+  img {
+    margin: 8px;
+    /* Weird bug with table cell height */
+    margin-bottom: 4px;
+  }
+
+  .outsidecart {
+    background-color: white;
+    margin-right: 5px;
   }
 
   .savetemplatecontainer {
     margin-top: 20px;
+  }
+
+  .flowercart {
+    margin-bottom: 80px;
+  }
+
+  .templatename {
+    text-align: left;
   }
 </style>
