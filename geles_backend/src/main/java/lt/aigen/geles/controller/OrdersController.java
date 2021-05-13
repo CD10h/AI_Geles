@@ -95,27 +95,50 @@ public class OrdersController {
     @PostMapping("/{id}/pay")
     public ResponseEntity<OrderDTO> payForOrder(@PathVariable Long id) {
         var user = currentUser.get();
-        var order = orderRepository.getOne(id);
+        var orderOpt = orderRepository.findById(id);
+        if (orderOpt.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        var order = orderOpt.get();
         if (!doesOrderBelongToUser(order, user))
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         if (order.getOrderStatus() != Order.OrderStatus.UNPAID)
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         order.setOrderStatus(Order.OrderStatus.PAID);
         orderRepository.save(order);
-        return new ResponseEntity<>(convertToDTO(order),HttpStatus.OK);
+        return new ResponseEntity<>(convertToDTO(order), HttpStatus.OK);
     }
 
+    @Authorized
     @PostMapping("/{id}/cancel")
     public ResponseEntity<OrderDTO> cancelOrder(@PathVariable Long id) {
         var user = currentUser.get();
-        var order = orderRepository.getOne(id);
+        var orderOpt = orderRepository.findById(id);
+        if (orderOpt.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        var order = orderOpt.get();
         if (!doesOrderBelongToUser(order, user))
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         if (order.getOrderStatus() == Order.OrderStatus.DELIVERED)
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         order.setOrderStatus(Order.OrderStatus.CANCELED);
         orderRepository.save(order);
-        return new ResponseEntity<>(convertToDTO(order),HttpStatus.OK);
+        return new ResponseEntity<>(convertToDTO(order), HttpStatus.OK);
+    }
+
+    @Authorized(admin = true)
+    @PostMapping("/{id}/confirm")
+    public ResponseEntity<?> confirmOrder(@PathVariable Long id) {
+        var orderOpt = orderRepository.findById(id);
+        if (orderOpt.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        var order = orderOpt.get();
+        if (!order.getOrderStatus().equals(Order.OrderStatus.UNPAID) &&
+                !order.getOrderStatus().equals(Order.OrderStatus.PAID)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+        order.setOrderStatus(Order.OrderStatus.CONFIRMED);
+        orderRepository.save(order);
+        return new ResponseEntity<>(convertToDTO(order), HttpStatus.OK);
     }
 
     public OrderDTO convertToDTO(Order order) {
