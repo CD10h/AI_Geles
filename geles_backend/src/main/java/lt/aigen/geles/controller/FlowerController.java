@@ -38,7 +38,7 @@ public class FlowerController {
         this.currentUser = currentUser;
     }
 
-    //@Authorized(optional = true)
+    @Authorized(optional = true)
     @GetMapping("/") // /flowers/?q=gele
     public ResponseEntity<List<FlowerDTO>> getFlowers(@RequestParam Optional<String> q,
                                                       @RequestParam Optional<String> favorite) {

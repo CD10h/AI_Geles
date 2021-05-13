@@ -41,7 +41,7 @@ public class CartController {
 
 
     @GetMapping("/{id}") // /carts/10
-    public ResponseEntity<CartDTO> getCart(@PathVariable Long id,  User user) {
+    public ResponseEntity<CartDTO> getCart(@PathVariable Long id) {
         var cart = cartRepository.findById(id);
         if (cart.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

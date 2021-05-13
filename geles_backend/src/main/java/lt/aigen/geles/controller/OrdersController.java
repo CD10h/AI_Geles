@@ -7,7 +7,10 @@ import lt.aigen.geles.models.Order;
 import lt.aigen.geles.models.dto.FlowerInOrderDTO;
 import lt.aigen.geles.models.dto.OrderAddDTO;
 import lt.aigen.geles.models.dto.OrderDTO;
-import lt.aigen.geles.repositories.*;
+import lt.aigen.geles.repositories.CartRepository;
+import lt.aigen.geles.repositories.FlowerInCartRepository;
+import lt.aigen.geles.repositories.FlowerInOrderRepository;
+import lt.aigen.geles.repositories.OrderRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,9 +18,7 @@ import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
@@ -30,7 +31,7 @@ public class OrdersController {
     private final CurrentUser currentUser;
     private final ModelMapper modelMapper;
 
-    public OrdersController(CartRepository cartRepository, OrderRepository orderRepository, FlowerInCartRepository flowerInCartRepository, FlowerInOrderRepository flowerInOrderRepository, UserRepository userRepository, ModelMapper modelMapper) {
+    public OrdersController(CartRepository cartRepository, OrderRepository orderRepository, FlowerInCartRepository flowerInCartRepository, FlowerInOrderRepository flowerInOrderRepository, CurrentUser currentUser, ModelMapper modelMapper) {
         this.cartRepository = cartRepository;
         this.orderRepository = orderRepository;
         this.flowerInCartRepository = flowerInCartRepository;
@@ -43,19 +44,15 @@ public class OrdersController {
     @Authorized
     @Transactional
     @PostMapping("/")
-    public ResponseEntity<OrderDTO> create(@RequestBody OrderAddDTO orderDTO, @CookieValue("user") Optional<String> userName) {
-        if (userName.isEmpty())
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        var user = userRepository.findByUsername(userName.get());
-        if (user.isEmpty())
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    public ResponseEntity<OrderDTO> create(@RequestBody OrderAddDTO orderDTO) {
+        var user = currentUser.get();
 
         Order order = new Order();
         order.setAddress(orderDTO.getAddress());
         order.setContactPhone(orderDTO.getContactPhone());
         order.setOrderProducts(null);
         order.setOrderStatus(Order.OrderStatus.UNPAID);
-        order.setUser(user.get());
+        order.setUser(user);
         orderRepository.save(order);
 
         var cart = cartRepository.findById(orderDTO.getCartId());
