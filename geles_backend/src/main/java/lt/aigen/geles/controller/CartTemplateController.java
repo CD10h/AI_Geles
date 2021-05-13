@@ -92,33 +92,6 @@ public class CartTemplateController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-//    @PutMapping("/{id}")
-//    @Transactional
-//    ResponseEntity<CartDTO> updateCart(@RequestBody @Validated CartDTO cartDTO, @PathVariable Long id) {
-//        Optional<Cart> oldCart = cartRepository.findById(id);
-//        if(oldCart.isEmpty()){
-//            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-//        }
-//
-//        Cart newCart = oldCart.get();
-//
-//        for(var f: newCart.getFlowersInCart()){
-//            flowerInCartRepository.delete(f);
-//        }
-//
-//        List<FlowerInCart> flowersInCart = new ArrayList<>();
-//        for (var f : cartDTO.getFlowersInCart()) {
-//            FlowerInCart flowerInCart = convertFromDTO(f);
-//            flowerInCart.setCart(newCart);
-//            flowerInCart = flowerInCartRepository.save(flowerInCart);
-//            flowersInCart.add(flowerInCart);
-//            System.out.println(flowerInCart);
-//        }
-//
-//        newCart.setFlowersInCart(flowersInCart);
-//        return new ResponseEntity<>(convertToDTO(newCart), HttpStatus.OK);
-//    }
-
     private CartTemplateDTO convertToDTO(CartTemplate cartTemplate) { return modelMapper.map(cartTemplate, CartTemplateDTO.class); }
 
     private CartTemplate convertFromDTO(CartTemplateDTO cartTemplateDTO) { return modelMapper.map(cartTemplateDTO, CartTemplate.class); }

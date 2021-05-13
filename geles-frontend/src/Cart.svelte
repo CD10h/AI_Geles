@@ -86,7 +86,7 @@
 
   async function handleUpdate() {
     const response = await axios.put(`${server_url}/carts/${cart.id}`, cart);
-    cart.flowersInCart = mapFlowersInCart(response.data);
+    cart.flowersInCart = mapFlowersInCart(response.data.flowersInCart);
   }
 
   async function getCartTemplates() {
@@ -99,24 +99,45 @@
   }
 
   async function handleSave() {
-    let template = {
-      name: cartTemplate.name,
-      flowersInCart: cart.flowersInCart
-    };
-    const response = await axios.post(`${server_url}/templates/`, template, {
-      withCredentials: true
-    });
-    // cart.flowersInCart = mapFlowersInCart(response.data);
+    if (cartTemplate.name.length > 0) {
+      let template = {
+        name: cartTemplate.name,
+        flowersInCart: cart.flowersInCart
+      };
+      const response = await axios.post(`${server_url}/templates/`, template, {
+        withCredentials: true
+      });
+      getCartTemplates();
+    } else {
+      //notification?
+    }
   }
 
   async function handleLoadTemplate(template: CartTemplate) {
-    cart.flowersInCart =
+    let flowersInTemplate =
       cartTemplates[cartTemplates.indexOf(template)].flowersInCart;
-    await handleUpdate();
+
+    let c = {
+      id: cart.id,
+      flowersInCart: flowersInTemplate
+    };
+
+    const response = await axios.put(`${server_url}/carts/${c.id}`, c);
+    cart.flowersInCart = mapFlowersInCart(response.data.flowersInCart);
   }
 
   async function handleDeleteTemplate(template: CartTemplate) {
     await axios.delete(`${server_url}/templates/${template.id}`);
+    getCartTemplates();
+  }
+
+  function calculateSum(template: CartTemplate) {
+    let sum = 0;
+    for (const flowerInTemplate of template.flowersInCart) {
+      sum +=
+        flowerInTemplate.amount * flowers[flowerInTemplate.flowerId - 1].price;
+    }
+    return sum;
   }
 
   // Run code on component mount (once)
@@ -186,23 +207,44 @@
   </div>
   <div class="carttemplate-list">
     <h2>Išsaugoti krepšeliai</h2>
-    <table>
+    <table class="template-table">
       <tr>
         <th>Krepšelis</th>
-        <th>Gėlių kiekis</th>
+        <th>Gėlės</th>
+        <th>Kiekis</th>
         <th>Suma</th>
-        <th />
-        <th />
+        <th colspan="2" />
       </tr>
       {#each cartTemplates as template (template.id)}
         <tr>
-          <td>{template.id}. {template.name}</td>
-          <td />
-          <td />
-          <button on:click={() => handleLoadTemplate(template)}>Naudoti</button>
-          <button on:click={() => handleDeleteTemplate(template)}
-            >Pašalinti</button
-          >
+          <td class="templatename">{template.name}</td>
+          <td>
+            <ol>
+              {#each template.flowersInCart as flowerInTemplate (flowerInTemplate.id)}
+                <li>
+                  {flowers[flowerInTemplate.flowerId - 1].name}
+                </li>
+              {/each}
+            </ol>
+          </td>
+          <td>
+            <ul class="amount-list">
+              {#each template.flowersInCart as flowerInTemplate (flowerInTemplate.id)}
+                <li>
+                  {flowerInTemplate.amount}
+                </li>
+              {/each}
+            </ul>
+          </td>
+          <td>{calculateSum(template)}€</td>
+          <td>
+            <button on:click={() => handleLoadTemplate(template)}
+              >Naudoti</button
+            >
+            <button on:click={() => handleDeleteTemplate(template)}
+              >Pašalinti</button
+            >
+          </td>
         </tr>
       {/each}
     </table>
@@ -241,6 +283,7 @@
     padding: 10px;
     text-align: center;
     border-bottom: 2px solid #8ebf42;
+    border-top: 2px solid #8ebf42;
   }
 
   td.number {
@@ -255,6 +298,7 @@
 
   .imagecontainer {
     border-bottom: 2px solid #8ebf42;
+    border-top: 2px solid #8ebf42;
   }
 
   .outsidecart {
@@ -288,5 +332,15 @@
     color: #000000;
     font-size: 24px;
     font-weight: 400;
+  }
+
+  .amount-list {
+    list-style-type: none;
+    margin: 0;
+    padding: 0;
+  }
+
+  .templatename {
+    text-align: left;
   }
 </style>
