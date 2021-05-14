@@ -103,6 +103,21 @@ public class OrdersController {
         return new ResponseEntity<>(convertToDTO(order), HttpStatus.OK);
     }
 
+    @Authorized
+    @Transactional
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Object> deleteOrder(@PathVariable Long id) {
+        var user = currentUser.get();
+        var orderOpt = orderRepository.findById(id);
+        if (orderOpt.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        var order = orderOpt.get();
+        if ( !user.getIsAdmin() && !doesOrderBelongToUser(order, user))
+            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        orderRepository.delete(order);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
 
     @Authorized
     @PostMapping("/{id}/pay")
@@ -152,6 +167,12 @@ public class OrdersController {
         }
 
         var flowerInOrderDTOs = orderEditDTO.getOrderFlowers();
+        if (flowerInOrderDTOs.isEmpty())
+        {
+            orderRepository.delete(order);
+            return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+        }
+
         var newFlowersInOrder = new ArrayList<FlowerInOrder>();
         var oldFlowersInOrder  = order.getOrderProducts();
         for (var flowerInOrder :  flowerInOrderDTOs ) {

@@ -26,7 +26,7 @@ public class Order implements Serializable {
     private String contactPhone;
     @JsonFormat(pattern = "yyyy-mm-dd")
     private Date createdDate;
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FlowerInOrder> orderProducts = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
