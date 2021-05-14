@@ -10,7 +10,9 @@ import javax.validation.constraints.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -44,6 +46,9 @@ public class User implements Serializable {
 
     @OneToOne
     private Cart cart;
+    
+    @OneToMany(mappedBy = "user")
+    private List<CartTemplate> cartTemplates = new ArrayList<>();
 
     @NotBlank
     private Boolean isAdmin;
