@@ -3,11 +3,8 @@ package lt.aigen.geles.controller;
 import lt.aigen.geles.annotations.Authorized;
 import lt.aigen.geles.components.CurrentUser;
 import lt.aigen.geles.models.User;
-import lt.aigen.geles.models.dto.FavoriteDTO;
-import lt.aigen.geles.models.dto.FlowerDTO;
+import lt.aigen.geles.models.dto.*;
 import lt.aigen.geles.models.Flower;
-import lt.aigen.geles.models.dto.FiltersDTO;
-import lt.aigen.geles.models.dto.FlowerFilterDTO;
 import lt.aigen.geles.repositories.FlowerRepository;
 import lt.aigen.geles.repositories.UserRepository;
 import org.springframework.data.domain.PageRequest;
@@ -59,6 +56,12 @@ public class FlowerController {
     @GetMapping("/favorite")
     public ResponseEntity<List<Long>> getFavoriteFlowers(@PathVariable Optional<String> q) {
         return new ResponseEntity<>(flowerRepository.findAllFavoriteFlowerIds(currentUser.get().getUsername()), HttpStatus.OK);
+    }
+
+    @Authorized(admin = true)
+    @GetMapping("/favorite/all")
+    public ResponseEntity<List<FlowerFavoriteAmountDTO>> getAllUsersFavoriteFlowers() {
+        return new ResponseEntity<>(flowerRepository.findAllUsersFavoriteFlowers(),HttpStatus.OK);
     }
 
     @GetMapping("/{id}") // /flowers/10
@@ -161,6 +164,10 @@ public class FlowerController {
                     .collect(Collectors.toList()), HttpStatus.OK);
     }
 
+    private FlowerFavoriteAmountDTO convertToFav(Flower flower) {
+        return modelMapper.map(flower, FlowerFavoriteAmountDTO.class);
+    }
+
     private FlowerDTO convertToDTO(Flower flower) {
         return modelMapper.map(flower, FlowerDTO.class);
     }
@@ -168,5 +175,4 @@ public class FlowerController {
     private Flower convertFromDTO(FlowerDTO flowerDTO) {
         return modelMapper.map(flowerDTO, Flower.class);
     }
-
 }
