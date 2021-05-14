@@ -12,6 +12,8 @@
   import Search from "./Search.svelte";
   import UpdateFlower from "./UpdateFlower.svelte";
   import Order from "./Order.svelte";
+  import NotificationContext from "./NotificationContext.svelte";
+  import Flower from "./Flower.svelte";
   import FavoriteFlowersStats from "./FavoriteFlowersStats.svelte";
 
   export let url = "";
@@ -28,31 +30,34 @@
   }
 </script>
 
-<Router {url}>
-  <nav>
-    <Link to="/">Pagrindinis</Link>
-    <Link to="/add">Pridėti gėlę</Link>
-    <Link to="/search">Paieška</Link>
-    {#if !$isLoggedIn}
-      <Link to="/login">Prisijungti</Link>
-      <Link to="/register">Užsiregistruoti</Link>
-    {:else}
-      <Link to="/flowers/favorite">Mėgstamiausios gėlės</Link>
-      <Link to="/cart">Krepšelis</Link>
-      <Link to="/favorite/stats">Mėgstamiausių statistika</Link>
-      <button on:click={handleLogout}>Atsijungti</button>
-    {/if}
-  </nav>
-  <div>
-    <Route path="/" component={Home} />
-    <Route path="/add" component={AddFlower} />
-    <Route path="/search" component={Search} />
-    <Route path="/update/:id" component={UpdateFlower} />
-    <Route path="/login" component={Login} {onLogin} />
-    <Route path="/register" component={Register} />
-    <Route path="/flowers/favorite" component={FavoriteFlowers} />
-    <Route path="/cart" component={Cart} />
-    <Route path="/order/:cartId" component={Order} />
-    <Route path="/favorite/stats" component={FavoriteFlowersStats} />
-  </div>
-</Router>
+<NotificationContext>
+  <Router {url}>
+    <nav>
+      <Link to="/">Pagrindinis</Link>
+      <Link to="/add">Pridėti gėlę</Link>
+      <Link to="/search">Paieška</Link>
+      {#if !$isLoggedIn}
+        <Link to="/login">Prisijungti</Link>
+        <Link to="/register">Užsiregistruoti</Link>
+      {:else}
+        <Link to="/flowers/favorite">Mėgstamiausios gėlės</Link>
+        <Link to="/cart">Krepšelis</Link>
+        <Link to="/favorite/stats">Mėgstamiausių statistika</Link>
+        <button on:click={handleLogout}>Atsijungti</button>
+      {/if}
+    </nav>
+    <div>
+      <Route path="/" component={Home} />
+      <Route path="/add" component={AddFlower} />
+      <Route path="/search" component={Search} />
+      <Route path="/update/:id" component={UpdateFlower} />
+      <Route path="/login" component={Login} {onLogin} />
+      <Route path="/register" component={Register} />
+      <Route path="/flowers/favorite" component={FavoriteFlowers} />
+      <Route path="/cart" component={Cart} />
+      <Route path="/order/:cartId" component={Order} />
+      <Route path="/flower/:flowerId" component={Flower} />
+      <Route path="/favorite/stats" component={FavoriteFlowersStats} />
+    </div>
+  </Router>
+</NotificationContext>

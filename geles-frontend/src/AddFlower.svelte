@@ -122,9 +122,4 @@
     display: flex;
     align-items: center;
   }
-
-  .error .mdi {
-    font-size: 24px;
-    margin-right: 8px;
-  }
 </style>
