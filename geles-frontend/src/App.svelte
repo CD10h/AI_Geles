@@ -13,6 +13,7 @@
   import UpdateFlower from "./UpdateFlower.svelte";
   import Order from "./Order.svelte";
   import NotificationContext from "./NotificationContext.svelte";
+  import Flower from "./Flower.svelte";
   import FavoriteFlowersStats from "./FavoriteFlowersStats.svelte";
 
   export let url = "";
@@ -55,6 +56,7 @@
       <Route path="/flowers/favorite" component={FavoriteFlowers} />
       <Route path="/cart" component={Cart} />
       <Route path="/order/:cartId" component={Order} />
+      <Route path="/flower/:flowerId" component={Flower} />
       <Route path="/favorite/stats" component={FavoriteFlowersStats} />
     </div>
   </Router>
