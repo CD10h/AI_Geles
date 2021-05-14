@@ -35,17 +35,19 @@
       </tr>
       {#each favoriteFlowers as flower (flower.id)}
         <tr>
-          <div class="imagecontainer">
-            {#if flower.photo != null}
-              <img
-                class="flower-list-item-photo"
-                src={`${server_url}/static/${flower.photo}`}
-                alt={flower.name}
-                width="80"
-                height="80"
-              />
-            {/if}
-          </div>
+          <td>
+            <div class="imagecontainer">
+              {#if flower.photo != null}
+                <img
+                  class="flower-list-item-photo"
+                  src={`${server_url}/static/${flower.photo}`}
+                  alt={flower.name}
+                  width="80"
+                  height="80"
+                />
+              {/if}
+            </div>
+          </td>
           <td>{flower.name}</td>
           <td>
             {flower.amount}
