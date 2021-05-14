@@ -20,7 +20,7 @@ import java.util.Set;
 @NamedNativeQuery(name = "Flower.findAllFavoriteFlowers",
         query = "select f.* from flower f left join user_flower uf on f.id = uf.flower_id left join users u on u.id = uf.user_id where u.username = :username", resultSetMapping = "mapToFlower")
 @NamedNativeQuery(name = "Flower.findAllUsersFavoriteFlowers",
-        query = "select f.*, count(f.id) as amount from flower f join user_flower uf on f.id = uf.flower_id group by f.id", resultSetMapping = "mapToFlowerWithAmount")
+        query = "select f.*, count(f.id) as amount from flower f join user_flower uf on f.id = uf.flower_id group by f.id order by amount desc", resultSetMapping = "mapToFlowerWithAmount")
 @SqlResultSetMapping(name="mapIdColumnToList",
         columns = { @ColumnResult(name="id", type=Long.class) }
 )
