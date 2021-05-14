@@ -1,10 +1,15 @@
 <script>
   import { isAxiosError } from "./util";
   import { navigate } from "svelte-routing";
-  import { onMount } from "svelte";
+  import { getContext, onMount } from "svelte";
   import axios from "axios";
 
   import Input from "./Input.svelte";
+  import { notificationContextKey } from "./contexts";
+  import { AppNotificationType } from "./enums";
+
+  const { addNotification, addLoadingNotification } =
+    getContext<AppNotificationContext>(notificationContextKey);
 
   let flower: Omit<Flower, "id" | "favorite"> = {
     name: "",
@@ -19,9 +24,18 @@
 
   async function handleSubmit() {
     try {
-      await axios.put(`/flowers/${id}`, flower, {
-        withCredentials: true
-      });
+      // Creates a loading notification, awaits the passed promise
+      // and removes the notification after promise was completed
+      await addLoadingNotification(
+        "Redaguojama...",
+        axios.put(`/flowers/${id}`, flower, {
+          withCredentials: true
+        })
+      );
+      addNotification(
+        "Gėlė sėkmingai paredaguota",
+        AppNotificationType.SUCCESS
+      );
       navigate("/");
     } catch (e) {
       if (isAxiosError(e)) {
