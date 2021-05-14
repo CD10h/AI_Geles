@@ -13,6 +13,7 @@
   import UpdateFlower from "./UpdateFlower.svelte";
   import Order from "./Order.svelte";
   import NotificationContext from "./NotificationContext.svelte";
+  import FavoriteFlowersStats from "./FavoriteFlowersStats.svelte";
 
   export let url = "";
 
@@ -40,6 +41,7 @@
       {:else}
         <Link to="/flowers/favorite">Mėgstamiausios gėlės</Link>
         <Link to="/cart">Krepšelis</Link>
+        <Link to="/favorite/stats">Mėgstamiausių statistika</Link>
         <button on:click={handleLogout}>Atsijungti</button>
       {/if}
     </nav>
@@ -53,6 +55,7 @@
       <Route path="/flowers/favorite" component={FavoriteFlowers} />
       <Route path="/cart" component={Cart} />
       <Route path="/order/:cartId" component={Order} />
+      <Route path="/favorite/stats" component={FavoriteFlowersStats} />
     </div>
   </Router>
 </NotificationContext>
