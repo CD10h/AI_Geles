@@ -165,7 +165,7 @@
               {#if flowerInCart.photo != null}
                 <img
                   class="flower-list-item-photo"
-                  src={`${server_url}/static/${flowerInCart.photo}`}
+                  src={`${server_url}/static/flowers/${flowerInCart.photo}`}
                   alt={flowerInCart.name}
                   width="80"
                   height="80"
