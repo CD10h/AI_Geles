@@ -58,9 +58,9 @@ public class FlowerController {
         return new ResponseEntity<>(flowerRepository.findAllFavoriteFlowerIds(currentUser.get().getUsername()), HttpStatus.OK);
     }
 
-    @Authorized
+    @Authorized(admin = true)
     @GetMapping("/favorite/all")
-    public ResponseEntity<List<FlowerFavoriteAmountDTO>> getAllFavoriteFlowers() {
+    public ResponseEntity<List<FlowerFavoriteAmountDTO>> getAllUsersFavoriteFlowers() {
         return new ResponseEntity<>(flowerRepository.findAllUsersFavoriteFlowers(),HttpStatus.OK);
     }
 
