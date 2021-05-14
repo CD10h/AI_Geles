@@ -61,8 +61,7 @@ public class FlowerController {
     @Authorized
     @GetMapping("/favorite/all")
     public ResponseEntity<List<FlowerFavoriteAmountDTO>> getAllFavoriteFlowers() {
-        List<FlowerFavoriteAmountDTO> f = flowerRepository.findAllUsersFavoriteFlowers();
-        return new ResponseEntity<>(f,HttpStatus.OK);
+        return new ResponseEntity<>(flowerRepository.findAllUsersFavoriteFlowers(),HttpStatus.OK);
     }
 
     @GetMapping("/{id}") // /flowers/10
