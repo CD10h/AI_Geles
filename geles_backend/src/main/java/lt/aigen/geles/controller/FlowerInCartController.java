@@ -1,5 +1,6 @@
 package lt.aigen.geles.controller;
 
+import lt.aigen.geles.annotations.Authorized;
 import lt.aigen.geles.models.Cart;
 import lt.aigen.geles.models.Flower;
 import lt.aigen.geles.models.FlowerInCart;
@@ -34,6 +35,7 @@ public class FlowerInCartController {
         this.modelMapper = modelMapper;
     }
 
+    @Authorized
     @GetMapping("/{id}")
     public List<FlowerInCartDTO> getFlowersInCart(@PathVariable long id) {
         return flowerInCartRepository.
@@ -43,6 +45,7 @@ public class FlowerInCartController {
                 collect(Collectors.toList());
     }
 
+    @Authorized
     @PostMapping("/")
     public ResponseEntity<FlowerInCartDTO> postFlowerInCart(@RequestBody @Validated FlowerInCartDTO flowerInCartDTO) {
         long flower_id = flowerInCartDTO.getFlowerId();
@@ -62,6 +65,7 @@ public class FlowerInCartController {
         }
 
         var flowerInCart = convertFromDTO(flowerInCartDTO);
+        flowerInCart.setCartTemplate(null);
 
         Optional<Flower> flower = flowerRepository.findById(flower_id);
         if(flower.isEmpty()){
@@ -76,11 +80,10 @@ public class FlowerInCartController {
         flowerInCart.setCart(cart.get());
 
         flowerInCartRepository.save(flowerInCart);
-        //flowerInCart.setFlower(null);
-        //flowerInCart.setCart(null);
         return ResponseEntity.ok(convertToDTO(flowerInCart));
     }
 
+    @Authorized
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id)
     {

@@ -2,9 +2,11 @@
   import { onMount } from "svelte";
   import { server_url } from "./index";
   import axios from "axios";
+  import { Link } from "svelte-routing";
 
-  interface Cart {
+  interface CartTemplate {
     id: number;
+    name: string;
     flowersInCart: FlowerInCart[];
   }
 
@@ -13,7 +15,14 @@
     flowersInCart: []
   };
 
+  let cartTemplate: CartTemplate = {
+    id: 0,
+    name: "",
+    flowersInCart: []
+  };
+
   let flowers: Flower[] = [];
+  let cartTemplates: CartTemplate[] = [];
 
   async function getCartId() {
     const response = await axios.get<Cart>("/users/cart/", {
@@ -47,7 +56,8 @@
         ...flowerInCart,
         name: flower.name,
         price: flower.price,
-        sum: flower.price * flowerInCart.amount
+        sum: flower.price * flowerInCart.amount,
+        photo: flower.photo
       };
     });
   }
@@ -65,48 +75,259 @@
   function handleDelete(fl: FlowerInCart) {
     let index = cart.flowersInCart.indexOf(fl);
     if (index !== -1) {
-      cart.flowersInCart.splice(index, 1);
-      cart.flowersInCart = cart.flowersInCart;
+      cart.flowersInCart = [
+        ...cart.flowersInCart.slice(0, index),
+        ...cart.flowersInCart.slice(index + 1)
+      ];
     }
   }
 
   async function handleUpdate() {
     const response = await axios.put(`${server_url}/carts/${cart.id}`, cart);
-    cart.flowersInCart = mapFlowersInCart(response.data);
+    cart.flowersInCart = mapFlowersInCart(response.data.flowersInCart);
+  }
+
+  async function getCartTemplates() {
+    const response = await axios.get(`${server_url}/templates/`, {
+      withCredentials: true
+    });
+    cartTemplates = response.data.map((cartTemplate: CartTemplate) => {
+      cartTemplate.flowersInCart = mapFlowersInCart(cartTemplate.flowersInCart);
+      return cartTemplate;
+    });
+  }
+
+  async function handleSave() {
+    if (cartTemplate.name.length > 0) {
+      let template = {
+        name: cartTemplate.name,
+        flowersInCart: cart.flowersInCart
+      };
+      const response = await axios.post(`${server_url}/templates/`, template, {
+        withCredentials: true
+      });
+      getCartTemplates();
+    } else {
+      //notification?
+    }
+  }
+
+  async function handleLoadTemplate(template: CartTemplate) {
+    let flowersInTemplate =
+      cartTemplates[cartTemplates.indexOf(template)].flowersInCart;
+
+    let c = {
+      id: cart.id,
+      flowersInCart: flowersInTemplate
+    };
+
+    const response = await axios.put(`${server_url}/carts/${c.id}`, c);
+    cart.flowersInCart = mapFlowersInCart(response.data.flowersInCart);
+  }
+
+  async function handleDeleteTemplate(template: CartTemplate) {
+    await axios.delete(`${server_url}/templates/${template.id}`);
+    getCartTemplates();
+  }
+
+  function calculateSum(template: CartTemplate) {
+    let sum = 0;
+
+    for (const flowerInTemplate of template.flowersInCart) {
+      sum += flowerInTemplate.amount * flowerInTemplate.price;
+    }
+    return sum;
   }
 
   // Run code on component mount (once)
   onMount(() => {
-    getFlowers().then(() => getCartId());
+    getFlowers()
+      .then(() => getCartId())
+      .then(() => getCartTemplates());
   });
 </script>
 
 <div class="flowerincart-list">
-  <table>
-    <tr>
-      <th>Gėlė</th>
-      <th>Kiekis</th>
-      <th>Vnt. kaina</th>
-      <th>Suma</th>
-    </tr>
-    {#each cart.flowersInCart as flowerInCart (flowerInCart.id)}
-      <tr>
-        <th>{flowerInCart.name}</th>
-        <th
-          ><input
-            type="number"
-            bind:value={flowerInCart.amount}
-            min="1"
-            max="100"
-            size="5"
-            on:input={e => updateSum(flowerInCart, e.currentTarget.value)}
-          /></th
+  <div class="flowercart">
+    <h2>Gėlių krepšelis</h2>
+    {#if cart.flowersInCart.length > 0}
+      <table>
+        <tr>
+          <th colspan="2">Gėlė</th>
+          <th>Kiekis</th>
+          <th>Vnt. kaina</th>
+          <th>Suma</th>
+          <th />
+        </tr>
+        {#each cart.flowersInCart as flowerInCart (flowerInCart.id)}
+          <tr>
+            <div class="imagecontainer">
+              {#if flowerInCart.photo != null}
+                <img
+                  class="flower-list-item-photo"
+                  src={`${server_url}/static/${flowerInCart.photo}`}
+                  alt={flowerInCart.name}
+                  width="80"
+                  height="80"
+                />
+              {/if}
+            </div>
+            <td>{flowerInCart.name}</td>
+            <td>
+              <input
+                type="number"
+                bind:value={flowerInCart.amount}
+                min="1"
+                max="100"
+                size="5"
+                on:input={e => {
+                  updateSum(flowerInCart, e.currentTarget.value);
+                }}
+              />
+            </td>
+            <td class="number">{flowerInCart.price} €</td>
+            <td class="number">{flowerInCart.sum?.toFixed(2)}€</td>
+            <td>
+              <button on:click={() => handleDelete(flowerInCart)}
+                >Pašalinti</button
+              >
+            </td>
+          </tr>
+        {/each}
+      </table>
+    {:else}
+      <p>Krepšelis tuščias!</p>
+    {/if}
+    <button class="savebutton" on:click={() => handleUpdate()}
+      >Išsaugoti pakeitimus</button
+    >
+    {#if cart.flowersInCart.length > 0}
+      <Link to={`/order/${cart.id}`}>Užsakyti</Link>
+      <div class="savetemplatecontainer">
+        <input
+          class="outsidecart"
+          type="string"
+          bind:value={cartTemplate.name}
+          placeholder="Šablono pavadinimas"
+        />
+        <button on:click={() => handleSave()}
+          >Išsaugoti krepšelį ateičiai</button
         >
-        <th>{flowerInCart.price}</th>
-        <th>{flowerInCart.sum?.toFixed(2)}</th>
-        <button on:click={() => handleDelete(flowerInCart)}>Pašalinti</button>
-      </tr>
-    {/each}
-  </table>
-  <button on:click={() => handleUpdate()}>Išsaugoti pakeitimus</button>
+      </div>
+    {/if}
+  </div>
+  <div class="carttemplate-list">
+    <h2>Išsaugoti krepšeliai</h2>
+    {#if cartTemplates.length > 0}
+      <table class="template-table">
+        <tr>
+          <th>Krepšelis</th>
+          <th>Gėlės</th>
+          <th>Kiekis</th>
+          <th>Suma</th>
+          <th colspan="2" />
+        </tr>
+        {#each cartTemplates as template (template.id)}
+          {#each template.flowersInCart as flowerInTemplate, i (flowerInTemplate.id)}
+            <tr>
+              {#if i === 0}
+                <td
+                  class="templatename"
+                  rowspan={template.flowersInCart.length}
+                >
+                  {template.name}
+                </td>
+              {/if}
+              <td>
+                {flowerInTemplate.name}
+              </td>
+              <td>
+                {flowerInTemplate.amount}
+              </td>
+              {#if i === 0}
+                <td rowspan={template.flowersInCart.length}
+                  >{calculateSum(template).toFixed(2)} €</td
+                >
+                <td rowspan={template.flowersInCart.length}>
+                  <button on:click={() => handleLoadTemplate(template)}
+                    >Naudoti</button
+                  >
+                  <button on:click={() => handleDeleteTemplate(template)}
+                    >Pašalinti</button
+                  >
+                </td>
+              {/if}
+            </tr>
+          {/each}
+        {/each}
+      </table>
+    {:else}
+      <p>Nėra išsaugotų krepšelių!</p>
+    {/if}
+  </div>
 </div>
+
+<style>
+  .flowerincart-list {
+    margin-left: 40px;
+  }
+
+  h2 {
+    color: #000000;
+    font-size: 24px;
+    font-weight: 400;
+  }
+
+  table,
+  th,
+  td {
+    border: 2px solid #8ebf42;
+    border-collapse: collapse;
+  }
+
+  table {
+    background-color: #d9d9d9;
+    border: 4px solid #8ebf42;
+    margin-bottom: 10px;
+  }
+
+  th,
+  td {
+    padding: 4px 8px;
+  }
+
+  td {
+    text-align: center;
+  }
+
+  td.number {
+    text-align: right;
+  }
+
+  td input {
+    background-color: white;
+  }
+
+  img {
+    margin: 8px;
+    /* Weird bug with table cell height */
+    margin-bottom: 4px;
+  }
+
+  .outsidecart {
+    background-color: white;
+    margin-right: 5px;
+  }
+
+  .savetemplatecontainer {
+    margin-top: 20px;
+  }
+
+  .flowercart {
+    margin-bottom: 80px;
+  }
+
+  .templatename {
+    text-align: left;
+  }
+</style>

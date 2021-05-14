@@ -4,12 +4,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
+import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 
 @Entity
@@ -43,6 +46,12 @@ public class User implements Serializable {
 
     @OneToOne
     private Cart cart;
+    
+    @OneToMany(mappedBy = "user")
+    private List<CartTemplate> cartTemplates = new ArrayList<>();
+
+    @NotBlank
+    private Boolean isAdmin;
 
     public User(Long id, String username, String password, String photo) {
         this.id = id;

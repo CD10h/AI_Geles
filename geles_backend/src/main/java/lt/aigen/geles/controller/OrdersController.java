@@ -1,12 +1,16 @@
 package lt.aigen.geles.controller;
 
+import lt.aigen.geles.annotations.Authorized;
+import lt.aigen.geles.components.CurrentUser;
 import lt.aigen.geles.models.FlowerInOrder;
 import lt.aigen.geles.models.Order;
 import lt.aigen.geles.models.dto.FlowerInOrderDTO;
+import lt.aigen.geles.models.dto.OrderAddDTO;
 import lt.aigen.geles.models.dto.OrderDTO;
+import lt.aigen.geles.repositories.CartRepository;
+import lt.aigen.geles.repositories.FlowerInCartRepository;
 import lt.aigen.geles.repositories.FlowerInOrderRepository;
 import lt.aigen.geles.repositories.OrderRepository;
-import lt.aigen.geles.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -15,77 +19,83 @@ import org.springframework.web.bind.annotation.*;
 import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/orders")
 public class OrdersController {
+    private final CartRepository cartRepository;
     private final OrderRepository orderRepository;
+    private final FlowerInCartRepository flowerInCartRepository;
     private final FlowerInOrderRepository flowerInOrderRepository;
-    private final UserRepository userRepository;
+    private final CurrentUser currentUser;
     private final ModelMapper modelMapper;
 
-    public OrdersController(OrderRepository orderRepository, FlowerInOrderRepository flowerInOrderRepository, UserRepository userRepository, ModelMapper modelMapper) {
+    public OrdersController(CartRepository cartRepository, OrderRepository orderRepository, FlowerInCartRepository flowerInCartRepository, FlowerInOrderRepository flowerInOrderRepository, CurrentUser currentUser, ModelMapper modelMapper) {
+        this.cartRepository = cartRepository;
         this.orderRepository = orderRepository;
+        this.flowerInCartRepository = flowerInCartRepository;
         this.flowerInOrderRepository = flowerInOrderRepository;
-        this.userRepository = userRepository;
+        this.currentUser = currentUser;
         this.modelMapper = modelMapper;
         modelMapper.typeMap(Order.class, OrderDTO.class).addMapping((order -> 0.0), OrderDTO::setTotalOrderPrice); //HACK
     }
 
+    @Authorized
     @Transactional
     @PostMapping("/")
-    public ResponseEntity<OrderDTO> create(@RequestBody OrderDTO orderDTO, @CookieValue("user") Optional<String> userName) {
-        if (userName.isEmpty())
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        var user = userRepository.findByUsername(userName.get());
-        if (user.isEmpty())
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+    public ResponseEntity<OrderDTO> create(@RequestBody OrderAddDTO orderDTO) {
+        var user = currentUser.get();
 
-        Order order = convertFromDTO(orderDTO);
-        List<FlowerInOrder> flowersInOrder = new ArrayList<>();
-
-        order.setOrderStatus(Order.OrderStatus.UNPAID);
+        Order order = new Order();
+        order.setAddress(orderDTO.getAddress());
+        order.setContactPhone(orderDTO.getContactPhone());
         order.setOrderProducts(null);
-        order.setUser(user.get());
+        order.setOrderStatus(Order.OrderStatus.UNPAID);
+        order.setUser(user);
         orderRepository.save(order);
 
-        for (var f : orderDTO.getOrderFlowers()) {
-            var flowerInOrder = convertFromDTO(f);
+        var cart = cartRepository.findById(orderDTO.getCartId());
+        if (cart.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        }
+
+        List<FlowerInOrder> flowersInOrder = new ArrayList<>();
+        for (var flowerInCart : cart.get().getFlowersInCart()) {
+            var flowerInOrder = new FlowerInOrder();
+            flowerInOrder.setFlower(flowerInCart.getFlower());
             flowerInOrder.setOrder(order);
+            flowerInOrder.setQuantity(flowerInCart.getAmount());
             flowersInOrder.add(flowerInOrder);
         }
+
         flowerInOrderRepository.saveAll(flowersInOrder);
         order.setOrderProducts(flowersInOrder); //so it adds it to DTO
+
+        // Empty cart after successful order
+        flowerInCartRepository.deleteAll(cart.get().getFlowersInCart());
 
         return new ResponseEntity<>(convertToDTO(order), HttpStatus.CREATED);
     }
 
-
+    @Authorized
     @GetMapping("/")
-    public ResponseEntity<List<OrderDTO>> getOrders(@CookieValue("user") Optional<String> userName) {
-        if (userName.isEmpty())
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        if (userName.get().equals("admin")) // ;)
+    public ResponseEntity<List<OrderDTO>> getOrders() {
+        var user = currentUser.get();
+
+        if (user.getIsAdmin()) // ;)
             return new ResponseEntity<>(orderRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList()), HttpStatus.OK);
-        var user = userRepository.findByUsername(userName.get());
-        if (user.isEmpty())
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        var orders = orderRepository.findAllByUser(user.get()).stream().map(this::convertToDTO).collect(Collectors.toList());
+
+        var orders = orderRepository.findAllByUser(user).stream().map(this::convertToDTO).collect(Collectors.toList());
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
 
+    @Authorized
     @PostMapping("/{id}/pay")
-    public ResponseEntity<OrderDTO> payForOrder(@CookieValue("user") Optional<String> userName, @PathVariable Long id) {
-        if (userName.isEmpty())
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        var user = userRepository.findByUsername(userName.get());
-        if (user.isEmpty())
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-
+    public ResponseEntity<OrderDTO> payForOrder(@PathVariable Long id) {
+        var user = currentUser.get();
         var order = orderRepository.getOne(id);
-        if (!order.getUser().getId().equals(user.get().getId()))
+        if (!order.getUser().getId().equals(user.getId()))
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         if (order.getOrderStatus() != Order.OrderStatus.UNPAID)
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);

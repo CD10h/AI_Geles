@@ -1,10 +1,10 @@
 package lt.aigen.geles.controller;
 
-import lt.aigen.geles.models.dto.FavoriteDTO;
-import lt.aigen.geles.models.dto.FlowerDTO;
+import lt.aigen.geles.annotations.Authorized;
+import lt.aigen.geles.components.CurrentUser;
+import lt.aigen.geles.models.User;
+import lt.aigen.geles.models.dto.*;
 import lt.aigen.geles.models.Flower;
-import lt.aigen.geles.models.dto.FiltersDTO;
-import lt.aigen.geles.models.dto.FlowerFilterDTO;
 import lt.aigen.geles.repositories.FlowerRepository;
 import lt.aigen.geles.repositories.UserRepository;
 import org.springframework.data.domain.PageRequest;
@@ -26,25 +26,25 @@ import java.util.stream.Collectors;
 @RequestMapping("/flowers")
 public class FlowerController {
     FlowerRepository flowerRepository;
-    UserRepository userRepository;
     ModelMapper modelMapper;
+    CurrentUser currentUser;
 
-    public FlowerController(FlowerRepository flowerRepository, UserRepository userRepository, ModelMapper modelMapper) {
+    public FlowerController(FlowerRepository flowerRepository, ModelMapper modelMapper, CurrentUser currentUser) {
         this.flowerRepository = flowerRepository;
-        this.userRepository = userRepository;
         this.modelMapper = modelMapper;
+        this.currentUser = currentUser;
     }
 
+    @Authorized(optional = true)
     @GetMapping("/") // /flowers/?q=gele
     public ResponseEntity<List<FlowerDTO>> getFlowers(@RequestParam Optional<String> q,
-                                                      @RequestParam Optional<String> favorite,
-                                                      @CookieValue("user") Optional<String> username) {
+                                                      @RequestParam Optional<String> favorite) {
         if (favorite.isPresent() && favorite.get().equals("true")) {
-            if (username.isEmpty()) {
+            var user = currentUser.get();
+            if (user == null) {
                 return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
             }
-            System.out.println(flowerRepository.findAllFavoriteFlowers(username.get()));
-            return new ResponseEntity<>(flowerRepository.findAllFavoriteFlowers(username.get()), HttpStatus.OK);
+            return new ResponseEntity<>(flowerRepository.findAllFavoriteFlowers(user.getUsername()), HttpStatus.OK);
         }
         return new ResponseEntity<>(flowerRepository.findAllByNameContainsIgnoreCase(q.orElse(""))
             .stream()
@@ -52,13 +52,16 @@ public class FlowerController {
             .collect(Collectors.toList()), HttpStatus.OK);
     }
 
+    @Authorized
     @GetMapping("/favorite")
-    public ResponseEntity<List<Long>> getFavoriteFlowers(@PathVariable Optional<String> q,
-                                                         @CookieValue("user") Optional<String> username) {
-        if (username.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        }
-        return new ResponseEntity<>(flowerRepository.findAllFavoriteFlowerIds(username.get()), HttpStatus.OK);
+    public ResponseEntity<List<Long>> getFavoriteFlowers(@PathVariable Optional<String> q) {
+        return new ResponseEntity<>(flowerRepository.findAllFavoriteFlowerIds(currentUser.get().getUsername()), HttpStatus.OK);
+    }
+
+    @Authorized(admin = true)
+    @GetMapping("/favorite/all")
+    public ResponseEntity<List<FlowerFavoriteAmountDTO>> getAllUsersFavoriteFlowers() {
+        return new ResponseEntity<>(flowerRepository.findAllUsersFavoriteFlowers(),HttpStatus.OK);
     }
 
     @GetMapping("/{id}") // /flowers/10
@@ -71,6 +74,7 @@ public class FlowerController {
         }
     }
 
+    @Authorized(admin = true)
     @PostMapping("/")
     public ResponseEntity<FlowerDTO> createFlower(@RequestBody @Validated FlowerDTO flowerDTO) {
         var flower = convertFromDTO(flowerDTO);
@@ -78,6 +82,7 @@ public class FlowerController {
         return ResponseEntity.ok(convertToDTO(flower));
     }
 
+    @Authorized(admin = true)
     @PutMapping("/{id}")
     ResponseEntity<FlowerDTO> updateFlower(@RequestBody @Validated FlowerDTO flowerDTO, @PathVariable Long id) {
         if (flowerRepository.findById(id).isEmpty()) {
@@ -88,6 +93,7 @@ public class FlowerController {
         return ResponseEntity.ok(convertToDTO(flowerRepository.save(newFlower)));
     }
 
+    @Authorized(admin = true)
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteFlower(@PathVariable Long id) {
         if (!flowerRepository.existsById(id)) {
@@ -97,30 +103,24 @@ public class FlowerController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
+    @Authorized
     @PutMapping("/{id}/favorite")
     public ResponseEntity<FlowerDTO> setFlowerAsFavorite(
-        @PathVariable Long id,
-        @CookieValue(name="user") String username,
-        @RequestBody FavoriteDTO favorite
+            @PathVariable Long id,
+            @RequestBody FavoriteDTO favorite
     ) {
+        var user = currentUser.get();
         var flowerOptional = flowerRepository.findById(id);
         if (flowerOptional.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         var flower = flowerOptional.get();
 
-        var userOptional = userRepository.findByUsername(username);
-        if (userOptional.isEmpty()) {
-            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-        }
-        var user = userOptional.get();
-
         if (favorite.isFavorite()) {
             flower.getUserFavorites().add(user);
         } else {
             flower.getUserFavorites().remove(user);
         }
-
         flowerRepository.save(flower);
         return new ResponseEntity<>(convertToDTO(flower), HttpStatus.OK);
     }
@@ -164,6 +164,10 @@ public class FlowerController {
                     .collect(Collectors.toList()), HttpStatus.OK);
     }
 
+    private FlowerFavoriteAmountDTO convertToFav(Flower flower) {
+        return modelMapper.map(flower, FlowerFavoriteAmountDTO.class);
+    }
+
     private FlowerDTO convertToDTO(Flower flower) {
         return modelMapper.map(flower, FlowerDTO.class);
     }
@@ -171,5 +175,4 @@ public class FlowerController {
     private Flower convertFromDTO(FlowerDTO flowerDTO) {
         return modelMapper.map(flowerDTO, Flower.class);
     }
-
 }

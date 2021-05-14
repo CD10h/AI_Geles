@@ -1,7 +1,9 @@
 package lt.aigen.geles.repositories;
 
 import lt.aigen.geles.models.Flower;
+import lt.aigen.geles.models.User;
 import lt.aigen.geles.models.dto.FlowerDTO;
+import lt.aigen.geles.models.dto.FlowerFavoriteAmountDTO;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
@@ -26,4 +28,7 @@ public interface FlowerRepository extends JpaRepository<Flower, Long> {
 
     List<Flower> findAllByPriceBetweenAndNameContainingIgnoreCaseAndDaysToExpireGreaterThanEqual (
             Pageable pageable, Double minPrice, Double maxPrice, String name, Integer daysToExpire);
+
+    @Query(nativeQuery = true)
+    List<FlowerFavoriteAmountDTO> findAllUsersFavoriteFlowers();
 }

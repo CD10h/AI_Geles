@@ -9,9 +9,12 @@ import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 public class WebConfig implements WebMvcConfigurer {
     @Autowired
     RequestLoggerInterceptor requestLoggerInterceptor;
+    @Autowired
+    AuthenticationInterceptor authenticationInterceptor;
 
     @Override
     public void addInterceptors(InterceptorRegistry registry) {
         registry.addInterceptor(requestLoggerInterceptor).excludePathPatterns("/static/**");
+        registry.addInterceptor(authenticationInterceptor).excludePathPatterns("/static/**");
     }
 }
