@@ -21,6 +21,7 @@ interface FlowerInCart {
   sum: number;
   price: number;
   name: string;
+  photo: string;
 }
 
 enum OrderStatus {

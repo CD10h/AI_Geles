@@ -13,15 +13,17 @@ public class FlowerInCart implements Serializable {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    //join column
     @ManyToOne
     @JoinColumn(name = "flower_id")
     private Flower flower;
 
-    //join column
     @ManyToOne
     @JoinColumn(name = "cart_id")
     private Cart cart;
+
+    @ManyToOne
+    @JoinColumn(name = "cart_template_id")
+    private CartTemplate cartTemplate;
 
     private Integer amount;
 
