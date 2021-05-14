@@ -13,6 +13,7 @@
   import UpdateFlower from "./UpdateFlower.svelte";
   import Order from "./Order.svelte";
   import Flower from "./Flower.svelte";
+  import FavoriteFlowersStats from "./FavoriteFlowersStats.svelte";
 
   export let url = "";
 
@@ -39,6 +40,7 @@
     {:else}
       <Link to="/flowers/favorite">Mėgstamiausios gėlės</Link>
       <Link to="/cart">Krepšelis</Link>
+      <Link to="/favorite/stats">Mėgstamiausių statistika</Link>
       <button on:click={handleLogout}>Atsijungti</button>
     {/if}
   </nav>
@@ -53,5 +55,6 @@
     <Route path="/cart" component={Cart} />
     <Route path="/order/:cartId" component={Order} />
     <Route path="/flower/:flowerId" component={Flower} />
+    <Route path="/favorite/stats" component={FavoriteFlowersStats} />
   </div>
 </Router>
