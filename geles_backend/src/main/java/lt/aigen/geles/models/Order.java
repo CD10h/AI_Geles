@@ -54,10 +54,6 @@ public class Order implements Serializable {
         PAID,
         CONFIRMED,
         DELIVERED,
-        CANCELED;
-        @JsonValue
-        public int toValue() {
-            return ordinal();
-        }
+        CANCELED
     }
 }
