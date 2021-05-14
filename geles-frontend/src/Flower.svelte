@@ -4,6 +4,7 @@
   import axios from "axios";
   import { isLoggedIn } from "./isLoggedIn";
   import { mapFlowerToWithFavorite } from "./util/flower";
+  import { Link } from "svelte-routing";
 
   export let flowerId: number;
 
@@ -40,6 +41,26 @@
     cartId = response.data.id;
   }
 
+  async function handleFavoriteChange() {
+    await axios.put(
+      `/flowers/${flower.id}/favorite`,
+      { favorite: !flower.favorite },
+      { withCredentials: true }
+    );
+    if (flower.favorite) {
+      flower.favorite = false;
+    } else {
+      flower.favorite = true;
+    }
+  }
+
+  async function handleDelete(id: number, name: string) {
+    if (window.confirm(`Ar tikrai norite ištrinti gėlę ${name}?`)) {
+      await axios.delete(`${server_url}/flowers/${id}`);
+      location.href = "/";
+    }
+  }
+
   onMount(() => {
     getFlower();
     if ($isLoggedIn) {
@@ -60,7 +81,10 @@
           height="400"
         />
         {#if $isLoggedIn}
-          <div class="flower-list-item-favorite">
+          <div
+            class="flower-list-item-favorite"
+            on:click={() => handleFavoriteChange()}
+          >
             {#if flower.favorite}
               <i class="mdi mdi-heart" />
             {:else}
@@ -89,6 +113,13 @@
               size="9"
             />
             <button on:click={() => handleToCart(flowerId, amount)}>+</button>
+            <br />
+            <div class="adminoptions">
+              <Link to="/update/{flower.id}">Redaguoti</Link>
+              <button on:click={() => handleDelete(flower.id, flower.name)}
+                >Ištrinti</button
+              >
+            </div>
           {/if}
         </div>
       </div>
@@ -109,12 +140,6 @@
     display: flex;
     max-width: 400px;
     min-width: 200px;
-  }
-
-  .name {
-  }
-
-  .price {
   }
 
   .flowerInfo {
@@ -162,5 +187,9 @@
 
   .description {
     text-align: justify;
+  }
+
+  .adminoptions {
+    margin-top: 20px;
   }
 </style>

@@ -144,9 +144,6 @@
     width: 100%;
   }
 
-  .flower-list-item-price {
-  }
-
   .flower-list-item-description {
     overflow: hidden;
     text-overflow: ellipsis;
