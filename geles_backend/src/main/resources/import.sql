@@ -36,7 +36,6 @@ INSERT INTO user_flower (user_id, flower_id) VALUES (3, 3);
 INSERT INTO user_flower (user_id, flower_id) VALUES (4, 3);
 INSERT INTO user_flower (user_id, flower_id) VALUES (4, 6);
 INSERT INTO user_flower (user_id, flower_id) VALUES (4, 7);
-INSERT INTO user_flower (user_id, flower_id) VALUES (4, 7);
 INSERT INTO public.orders (address, contact_phone, created_date, order_status, user_id) VALUES ('Gatvė 1', '09130239', '2021-05-08 16:30:35.498000', 0, 3);
 INSERT INTO public.orders (address, contact_phone, created_date, order_status, user_id) VALUES ('Gatvė 1', '09130239', '2021-05-08 16:30:35.769000', 1, 2);
 INSERT INTO public.flower_in_order (quantity, flower_id, order_id) VALUES (50, 10, 1);
