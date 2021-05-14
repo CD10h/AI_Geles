@@ -9,16 +9,43 @@
     name: "",
     price: 0,
     description: "",
-    daysToExpire: 0
+    daysToExpire: 0,
+    photo: ""
   };
 
   let errors: string[] = [];
+  let fileName;
+  let files: File[];
+
+  async function upload() {
+    const formData = new FormData();
+    formData.append("file", files[0]);
+    try {
+      await axios.post("/file/", formData, {
+        headers: { "Content-Type": "multipart/form-data" }
+      });
+    } catch (e) {
+      if (isAxiosError(e)) {
+        if (e.response) {
+          if (e.response.status === 500) {
+            errors = [`Internal server error: ${e.response.data.message}`];
+          }
+        }
+      }
+    }
+  }
 
   async function handleSubmit() {
     try {
-      await axios.post("/flowers/", flower, {
+      if (!files[0].type.match(/image\/.*/)) {
+        errors = ["Choose valid image type"];
+        return;
+      }
+      flower.photo = files[0].name;
+      const response = await axios.post("/flowers/", flower, {
         withCredentials: true
       });
+      await upload();
       navigate("/");
     } catch (e) {
       if (isAxiosError(e)) {
@@ -70,6 +97,16 @@
     min={1}
     name="expirydate"
   /><br /><br />
+  <label>Nuotrauka</label>
+  <br />
+  <input
+    id="fileUpload"
+    type="file"
+    multiple={false}
+    bind:files
+    accept="image/*"
+  />
+  <br /><br />
   <button>Sukurti</button>
   {#each errors as error}
     <p class="error">

@@ -51,6 +51,7 @@ public class User implements Serializable {
     private List<CartTemplate> cartTemplates = new ArrayList<>();
 
     @NotBlank
+    @Column(columnDefinition = "boolean default false")
     private Boolean isAdmin;
 
     public User(Long id, String username, String password, String photo) {
