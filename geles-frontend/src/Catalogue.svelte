@@ -132,10 +132,6 @@
     position: relative;
   }
 
-  input {
-    margin-left: 50px;
-  }
-
   .flower-list-item-name {
     font-size: 24px;
   }
