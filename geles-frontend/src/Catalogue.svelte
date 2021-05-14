@@ -10,9 +10,8 @@
   export let flowers: Flower[];
   export let owner: boolean | undefined = false;
   export let onChange: (() => void) | undefined = undefined;
-  export let onFavoriteChange:
-    | ((flower: Flower) => void)
-    | undefined = undefined;
+  export let onFavoriteChange: ((flower: Flower) => void) | undefined =
+    undefined;
 
   interface Cart {
     id: number;
@@ -70,11 +69,13 @@
   -->
   {#each flowers as flower (flower.id)}
     <div class="flower-list-item">
-      <img
-        class="flower-list-item-photo"
-        src={`${server_url}/static/${flower.photo}`}
-        alt={flower.name}
-      />
+      <Link to="/flower/{flower.id}">
+        <img
+          class="flower-list-item-photo"
+          src={`${server_url}/static/${flower.photo}`}
+          alt={flower.name}
+        />
+      </Link>
       {#if $isLoggedIn}
         <div
           class="flower-list-item-favorite"
@@ -105,6 +106,7 @@
           max="100"
           on:input={e => (amount = +e.currentTarget.value)}
           value="1"
+          size="7"
         />
         <button on:click={() => handleToCart(flower.id, amount)}>+</button>
       {/if}
@@ -136,9 +138,6 @@
 
   .flower-list-item-photo {
     width: 100%;
-  }
-
-  .flower-list-item-price {
   }
 
   .flower-list-item-description {
