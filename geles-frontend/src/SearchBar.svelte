@@ -25,5 +25,6 @@
     flex-grow: 1;
     margin-left: 8px;
     outline: none;
+    background-color: ivory;
   }
 </style>
