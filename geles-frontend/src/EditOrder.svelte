@@ -84,18 +84,44 @@ import { bind, text } from "svelte/internal";
         editDto.contactPhone = order.contactPhone;
         recalcSum();
       });
+  }
 
+  function handlePay() {
+    axios.post(`/orders/${id}/pay`);
+  }
+
+  function handleCancel() {
+    axios.post(`/orders/${id}/cancel`);
+  }
+
+  function orderStatusString(status: any): string {
+    switch (status) {
+      case "UNPAID":
+        return "Neapmokėta";
+      case "PAID":
+        return "Apmokėtas";
+      case "CONFIRMED":
+        return "Patvirtintas";
+      case "DELIVERED":
+        return "Pristatytas";
+      case "CANCELED":
+        return "Atšauktas";
+      default:
+        return "???????";
+    }
   }
 </script>
 
-<h2>Užsakymas nr <strong>{order.id}</strong></h2>
+<h2>Užsakymas nr <strong>{order.id}</strong> Būsena : {orderStatusString(order.orderStatus)} </h2>
 <table>
   <tr>
     <th colspan="2">Gėlė</th>
     <th>Kiekis</th>
     <th>Vnt. kaina</th>
     <th>Suma</th>
+    {#if order.orderStatus == "UNPAID"}
     <th >Veiksmai</th>
+    {/if}
   </tr>
   {#each editDto.orderFlowers as flower (flower.id)}
     <tr>
@@ -114,6 +140,7 @@ import { bind, text } from "svelte/internal";
       </div>
       <td>{flowerFromId(flower.id).name}</td>
       <td>
+        {#if order.orderStatus == "UNPAID"}
         <input
           type="number"
           bind:value={flower.quantity}
@@ -124,19 +151,23 @@ import { bind, text } from "svelte/internal";
             recalcSum();
           }}
         />
+        {:else}
+        {flower.quantity}
+        {/if}
       </td>
       <td class="number">{flowerFromId(flower.id).price} €</td>
       <td class="number">{rowSum(flower).toFixed(2)}€</td>
+      {#if order.orderStatus == "UNPAID"}
       <td>
         <button on:click={() => handleDelete(flower)}>Pašalinti</button>
       </td>
+      {/if}
     </tr>
   {/each}
 </table>
 
 
-
-
+{#if order.orderStatus == "UNPAID"}
 <label for="adress">Adresas</label>
 <input
 id="address"
@@ -150,9 +181,26 @@ id="address"
   id="phone"
   bind:value={editDto.contactPhone} />
 <br/>
-<button class="savebutton" on:click={() => handleUpdate()}
-  >Išsaugoti pakeitimus</button
->
+{:else}
+<div>
+  Adresas : {order.address}
+</div>
+<div>
+  Telefonas : {order.contactPhone}
+</div>
+{/if}
+
+{#if order.orderStatus == "UNPAID"}
+<button class="savebutton" on:click={() => handleUpdate()}>
+  Išsaugoti pakeitimus
+</button>
+<button class="paybutton" on:click={() => handlePay()}>
+  Apmokėti
+</button>
+{/if}
+<button class="paybutton" on:click={() => handleCancel()}>
+  Atšaukti
+</button>
 
 <style>
   .flowerincart-list {
