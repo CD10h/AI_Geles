@@ -16,6 +16,7 @@
   import NotificationContext from "./NotificationContext.svelte";
   import Flower from "./Flower.svelte";
   import FavoriteFlowersStats from "./FavoriteFlowersStats.svelte";
+  import EditOrder from "./EditOrder.svelte"
 
   export let url = "";
 
@@ -61,6 +62,7 @@
       <Route path="/flower/:flowerId" component={Flower} />
       <Route path="/favorite/stats" component={FavoriteFlowersStats} />
       <Route path="/orders" component={ManageOrders} />
+      <Route path="/editOrder/:id" component={EditOrder}/>
     </div>
   </Router>
 </NotificationContext>

@@ -174,15 +174,14 @@ public class OrdersController {
         }
 
         var newFlowersInOrder = new ArrayList<FlowerInOrder>();
-        var oldFlowersInOrder  = order.getOrderProducts();
         for (var flowerInOrder :  flowerInOrderDTOs ) {
             var f = convertFromDTO(flowerInOrder);
             f.setOrder(order);
             newFlowersInOrder.add(f);
         }
-        flowerInOrderRepository.deleteAll(oldFlowersInOrder);
-        flowerInOrderRepository.saveAll(newFlowersInOrder);
-        order.setOrderProducts(newFlowersInOrder);
+        //flowerInOrderRepository.saveAll(newFlowersInOrder);
+        order.getOrderProducts().clear();
+        order.getOrderProducts().addAll(newFlowersInOrder);
         order.setAddress(orderEditDTO.getAddress());
         order.setContactPhone(orderEditDTO.getContactPhone());
         order.setOrderStatus(Order.OrderStatus.UNPAID);
