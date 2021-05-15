@@ -32,18 +32,19 @@
 
 <NotificationContext>
   <Router {url}>
-    <nav>
-      <Link to="/">Pagrindinis</Link>
-      <Link to="/add">Pridėti gėlę</Link>
-      <Link to="/search">Paieška</Link>
+    <nav class="navbar">
+      <Link class="button" to="/">Pagrindinis</Link>
+      <Link class="button" to="/add">Pridėti gėlę</Link>
+      <Link class="button" to="/search">Paieška</Link>
       {#if !$isLoggedIn}
-        <Link to="/login">Prisijungti</Link>
-        <Link to="/register">Užsiregistruoti</Link>
+        <Link class="button" to="/login">Prisijungti</Link>
+        <Link class="button" to="/register">Užsiregistruoti</Link>
       {:else}
-        <Link to="/flowers/favorite">Mėgstamiausios gėlės</Link>
-        <Link to="/cart">Krepšelis</Link>
-        <Link to="/favorite/stats">Mėgstamiausių statistika</Link>
-        <button on:click={handleLogout}>Atsijungti</button>
+        <Link class="button" to="/flowers/favorite">Mėgstamiausios gėlės</Link>
+        <Link class="button" to="/cart">Krepšelis</Link>
+        <Link class="button" to="/favorite/stats">Mėgstamiausių statistika</Link
+        >
+        <button class="button" on:click={handleLogout}>Atsijungti</button>
       {/if}
     </nav>
     <div>

@@ -4,7 +4,7 @@
   import axios from "axios";
   import { isLoggedIn } from "./isLoggedIn";
   import { mapFlowerToWithFavorite } from "./util/flower";
-  import { Link } from "svelte-routing";
+  import { Link, navigate } from "svelte-routing";
 
   export let flowerId: number;
 
@@ -57,7 +57,7 @@
   async function handleDelete(id: number, name: string) {
     if (window.confirm(`Ar tikrai norite ištrinti gėlę ${name}?`)) {
       await axios.delete(`${server_url}/flowers/${id}`);
-      location.href = "/";
+      navigate("/");
     }
   }
 
@@ -93,7 +93,7 @@
           </div>
         {/if}
       </div>
-      <div class="info">
+      <div class="infocontainer">
         <div class="nameAndPrice">
           <h2 class="name">{flower.name}</h2>
           <div style="flex-grow:1;" />
@@ -103,8 +103,8 @@
         <p class="description">{flower.description}</p>
         <div class="tocart">
           {#if $isLoggedIn}
-            <p class="addText">Pridėti į krepšelį:</p>
             <input
+              class="numberinput"
               type="number"
               min="1"
               max="100"
@@ -112,11 +112,18 @@
               value="1"
               size="9"
             />
-            <button on:click={() => handleToCart(flowerId, amount)}>+</button>
+            <button
+              class="button add"
+              on:click={() => handleToCart(flowerId, amount)}
+              >Pridėti į krepšelį</button
+            >
             <br />
             <div class="adminoptions">
-              <Link to="/update/{flower.id}">Redaguoti</Link>
-              <button on:click={() => handleDelete(flower.id, flower.name)}
+              <Link class="button edit" to="/update/{flower.id}">Redaguoti</Link
+              >
+              <button
+                class="button delete"
+                on:click={() => handleDelete(flower.id, flower.name)}
                 >Ištrinti</button
               >
             </div>
@@ -128,14 +135,6 @@
 </div>
 
 <style>
-  .addText {
-    display: inline;
-  }
-
-  input {
-    margin-left: 10px;
-  }
-
   .nameAndPrice {
     display: flex;
     max-width: 400px;
@@ -152,7 +151,7 @@
     flex-wrap: wrap;
   }
 
-  .info {
+  .infocontainer {
     max-width: 400px;
     min-width: 200px;
   }
@@ -175,7 +174,7 @@
   }
 
   .flower-list-item-favorite {
-    background-color: white;
+    background-color: ivory;
     border: 1px solid grey;
     position: absolute;
     top: 8px;
