@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { server_url } from "./index";
   import axios from "axios";
-  import { isLoggedIn } from "./isLoggedIn";
+  import { user } from "./stores";
   import { mapFlowerToWithFavorite } from "./util/flower";
   import { Link, navigate } from "svelte-routing";
 
@@ -13,12 +13,15 @@
   let cartId = 0;
   let amount = 1;
 
+  $: isLoggedIn = !!$user;
+  $: isAdmin = $user && $user.admin;
+
   async function getFlower() {
     const response = await axios.get(`/flowers/${flowerId}`);
     flower = response.data;
     flower.favorite = false;
 
-    if ($isLoggedIn) {
+    if (isLoggedIn) {
       const favoriteResponse = await axios.get<number[]>("/flowers/favorite", {
         withCredentials: true
       });
@@ -63,7 +66,7 @@
 
   onMount(() => {
     getFlower();
-    if ($isLoggedIn) {
+    if (isLoggedIn) {
       getCartId();
     }
   });
@@ -80,7 +83,7 @@
           width="400"
           height="400"
         />
-        {#if $isLoggedIn}
+        {#if !isAdmin}
           <div
             class="flower-list-item-favorite"
             on:click={() => handleFavoriteChange()}
@@ -102,7 +105,7 @@
         </div>
         <p class="description">{flower.description}</p>
         <div class="tocart">
-          {#if $isLoggedIn}
+          {#if !isAdmin}
             <input
               class="numberinput"
               type="number"
@@ -117,7 +120,7 @@
               on:click={() => handleToCart(flowerId, amount)}
               >Pridėti į krepšelį</button
             >
-            <br />
+          {:else}
             <div class="adminoptions">
               <Link class="button edit" to="/update/{flower.id}">Redaguoti</Link
               >
