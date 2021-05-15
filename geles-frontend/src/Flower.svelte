@@ -75,7 +75,7 @@
       <div class="imagecontainer">
         <img
           class="flower-photo"
-          src={`${server_url}/static/${flower.photo}`}
+          src={`${server_url}/static/flowers/${flower.photo}`}
           alt={flower.name}
           width="400"
           height="400"
