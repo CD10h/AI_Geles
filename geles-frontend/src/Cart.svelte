@@ -179,6 +179,7 @@
             <td>{flowerInCart.name}</td>
             <td>
               <input
+                class="numberinput"
                 type="number"
                 bind:value={flowerInCart.amount}
                 min="1"
@@ -347,7 +348,21 @@
     margin-left: 0;
   }
 
+  td > .button {
+    margin-top: 4px;
+  }
+
   .favorite {
     margin-left: 8px;
+  }
+
+  .numberinput {
+    height: 1.5em;
+    border-radius: 0.2em;
+    box-shadow: 0 0 1px 1px rgba(255, 255, 255, 0.8) inset,
+      0 1px 0 rgba(0, 0, 0, 0.3);
+    text-align: center;
+    border: 1px solid #777;
+    background-color: #e6f5d4;
   }
 </style>
