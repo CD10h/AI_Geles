@@ -10,6 +10,8 @@
     flowersInCart: FlowerInCart[];
   }
 
+  let cartErrors: string[] = [];
+
   let cart: Cart = {
     id: 0,
     flowersInCart: []
@@ -99,6 +101,7 @@
 
   async function handleSave() {
     if (cartTemplate.name.length > 0) {
+      cartErrors = [];
       let template = {
         name: cartTemplate.name,
         flowersInCart: cart.flowersInCart
@@ -108,7 +111,7 @@
       });
       getCartTemplates();
     } else {
-      //notification?
+      cartErrors = [`Įrašykite šablono pavadinimą`];
     }
   }
 
@@ -216,6 +219,12 @@
         >
       </div>
     {/if}
+    {#each cartErrors as error}
+      <p class="error">
+        <i class="mdi mdi-alert-circle" />
+        {error.slice(0, 1).toUpperCase()}{error.slice(1)}
+      </p>
+    {/each}
   </div>
   <div class="carttemplate-list">
     <h2>Išsaugoti krepšeliai</h2>
@@ -325,5 +334,10 @@
 
   .templatename {
     text-align: left;
+  }
+  .error {
+    color: red;
+    display: flex;
+    align-items: center;
   }
 </style>

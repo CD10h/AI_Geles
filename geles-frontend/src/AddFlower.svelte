@@ -38,7 +38,7 @@
   async function handleSubmit() {
     try {
       if (!files[0].type.match(/image\/.*/)) {
-        errors = ["Choose valid image type"];
+        errors = ["Pasirinkite tinkamą nuotraukos formatą"];
         return;
       }
       flower.photo = files[0].name;
