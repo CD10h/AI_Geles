@@ -170,4 +170,8 @@
   .priceInput {
     width: 60px;
   }
+
+  .sort {
+    margin-left: 20px;
+  }
 </style>

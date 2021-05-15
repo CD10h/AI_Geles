@@ -31,35 +31,37 @@
   }
 </script>
 
-<h2>Užsiregistruoti</h2>
-<form
-  on:submit={e => {
-    e.preventDefault();
-    handleSubmit();
-  }}
->
-  <Input
-    label="Vartotojo vardas"
-    bind:value={registerFields.username}
-    name="username"
-    type="text"
-    autocomplete="nickname"
-  /><br /><br />
-  <Input
-    label="Slaptažodis"
-    bind:value={registerFields.password}
-    name="password"
-    type="password"
-    autocomplete="new-password"
-  /><br /><br />
-  <button>Užsiregistruoti</button>
-  {#each errors as error}
-    <p class="error">
-      <i class="mdi mdi-alert-circle" />
-      {error.slice(0, 1).toUpperCase()}{error.slice(1)}
-    </p>
-  {/each}
-</form>
+<div class="pagecontent">
+  <h2>Užsiregistruoti</h2>
+  <form
+    on:submit={e => {
+      e.preventDefault();
+      handleSubmit();
+    }}
+  >
+    <Input
+      label="Vartotojo vardas"
+      bind:value={registerFields.username}
+      name="username"
+      type="text"
+      autocomplete="nickname"
+    /><br /><br />
+    <Input
+      label="Slaptažodis"
+      bind:value={registerFields.password}
+      name="password"
+      type="password"
+      autocomplete="new-password"
+    /><br /><br />
+    <button>Užsiregistruoti</button>
+    {#each errors as error}
+      <p class="error">
+        <i class="mdi mdi-alert-circle" />
+        {error.slice(0, 1).toUpperCase()}{error.slice(1)}
+      </p>
+    {/each}
+  </form>
+</div>
 
 <style>
   .error {

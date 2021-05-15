@@ -25,7 +25,7 @@
   });
 </script>
 
-<div class="favoriteflowersstats-list">
+<div class="pagecontent">
   <h2>Vartotojų mėgstamiausios gėlės</h2>
   {#if favoriteFlowers.length > 0}
     <table class="favoriteflowers-table">

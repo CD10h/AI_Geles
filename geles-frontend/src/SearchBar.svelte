@@ -15,6 +15,8 @@
     display: flex;
     padding: 8px 12px;
     width: 300px;
+    margin-left: 20px;
+    margin-top: 20px;
   }
 
   .search-input {

@@ -93,7 +93,7 @@
       <p class="flower-list-item-description">
         {flower.description}
       </p>
-      {#if owner}
+      {#if owner && $isLoggedIn}
         <Link to="/update/{flower.id}" class="button edit">Redaguoti</Link>
         <button
           class="button delete"

@@ -147,7 +147,7 @@
   });
 </script>
 
-<div class="flowerincart-list">
+<div class="pagecontent">
   <div class="flowercart">
     <h2>Gėlių krepšelis</h2>
     {#if cart.flowersInCart.length > 0}
@@ -273,10 +273,6 @@
 </div>
 
 <style>
-  .flowerincart-list {
-    margin-left: 40px;
-  }
-
   h2 {
     color: #000000;
     font-size: 24px;

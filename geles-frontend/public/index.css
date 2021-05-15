@@ -149,3 +149,11 @@ body {
   border: 1px solid #777;
   background-color: #d2ebb1d3;
 }
+
+.pagecontent {
+  margin-left: 20px;
+}
+
+.navbar {
+  margin-left: 10px;
+}

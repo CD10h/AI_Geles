@@ -63,58 +63,60 @@
   }
 </script>
 
-<h2>Pridėti gėlę</h2>
-<form
-  on:submit={e => {
-    e.preventDefault();
-    handleSubmit();
-  }}
->
-  <Input
-    label="Pavadinimas"
-    bind:value={flower.name}
-    type="text"
-    name="name"
-  /><br /><br />
-  <Input
-    label="Kaina"
-    bind:value={flower.price}
-    type="number"
-    min={0}
-    step="0.01"
-    name="price"
-  /><br /><br />
-  <Input
-    label="Aprašymas"
-    bind:value={flower.description}
-    type="text"
-    name="description"
-  /><br /><br />
-  <Input
-    label="Galiojimo trukmė(dienomis)"
-    bind:value={flower.daysToExpire}
-    type="number"
-    min={1}
-    name="expirydate"
-  /><br /><br />
-  <label>Nuotrauka</label>
-  <br />
-  <input
-    id="fileUpload"
-    type="file"
-    multiple={false}
-    bind:files
-    accept="image/*"
-  />
-  <br /><br />
-  <button>Sukurti</button>
-  {#each errors as error}
-    <p class="error">
-      <i class="mdi mdi-alert-circle" />
-      {error.slice(0, 1).toUpperCase()}{error.slice(1)}
-    </p>
-  {/each}
-</form>
+<div class="pagecontent">
+  <h2>Pridėti gėlę</h2>
+  <form
+    on:submit={e => {
+      e.preventDefault();
+      handleSubmit();
+    }}
+  >
+    <Input
+      label="Pavadinimas"
+      bind:value={flower.name}
+      type="text"
+      name="name"
+    /><br /><br />
+    <Input
+      label="Kaina"
+      bind:value={flower.price}
+      type="number"
+      min={0}
+      step="0.01"
+      name="price"
+    /><br /><br />
+    <Input
+      label="Aprašymas"
+      bind:value={flower.description}
+      type="text"
+      name="description"
+    /><br /><br />
+    <Input
+      label="Galiojimo trukmė(dienomis)"
+      bind:value={flower.daysToExpire}
+      type="number"
+      min={1}
+      name="expirydate"
+    /><br /><br />
+    <label>Nuotrauka</label>
+    <br />
+    <input
+      id="fileUpload"
+      type="file"
+      multiple={false}
+      bind:files
+      accept="image/*"
+    />
+    <br /><br />
+    <button>Sukurti</button>
+    {#each errors as error}
+      <p class="error">
+        <i class="mdi mdi-alert-circle" />
+        {error.slice(0, 1).toUpperCase()}{error.slice(1)}
+      </p>
+    {/each}
+  </form>
+</div>
 
 <style>
   .error {

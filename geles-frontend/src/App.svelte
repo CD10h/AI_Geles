@@ -32,7 +32,7 @@
 
 <NotificationContext>
   <Router {url}>
-    <nav>
+    <nav class="navbar">
       <Link class="button" to="/">Pagrindinis</Link>
       <Link class="button" to="/add">Pridėti gėlę</Link>
       <Link class="button" to="/search">Paieška</Link>
