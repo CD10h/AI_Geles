@@ -37,13 +37,15 @@
   function addLoadingNotification<T>(text: string, promise: Promise<T>) {
     const id = ++lastId;
 
-    notifications = [
-      ...notifications,
-      { id, text, loading: true, type: AppNotificationType.INFO }
-    ];
-    promise.finally(() => {
-      handleRemoveNotification(id);
-    });
+    setTimeout(() => {
+      notifications = [
+        ...notifications,
+        { id, text, loading: true, type: AppNotificationType.INFO }
+      ];
+      promise.finally(() => {
+        handleRemoveNotification(id);
+      });
+    }, 150);
     return promise;
   }
 
