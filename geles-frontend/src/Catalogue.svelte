@@ -4,6 +4,7 @@
   import { onMount } from "svelte";
 
   import axios from "axios";
+  import noPhoto from "./assets/no-image.jfif";
   import { isLoggedIn } from "./isLoggedIn";
 
   // Variable to hold fetched list
@@ -69,13 +70,23 @@
   -->
   {#each flowers as flower (flower.id)}
     <div class="flower-list-item">
-      <Link to="/flower/{flower.id}">
-        <img
-          class="flower-list-item-photo"
-          src={`${server_url}/static/flowers/${flower.photo}`}
-          alt={flower.name}
-        />
-      </Link>
+      <div class="flower-list-item-photo-container">
+        <Link to="/flower/{flower.id}" class="link-wrapper">
+          {#if flower.photo}
+            <img
+              class="flower-list-item-photo"
+              src={`${server_url}/static/flowers/${flower.photo}`}
+              alt={flower.name}
+            />
+          {:else}
+            <img
+              class="flower-list-item-photo"
+              src={noPhoto}
+              alt="Nėra nuotraukos"
+            />
+          {/if}
+        </Link>
+      </div>
       {#if $isLoggedIn}
         <div
           class="flower-list-item-favorite"
@@ -112,7 +123,7 @@
         />
         <button
           class="button add"
-          on:click={() => handleToCart(flower.id, amount)}>Pridėti</button
+          on:click={() => handleToCart(flower.id, amount)}>Į krepšelį</button
         >
       {/if}
     </div>
