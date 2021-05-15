@@ -103,6 +103,9 @@
       })
       .then(response => {
         favoriteFlowers = response.data;
+      })
+      .catch(() => {
+        favoriteFlowers = [];
       });
   });
 </script>

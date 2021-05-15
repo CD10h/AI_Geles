@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { server_url } from "./index";
   import axios from "axios";
-  import { isLoggedIn } from "./isLoggedIn";
+  import { user } from "./stores";
   import { mapFlowerToWithFavorite } from "./util/flower";
   import { Link, navigate } from "svelte-routing";
 
@@ -13,12 +13,15 @@
   let cartId = 0;
   let amount = 1;
 
+  $: isLoggedIn = !!$user;
+  $: isAdmin = $user && $user.admin;
+
   async function getFlower() {
     const response = await axios.get(`/flowers/${flowerId}`);
     flower = response.data;
     flower.favorite = false;
 
-    if ($isLoggedIn) {
+    if (isLoggedIn) {
       const favoriteResponse = await axios.get<number[]>("/flowers/favorite", {
         withCredentials: true
       });
@@ -63,7 +66,7 @@
 
   onMount(() => {
     getFlower();
-    if ($isLoggedIn) {
+    if (isLoggedIn) {
       getCartId();
     }
   });
@@ -80,7 +83,7 @@
           width="400"
           height="400"
         />
-        {#if $isLoggedIn}
+        {#if isLoggedIn && !isAdmin}
           <div
             class="flower-list-item-favorite"
             on:click={() => handleFavoriteChange()}
@@ -102,31 +105,34 @@
         </div>
         <p class="description">{flower.description}</p>
         <div class="tocart">
-          {#if $isLoggedIn}
-            <input
-              class="numberinput"
-              type="number"
-              min="1"
-              max="100"
-              on:input={e => (amount = +e.currentTarget.value)}
-              value="1"
-              size="9"
-            />
-            <button
-              class="button add"
-              on:click={() => handleToCart(flowerId, amount)}
-              >Pridėti į krepšelį</button
-            >
-            <br />
-            <div class="adminoptions">
-              <Link class="button edit" to="/update/{flower.id}">Redaguoti</Link
-              >
+          {#if isLoggedIn}
+            {#if !isAdmin}
+              <input
+                class="numberinput"
+                type="number"
+                min="1"
+                max="100"
+                on:input={e => (amount = +e.currentTarget.value)}
+                value="1"
+                size="9"
+              />
               <button
-                class="button delete"
-                on:click={() => handleDelete(flower.id, flower.name)}
-                >Ištrinti</button
+                class="button add"
+                on:click={() => handleToCart(flowerId, amount)}
+                >Pridėti į krepšelį</button
               >
-            </div>
+            {:else}
+              <div class="adminoptions">
+                <Link class="button edit" to="/update/{flower.id}"
+                  >Redaguoti</Link
+                >
+                <button
+                  class="button delete"
+                  on:click={() => handleDelete(flower.id, flower.name)}
+                  >Ištrinti</button
+                >
+              </div>
+            {/if}
           {/if}
         </div>
       </div>
