@@ -1,5 +1,5 @@
 <script>
-  import { setContext } from "svelte";
+  import { onMount, setContext } from "svelte";
   import { notificationContextKey } from "./contexts";
   import { AppNotificationType } from "./enums";
   import Notifications from "./Notifications.svelte";
@@ -37,13 +37,15 @@
   function addLoadingNotification<T>(text: string, promise: Promise<T>) {
     const id = ++lastId;
 
-    notifications = [
-      ...notifications,
-      { id, text, loading: true, type: AppNotificationType.INFO }
-    ];
-    promise.finally(() => {
-      handleRemoveNotification(id);
-    });
+    setTimeout(() => {
+      notifications = [
+        ...notifications,
+        { id, text, loading: true, type: AppNotificationType.INFO }
+      ];
+      promise.finally(() => {
+        handleRemoveNotification(id);
+      });
+    }, 150);
     return promise;
   }
 
@@ -59,7 +61,11 @@
   };
 
   setContext(notificationContextKey, context);
+
+  onMount(() => {
+    // addNotification("sėkmė", AppNotificationType.SUCCESS, 100000000000);
+  });
 </script>
 
-<Notifications {notifications} />
+<Notifications {notifications} onClick={removeNotification} />
 <slot />

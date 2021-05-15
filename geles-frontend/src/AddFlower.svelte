@@ -4,6 +4,12 @@
   import axios from "axios";
 
   import Input from "./Input.svelte";
+  import { getContext } from "svelte";
+  import { notificationContextKey } from "./contexts";
+  import { AppNotificationType } from "./enums";
+
+  const { addLoadingNotification, addNotification } =
+    getContext<AppNotificationContext>(notificationContextKey);
 
   let flower: Omit<Flower, "id" | "favorite"> = {
     name: "",
@@ -14,7 +20,6 @@
   };
 
   let errors: string[] = [];
-  let fileName;
   let files: File[];
 
   async function upload() {
@@ -32,20 +37,39 @@
           }
         }
       }
+      addNotification(
+        "Nepavyko pridėti nuotraukos",
+        AppNotificationType.DANGER
+      );
     }
   }
 
   async function handleSubmit() {
-    try {
+    const hasFile = files && !!files[0];
+    if (hasFile) {
       if (!files[0].type.match(/image\/.*/)) {
-        errors = ["Choose valid image type"];
+        errors = ["Pasirinkite tinkamą nuotraukos formatą"];
+        return;
+      }
+      if (files[0].size > 1024 * 1024) {
+        errors = ["Nuotrauka per didelė, daugiausiai 1 MB"];
         return;
       }
       flower.photo = files[0].name;
-      const response = await axios.post("/flowers/", flower, {
-        withCredentials: true
-      });
-      await upload();
+    }
+    try {
+      await addLoadingNotification(
+        "Pridedama...",
+        (async () => {
+          await axios.post("/flowers/", flower, {
+            withCredentials: true
+          });
+          if (hasFile) {
+            await upload();
+          }
+        })()
+      );
+      addNotification("Gėlė sėkmingai pridėta", AppNotificationType.SUCCESS);
       navigate("/");
     } catch (e) {
       if (isAxiosError(e)) {
@@ -54,72 +78,106 @@
             errors = e.response.data.errors.map(
               error => `${error.field} ${error.defaultMessage}`
             );
+            return; // Avoid showing error message
           } else if (e.response.status === 500) {
             errors = [`Internal server error: ${e.response.data.message}`];
           }
         }
       }
+      addNotification("Nepavyko pridėti gėlės", AppNotificationType.DANGER);
     }
   }
 </script>
 
-<h2>Pridėti gėlę</h2>
-<form
-  on:submit={e => {
-    e.preventDefault();
-    handleSubmit();
-  }}
->
-  <Input
-    label="Pavadinimas"
-    bind:value={flower.name}
-    type="text"
-    name="name"
-  /><br /><br />
-  <Input
-    label="Kaina"
-    bind:value={flower.price}
-    type="number"
-    min={0}
-    step="0.01"
-    name="price"
-  /><br /><br />
-  <Input
-    label="Aprašymas"
-    bind:value={flower.description}
-    type="text"
-    name="description"
-  /><br /><br />
-  <Input
-    label="Galiojimo trukmė(dienomis)"
-    bind:value={flower.daysToExpire}
-    type="number"
-    min={1}
-    name="expirydate"
-  /><br /><br />
-  <label>Nuotrauka</label>
-  <br />
-  <input
-    id="fileUpload"
-    type="file"
-    multiple={false}
-    bind:files
-    accept="image/*"
-  />
-  <br /><br />
-  <button>Sukurti</button>
-  {#each errors as error}
-    <p class="error">
-      <i class="mdi mdi-alert-circle" />
-      {error.slice(0, 1).toUpperCase()}{error.slice(1)}
-    </p>
-  {/each}
-</form>
+<div class="pagecontent">
+  <h2>Pridėti gėlę</h2>
+  <form
+    on:submit={e => {
+      e.preventDefault();
+      handleSubmit();
+    }}
+  >
+    <Input
+      label="Pavadinimas"
+      bind:value={flower.name}
+      type="text"
+      name="name"
+    /><br />
+    <Input
+      label="Kaina"
+      bind:value={flower.price}
+      type="number"
+      min={0}
+      step="0.01"
+      name="price"
+    /><br />
+    <Input
+      label="Aprašymas"
+      bind:value={flower.description}
+      type="text"
+      name="description"
+    /><br />
+    <Input
+      label="Galiojimo trukmė(dienomis)"
+      bind:value={flower.daysToExpire}
+      type="number"
+      min={1}
+      name="expirydate"
+    /><br />
+    <label for="fileUpload">Nuotrauka</label>
+    <br />
+    <div class="container">
+      <div class="button-wrap">
+        <button
+          class="button add"
+          type="button"
+          on:click={() => {
+            document.getElementById("fileUpload")?.click();
+          }}>Pridėti</button
+        >
+        <input
+          id="fileUpload"
+          type="file"
+          multiple={false}
+          bind:files
+          accept="image/*"
+          style="display:none;"
+        />
+        {#if !files}
+          Nuotrauka nepasirinkta
+        {:else}
+          Nuotrauka: {files[0].name}
+        {/if}
+      </div>
+    </div>
+    <br />
+    <button class="button save">Sukurti</button>
+    {#each errors as error}
+      <p class="error">
+        <i class="mdi mdi-alert-circle" />
+        {error.slice(0, 1).toUpperCase()}{error.slice(1)}
+      </p>
+    {/each}
+  </form>
+</div>
 
 <style>
   .error {
     color: red;
     display: flex;
     align-items: center;
+  }
+
+  .container {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: 100%;
+  }
+
+  .button {
+    margin-top: 10px;
+    margin-left: 0;
+    width: 85px;
   }
 </style>

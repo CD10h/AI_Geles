@@ -110,43 +110,93 @@
 <SearchBar bind:query />
 
 <div class="sort">
-  <h3>Rikiavimas</h3>
-  <select bind:value={filter.sort}>
-    {#each sortableFields as field}
-      <option value={field.field}>{field.label}</option>
-    {/each}
-  </select>
-  <select bind:value={filter.sortType}>
-    <option value="asc">Didėjimo tvarka</option>
-    <option value="desc">Mažėjimo tvarka</option>
-  </select><br /><br />
-  <label>Kaina </label>
-  <input
-    on:input={e => handleFilter("minPrice", e.currentTarget.value)}
-    class="priceInput"
-    type="number"
-    min={0}
-    placeholder="Nuo"
-    step={0.1}
-  />
-  <input
-    on:input={e => handleFilter("maxPrice", e.currentTarget.value)}
-    class="priceInput"
-    type="number"
-    min={0}
-    placeholder="Iki"
-    step={0.1}
-  />
-  <br />
+  <div>
+    <h3>Rikiavimas</h3>
+    <span class="sort-inputs">
+      <select class="selectinput" bind:value={filter.sort}>
+        {#each sortableFields as field}
+          <option value={field.field}>{field.label}</option>
+        {/each}
+      </select>
+      <select class="selectinput" bind:value={filter.sortType}>
+        <option value="asc">Didėjimo tvarka</option>
+        <option value="desc">Mažėjimo tvarka</option>
+      </select><br /><br />
+    </span>
+  </div>
+  <div>
+    <h3>Filtravimas</h3>
+    <label class="priceLabel" for="priceInput">Kaina</label>
+    <span class="filter-price-inputs">
+      <input
+        id="priceInput"
+        on:input={e => handleFilter("minPrice", e.currentTarget.value)}
+        class="priceInput numberinput"
+        type="number"
+        min={0}
+        placeholder="Nuo"
+        step={0.1}
+      />
+      <input
+        on:input={e => handleFilter("maxPrice", e.currentTarget.value)}
+        class="priceInput numberinput"
+        type="number"
+        min={0}
+        placeholder="Iki"
+        step={0.1}
+      />
+    </span>
+  </div>
 </div>
 
-<Catalogue {flowers} {onFavoriteChange} />
+<div style="padding:6px">
+  <Catalogue {flowers} {onFavoriteChange} />
+</div>
 
 <!-- <div class="filter">
   <input type="range" id="volume" name="volume" min="0" max="11" />
 </div> -->
 <style>
+  .priceLabel {
+    display: inline-block;
+    margin-bottom: 8px;
+    margin-right: 8px;
+  }
+
   .priceInput {
     width: 60px;
+  }
+
+  .sort {
+    margin-left: 20px;
+    display: flex;
+    align-items: flex-start;
+  }
+
+  .sort > div:not(:first-child) {
+    margin-left: 20px;
+  }
+
+  .sort-inputs {
+    display: flex;
+    flex-wrap: wrap;
+  }
+
+  .selectinput {
+    margin-left: 0;
+    margin-right: 4px;
+    margin-bottom: 4px;
+    height: 2.3em;
+  }
+
+  .filter-price-inputs {
+    display: inline-flex;
+    flex-wrap: wrap;
+  }
+
+  .filter-price-inputs .numberinput {
+    margin-left: 0;
+    margin-right: 4px;
+    margin-bottom: 4px;
   }
 </style>
