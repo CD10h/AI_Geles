@@ -141,7 +141,6 @@ public class FlowerController {
 
         double minPrice = 0.0;
         double maxPrice = Double.MAX_VALUE;
-        int daysToExpire = 0;
 
         if (!filters.getFilters().isEmpty()) {
             for (FiltersDTO filter : filters.getFilters()) {
@@ -151,14 +150,11 @@ public class FlowerController {
                 if (filter.getName().equals("maxPrice")){
                     maxPrice = Double.parseDouble(filter.getValue());
                 }
-                if (filter.getName().equals("minDate")){
-                    daysToExpire = Period.between(LocalDate.now(), LocalDate.parse(filter.getValue())).getDays();
-                }
             }
         }
         return new ResponseEntity<>(
-                flowerRepository.findAllByPriceBetweenAndNameContainingIgnoreCaseAndDaysToExpireGreaterThanEqual(
-                    paging, minPrice, maxPrice, q, daysToExpire
+                flowerRepository.findAllByPriceBetweenAndNameContainingIgnoreCase(
+                    paging, minPrice, maxPrice, q
                 ).stream()
                     .map(this::convertToDTO)
                     .collect(Collectors.toList()), HttpStatus.OK);
