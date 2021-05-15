@@ -10,10 +10,7 @@ import javax.validation.constraints.*;
 
 import javax.persistence.*;
 import java.io.Serializable;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 
 @Entity
 @Getter @Setter
@@ -54,6 +51,7 @@ public class User implements Serializable {
     private List<Order> orders = new ArrayList<>();
 
     @NotBlank
+    @Column(columnDefinition = "boolean default false")
     private Boolean isAdmin;
 
     public User(Long id, String username, String password, String photo) {
@@ -63,5 +61,20 @@ public class User implements Serializable {
         this.photo = photo;
     }
 
-    public User() {}
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        User user = (User) o;
+        return Objects.equals(username, user.username) && Objects.equals(password, user.password);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username, password);
+    }
+
+    public User() {
+
+    }
 }

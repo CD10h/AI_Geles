@@ -1,0 +1,56 @@
+* {
+  font-family: Roboto, sans-serif;
+}
+
+.mdi {
+  font-size: 24px;
+  margin-right: 8px;
+}
+
+.success {
+  color: #198754;
+}
+
+.danger {
+  color: #dc3545;
+}
+
+.warning {
+  color: #ffc107;
+}
+
+.info {
+  color: #0dcaf0;
+}
+
+.success-bg {
+  background-color: #198754;
+}
+
+.danger-bg {
+  background-color: #dc3545;
+}
+
+.warning-bg {
+  background-color: #ffc107;
+}
+
+.info-bg {
+  background-color: #0dcaf0;
+}
+
+.white {
+  color: white;
+}
+
+.black {
+  color: #212529;
+}
+
+.white-bg {
+  background-color: white;
+}
+
+.black-bg {
+  background-color: #212529;
+}

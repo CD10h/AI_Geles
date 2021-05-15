@@ -47,7 +47,6 @@ public class UserController {
     {
         if (userRepository.findByUsername(userCookie).isPresent()) {
             var user = userRepository.findByUsername(userCookie);
-            System.out.println(user.get().getCart().getId());
             return ResponseEntity.ok(convertToDTO(user.get().getCart()));
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);

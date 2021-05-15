@@ -9,6 +9,7 @@ import javax.validation.constraints.Min;
 import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import java.util.Date;
+import java.util.Objects;
 
 @Entity
 @Getter @Setter
@@ -37,5 +38,18 @@ public class RequestLog {
         this.executionDate = executionDate;
         this.requestURL = requestURL;
         this.methodName = methodName;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        RequestLog that = (RequestLog) o;
+        return Objects.equals(username, that.username) && Objects.equals(executionDate, that.executionDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(username, executionDate);
     }
 }
