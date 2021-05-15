@@ -100,15 +100,20 @@
     /><br /><br />
     <label>Nuotrauka</label>
     <br />
-    <input
-      id="fileUpload"
-      type="file"
-      multiple={false}
-      bind:files
-      accept="image/*"
-    />
+    <div class="container">
+      <div class="button-wrap">
+        <label class="button add" for="fileUpload">Pridėti</label>
+        <input
+          id="fileUpload"
+          type="file"
+          multiple={false}
+          bind:files
+          accept="image/*"
+        />
+      </div>
+    </div>
     <br /><br />
-    <button>Sukurti</button>
+    <button class="button save">Sukurti</button>
     {#each errors as error}
       <p class="error">
         <i class="mdi mdi-alert-circle" />
@@ -123,5 +128,31 @@
     color: red;
     display: flex;
     align-items: center;
+  }
+
+  .container {
+    display: flex;
+    align-items: flex-start;
+    justify-content: flex-start;
+    width: 100%;
+  }
+  input[type="file"] {
+    position: absolute;
+    z-index: -1;
+    top: 12px;
+    left: 38px;
+    font-size: 17px;
+  }
+  .button-wrap {
+    position: relative;
+  }
+  .button {
+    margin-top: 10px;
+    margin-left: 0;
+    width: 85px;
+  }
+
+  .save {
+    width: 130px;
   }
 </style>
