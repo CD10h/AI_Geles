@@ -188,8 +188,9 @@
             <td class="number">{flowerInCart.price} €</td>
             <td class="number">{flowerInCart.sum?.toFixed(2)}€</td>
             <td>
-              <button on:click={() => handleDelete(flowerInCart)}
-                >Pašalinti</button
+              <button
+                class="button delete"
+                on:click={() => handleDelete(flowerInCart)}>Pašalinti</button
               >
             </td>
           </tr>
@@ -198,19 +199,19 @@
     {:else}
       <p>Krepšelis tuščias!</p>
     {/if}
-    <button class="savebutton" on:click={() => handleUpdate()}
+    <button class="button save" on:click={() => handleUpdate()}
       >Išsaugoti pakeitimus</button
     >
     {#if cart.flowersInCart.length > 0}
-      <Link to={`/order/${cart.id}`}>Užsakyti</Link>
+      <Link class="button next" to={`/order/${cart.id}`}>Užsakyti</Link>
       <div class="savetemplatecontainer">
         <input
-          class="outsidecart"
+          class="textinput"
           type="string"
           bind:value={cartTemplate.name}
           placeholder="Šablono pavadinimas"
         />
-        <button on:click={() => handleSave()}
+        <button class="button favorite" on:click={() => handleSave()}
           >Išsaugoti krepšelį ateičiai</button
         >
       </div>
@@ -249,10 +250,14 @@
                   >{calculateSum(template).toFixed(2)} €</td
                 >
                 <td rowspan={template.flowersInCart.length}>
-                  <button on:click={() => handleLoadTemplate(template)}
+                  <button
+                    class="button add"
+                    on:click={() => handleLoadTemplate(template)}
                     >Naudoti</button
                   >
-                  <button on:click={() => handleDeleteTemplate(template)}
+                  <button
+                    class="button delete"
+                    on:click={() => handleDeleteTemplate(template)}
                     >Pašalinti</button
                   >
                 </td>
@@ -312,11 +317,6 @@
     margin: 8px;
     /* Weird bug with table cell height */
     margin-bottom: 4px;
-  }
-
-  .outsidecart {
-    background-color: white;
-    margin-right: 5px;
   }
 
   .savetemplatecontainer {

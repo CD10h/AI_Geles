@@ -94,13 +94,15 @@
         {flower.description}
       </p>
       {#if owner}
-        <Link to="/update/{flower.id}">Redaguoti</Link>
-        <button on:click={() => handleDelete(flower.id, flower.name)}
-          >Ištrinti</button
+        <Link to="/update/{flower.id}" class="button edit">Redaguoti</Link>
+        <button
+          class="button delete"
+          on:click={() => handleDelete(flower.id, flower.name)}>Ištrinti</button
         >
       {/if}
       {#if $isLoggedIn}
         <input
+          class="numberinput"
           type="number"
           min="1"
           max="100"
@@ -108,7 +110,10 @@
           value="1"
           size="7"
         />
-        <button on:click={() => handleToCart(flower.id, amount)}>+</button>
+        <button
+          class="button add"
+          on:click={() => handleToCart(flower.id, amount)}>Pridėti</button
+        >
       {/if}
     </div>
   {/each}
@@ -146,6 +151,7 @@
     display: -webkit-box;
     -webkit-line-clamp: 4;
     -webkit-box-orient: vertical;
+    min-height: 76px;
     /* text-align: justify; */
   }
 

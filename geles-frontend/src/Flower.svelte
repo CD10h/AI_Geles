@@ -4,7 +4,7 @@
   import axios from "axios";
   import { isLoggedIn } from "./isLoggedIn";
   import { mapFlowerToWithFavorite } from "./util/flower";
-  import { Link } from "svelte-routing";
+  import { Link, navigate } from "svelte-routing";
 
   export let flowerId: number;
 
@@ -57,7 +57,7 @@
   async function handleDelete(id: number, name: string) {
     if (window.confirm(`Ar tikrai norite ištrinti gėlę ${name}?`)) {
       await axios.delete(`${server_url}/flowers/${id}`);
-      location.href = "/";
+      navigate("/");
     }
   }
 
@@ -93,7 +93,7 @@
           </div>
         {/if}
       </div>
-      <div class="info">
+      <div class="infocontainer">
         <div class="nameAndPrice">
           <h2 class="name">{flower.name}</h2>
           <div style="flex-grow:1;" />
@@ -152,7 +152,7 @@
     flex-wrap: wrap;
   }
 
-  .info {
+  .infocontainer {
     max-width: 400px;
     min-width: 200px;
   }
