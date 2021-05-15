@@ -157,3 +157,11 @@ body {
 .navbar {
   margin-left: 10px;
 }
+
+button {
+  box-sizing: content-box;
+}
+
+.theme-primary-light-bg {
+  background-color: #a8d16b;
+}

@@ -1,5 +1,5 @@
 <script>
-  import { setContext } from "svelte";
+  import { onMount, setContext } from "svelte";
   import { notificationContextKey } from "./contexts";
   import { AppNotificationType } from "./enums";
   import Notifications from "./Notifications.svelte";
@@ -61,7 +61,11 @@
   };
 
   setContext(notificationContextKey, context);
+
+  onMount(() => {
+    // addNotification("sėkmė", AppNotificationType.SUCCESS, 100000000000);
+  });
 </script>
 
-<Notifications {notifications} />
+<Notifications {notifications} onClick={removeNotification} />
 <slot />
