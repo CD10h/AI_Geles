@@ -75,7 +75,7 @@
   }
 
   table {
-    background-color: #d9d9d9;
+    background-color: #d2ebb1d3;
     border: 4px solid #8ebf42;
     margin-bottom: 10px;
   }
@@ -85,34 +85,9 @@
     padding: 4px 8px;
   }
 
-  td {
-    text-align: center;
-  }
-
-  td.number {
-    text-align: right;
-  }
-
-  td input {
-    background-color: white;
-  }
-
   img {
     margin: 8px;
     /* Weird bug with table cell height */
     margin-bottom: 4px;
-  }
-
-  .outsidecart {
-    background-color: white;
-    margin-right: 5px;
-  }
-
-  .savetemplatecontainer {
-    margin-top: 20px;
-  }
-
-  .templatename {
-    text-align: left;
   }
 </style>
