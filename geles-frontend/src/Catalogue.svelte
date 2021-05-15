@@ -89,7 +89,7 @@
           {/if}
         </Link>
       </div>
-      {#if !isAdmin}
+      {#if isLoggedIn && !isAdmin}
         <div
           class="flower-list-item-favorite"
           on:click={() => handleFavoriteChange(flower)}
@@ -115,7 +115,7 @@
           Ištrinti
         </button>
       {/if}
-      {#if !isAdmin}
+      {#if isLoggedIn && !isAdmin}
         <input
           class="numberinput"
           type="number"

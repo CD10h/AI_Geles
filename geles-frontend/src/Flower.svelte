@@ -83,7 +83,7 @@
           width="400"
           height="400"
         />
-        {#if !isAdmin}
+        {#if isLoggedIn && !isAdmin}
           <div
             class="flower-list-item-favorite"
             on:click={() => handleFavoriteChange()}
@@ -105,31 +105,34 @@
         </div>
         <p class="description">{flower.description}</p>
         <div class="tocart">
-          {#if !isAdmin}
-            <input
-              class="numberinput"
-              type="number"
-              min="1"
-              max="100"
-              on:input={e => (amount = +e.currentTarget.value)}
-              value="1"
-              size="9"
-            />
-            <button
-              class="button add"
-              on:click={() => handleToCart(flowerId, amount)}
-              >Pridėti į krepšelį</button
-            >
-          {:else}
-            <div class="adminoptions">
-              <Link class="button edit" to="/update/{flower.id}">Redaguoti</Link
-              >
+          {#if isLoggedIn}
+            {#if !isAdmin}
+              <input
+                class="numberinput"
+                type="number"
+                min="1"
+                max="100"
+                on:input={e => (amount = +e.currentTarget.value)}
+                value="1"
+                size="9"
+              />
               <button
-                class="button delete"
-                on:click={() => handleDelete(flower.id, flower.name)}
-                >Ištrinti</button
+                class="button add"
+                on:click={() => handleToCart(flowerId, amount)}
+                >Pridėti į krepšelį</button
               >
-            </div>
+            {:else}
+              <div class="adminoptions">
+                <Link class="button edit" to="/update/{flower.id}"
+                  >Redaguoti</Link
+                >
+                <button
+                  class="button delete"
+                  on:click={() => handleDelete(flower.id, flower.name)}
+                  >Ištrinti</button
+                >
+              </div>
+            {/if}
           {/if}
         </div>
       </div>
