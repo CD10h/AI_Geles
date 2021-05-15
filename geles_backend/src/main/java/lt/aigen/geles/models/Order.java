@@ -11,6 +11,7 @@ import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.Objects;
 
 @Entity
 @Getter
@@ -20,12 +21,16 @@ public class Order implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
     @NotNull
     private String address;
+
     @NotNull
     private String contactPhone;
-    @JsonFormat(pattern = "yyyy-mm-dd")
+
+    @NotNull
     private Date createdDate;
+
     @OneToMany(mappedBy = "order")
     private List<FlowerInOrder> orderProducts = new ArrayList<>();
 
@@ -33,9 +38,21 @@ public class Order implements Serializable {
     @JoinColumn(name = "USER_ID")
     private User user;
 
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Order order = (Order) o;
+        return Objects.equals(address, order.address) && Objects.equals(contactPhone, order.contactPhone) && Objects.equals(createdDate, order.createdDate);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(address, contactPhone, createdDate);
+    }
+
     @NotNull
     OrderStatus orderStatus;
-
 
     @PrePersist
     protected void onCreate() {

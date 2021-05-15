@@ -65,8 +65,6 @@
     { field: "name", label: "Pavadinimas" }
   ];
 
-  let dateValue = "";
-
   function handleFilter(name: string, value: string | number) {
     const index = filter.filters.findIndex(filter => filter.name === name);
     if (index > -1) {
@@ -80,17 +78,6 @@
       }
     } else {
       filter.filters = [...filter.filters, { name, value }];
-    }
-  }
-
-  function handleDateRemove() {
-    const index = filter.filters.findIndex(filter => filter.name === "minDate");
-    if (index !== -1) {
-      filter.filters = [
-        ...filter.filters.slice(0, index),
-        ...filter.filters.slice(index + 1)
-      ];
-      dateValue = "";
     }
   }
 
@@ -150,14 +137,6 @@
     placeholder="Iki"
     step={0.1}
   />
-  <label>Galioja iki</label>
-  <input
-    bind:value={dateValue}
-    on:input={e => handleFilter("minDate", e.currentTarget.value)}
-    type="date"
-    min={new Date().toISOString().slice(0, 10)}
-  />
-  <button on:click={handleDateRemove}>Valyti Datą</button>
   <br />
 </div>
 
