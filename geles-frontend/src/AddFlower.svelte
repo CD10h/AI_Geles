@@ -102,7 +102,7 @@
       bind:value={flower.name}
       type="text"
       name="name"
-    /><br /><br />
+    /><br />
     <Input
       label="Kaina"
       bind:value={flower.price}
@@ -110,20 +110,20 @@
       min={0}
       step="0.01"
       name="price"
-    /><br /><br />
+    /><br />
     <Input
       label="Aprašymas"
       bind:value={flower.description}
       type="text"
       name="description"
-    /><br /><br />
+    /><br />
     <Input
       label="Galiojimo trukmė(dienomis)"
       bind:value={flower.daysToExpire}
       type="number"
       min={1}
       name="expirydate"
-    /><br /><br />
+    /><br />
     <label for="fileUpload">Nuotrauka</label>
     <br />
     <div class="container">

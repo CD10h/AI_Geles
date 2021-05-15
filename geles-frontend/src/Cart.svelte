@@ -3,6 +3,7 @@
   import { server_url } from "./index";
   import axios from "axios";
   import { Link } from "svelte-routing";
+  import Input from "./Input.svelte";
 
   interface CartTemplate {
     id: number;
@@ -202,21 +203,21 @@
     {:else}
       <p>Krepšelis tuščias!</p>
     {/if}
-    <button class="button save" on:click={() => handleUpdate()}
-      >Išsaugoti pakeitimus</button
-    >
+    <button class="button save" on:click={() => handleUpdate()}>
+      Išsaugoti pakeitimus
+    </button>
     {#if cart.flowersInCart.length > 0}
       <Link class="button next" to={`/order/${cart.id}`}>Užsakyti</Link>
       <div class="savetemplatecontainer">
-        <input
-          class="textinput"
-          type="string"
-          bind:value={cartTemplate.name}
+        <Input
+          style="display:inline-block;"
+          label=""
           placeholder="Šablono pavadinimas"
+          bind:value={cartTemplate.name}
         />
-        <button class="button favorite" on:click={() => handleSave()}
-          >Išsaugoti krepšelį ateičiai</button
-        >
+        <button class="button favorite" on:click={() => handleSave()}>
+          Išsaugoti krepšelį ateičiai
+        </button>
       </div>
     {/if}
     {#each cartErrors as error}
@@ -339,5 +340,14 @@
     color: red;
     display: flex;
     align-items: center;
+  }
+
+  .button {
+    margin-top: 10px;
+    margin-left: 0;
+  }
+
+  .favorite {
+    margin-left: 8px;
   }
 </style>
