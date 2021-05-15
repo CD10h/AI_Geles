@@ -128,13 +128,7 @@ import Order from "./Order.svelte";
             {orderStatusString(order.orderStatus)}
           </td>
           <td>
-            <a href="{'/editOrder/' + order.id}"> Redaguoti</a> 
-            {#if order.orderStatus != "CANCELED"}
-            / <a href="#" on:click={() => handleDelete(order).then(getOrders)}> Trinti</a>
-            {/if}
-            {#if order.orderStatus == "UNPAID"}
-            / <a href="#" on:click={() => handlePay(order).then(getOrders)}> Apmokėti</a> 
-            {/if}
+            <a href="{'/editOrder/' + order.id}"> Daugiau info</a>
           </td>
         </tr>
       {/each}
