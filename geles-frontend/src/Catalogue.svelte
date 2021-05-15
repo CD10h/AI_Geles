@@ -135,6 +135,7 @@
     max-width: 300px;
     flex-basis: calc(25% - 48px);
     position: relative;
+    background-color: rgb(245, 253, 223);
   }
 
   .flower-list-item-name {
@@ -156,8 +157,8 @@
   }
 
   .flower-list-item-favorite {
-    background-color: white;
-    border: 1px solid grey;
+    background-color: rgb(245, 253, 223);
+    border: 1px solid black;
     width: 48px;
     height: 48px;
     position: absolute;

@@ -23,6 +23,10 @@
   color: #0dcaf0;
 }
 
+body {
+  background-color: ivory;
+}
+
 .success-bg {
   background-color: #198754;
 }
@@ -132,7 +136,7 @@
   margin-left: 4px;
   text-align: center;
   border: 1px solid #777;
-  background-color: #c9f18e;
+  background-color: #d2ebb1d3;
 }
 
 .textinput {
@@ -143,4 +147,5 @@
   margin-left: 4px;
   text-align: left;
   border: 1px solid #777;
+  background-color: #d2ebb1d3;
 }

@@ -291,7 +291,7 @@
   }
 
   table {
-    background-color: #d9d9d9;
+    background-color: #d2ebb1d3;
     border: 4px solid #8ebf42;
     margin-bottom: 10px;
   }
@@ -310,7 +310,7 @@
   }
 
   td input {
-    background-color: white;
+    background-color: #e6f5d4;
   }
 
   img {
