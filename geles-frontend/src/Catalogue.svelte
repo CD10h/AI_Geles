@@ -134,8 +134,6 @@
   .flower-list {
     display: flex;
     flex-wrap: wrap;
-    margin: 0 -16px;
-    padding: 0 16px;
   }
 
   .flower-list-item {
@@ -147,6 +145,7 @@
     flex-basis: calc(25% - 48px);
     position: relative;
     background-color: rgb(245, 253, 223);
+    border-radius: 4px;
   }
 
   .flower-list-item-name {

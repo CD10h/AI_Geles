@@ -128,7 +128,7 @@ body {
   content: "\2764";
 }
 
-.numberinput:not(:first-child) {
+.numberinput {
   height: 2em;
   border-radius: 0.2em;
   box-shadow: 0 0 1px 1px rgba(255, 255, 255, 0.8) inset,
@@ -149,11 +149,25 @@ body {
   background-color: #d2ebb1d3;
 }
 
+.selectinput {
+  height: 2em;
+  border-radius: 0.2em;
+  box-shadow: 0 0 1px 1px rgba(255, 255, 255, 0.8) inset,
+    0 1px 0 rgba(0, 0, 0, 0.3);
+  text-align: left;
+  border: 1px solid #777;
+  background-color: #d2ebb1d3;
+}
+
 .numberinput:not(:first-child) {
   margin-left: 4px;
 }
 
 .textinput:not(:first-child) {
+  margin-left: 4px;
+}
+
+.selectinput:not(:first-child) {
   margin-left: 4px;
 }
 
