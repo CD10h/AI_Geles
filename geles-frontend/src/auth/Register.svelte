@@ -53,7 +53,7 @@
       type="password"
       autocomplete="new-password"
     /><br /><br />
-    <button>Užsiregistruoti</button>
+    <button class="button">Užsiregistruoti</button>
     {#each errors as error}
       <p class="error">
         <i class="mdi mdi-alert-circle" />
@@ -73,5 +73,9 @@
   .error .mdi {
     font-size: 24px;
     margin-right: 8px;
+  }
+
+  .button {
+    margin-left: 0;
   }
 </style>

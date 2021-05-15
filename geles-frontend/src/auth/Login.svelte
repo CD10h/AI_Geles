@@ -54,7 +54,7 @@
       type="password"
       autocomplete="current-password"
     /><br /><br />
-    <button>Prisijungti</button>
+    <button class="button">Prisijungti</button>
     {#if error}
       <p class="error">
         <i class="mdi mdi-alert-circle" />
@@ -74,5 +74,9 @@
   .error .mdi {
     font-size: 24px;
     margin-right: 8px;
+  }
+
+  .button {
+    margin-left: 0;
   }
 </style>
