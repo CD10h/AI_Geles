@@ -16,6 +16,7 @@
   import Flower from "./Flower.svelte";
   import FavoriteFlowersStats from "./FavoriteFlowersStats.svelte";
   import { onMount } from "svelte";
+  import NotFound from "./NotFound.svelte";
 
   export let url = "";
   $: isLoggedIn = !!$user;
@@ -72,16 +73,21 @@
       </nav>
       <div>
         <Route path="/" component={Home} />
-        <Route path="/add" component={AddFlower} />
         <Route path="/search" component={Search} />
-        <Route path="/update/:id" component={UpdateFlower} />
-        <Route path="/login" component={Login} />
-        <Route path="/register" component={Register} />
-        <Route path="/flowers/favorite" component={FavoriteFlowers} />
-        <Route path="/cart" component={Cart} />
-        <Route path="/order/:cartId" component={Order} />
         <Route path="/flower/:flowerId" component={Flower} />
-        <Route path="/favorite/stats" component={FavoriteFlowersStats} />
+        {#if !isLoggedIn}
+          <Route path="/login" component={Login} />
+          <Route path="/register" component={Register} />
+        {:else if isAdmin}
+          <Route path="/add" component={AddFlower} />
+          <Route path="/update/:id" component={UpdateFlower} />
+          <Route path="/favorite/stats" component={FavoriteFlowersStats} />
+        {:else}
+          <Route path="/cart" component={Cart} />
+          <Route path="/flowers/favorite" component={FavoriteFlowers} />
+          <Route path="/order/:cartId" component={Order} />
+        {/if}
+        <Route component={NotFound} />
       </div>
     </Router>
   {/if}
