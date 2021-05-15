@@ -1,7 +1,6 @@
 package lt.aigen.geles.controller;
 
 import lt.aigen.geles.models.Login;
-import lt.aigen.geles.models.User;
 import lt.aigen.geles.repositories.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;

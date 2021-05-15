@@ -2,11 +2,9 @@ package lt.aigen.geles.controller;
 
 import lt.aigen.geles.annotations.Authorized;
 import lt.aigen.geles.components.CurrentUser;
-import lt.aigen.geles.models.User;
 import lt.aigen.geles.models.dto.*;
 import lt.aigen.geles.models.Flower;
 import lt.aigen.geles.repositories.FlowerRepository;
-import lt.aigen.geles.repositories.UserRepository;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
