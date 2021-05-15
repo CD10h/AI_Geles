@@ -4,6 +4,12 @@
   import axios from "axios";
 
   import Input from "./Input.svelte";
+  import { getContext } from "svelte";
+  import { notificationContextKey } from "./contexts";
+  import { AppNotificationType } from "./enums";
+
+  const { addLoadingNotification, addNotification } =
+    getContext<AppNotificationContext>(notificationContextKey);
 
   let flower: Omit<Flower, "id" | "favorite"> = {
     name: "",
@@ -14,7 +20,6 @@
   };
 
   let errors: string[] = [];
-  let fileName;
   let files: File[];
 
   async function upload() {
@@ -32,20 +37,39 @@
           }
         }
       }
+      addNotification(
+        "Nepavyko pridėti nuotraukos",
+        AppNotificationType.DANGER
+      );
     }
   }
 
   async function handleSubmit() {
-    try {
+    const hasFile = files && !!files[0];
+    if (hasFile) {
       if (!files[0].type.match(/image\/.*/)) {
         errors = ["Pasirinkite tinkamą nuotraukos formatą"];
         return;
       }
+      if (files[0].size > 1024 * 1024) {
+        errors = ["Nuotrauka per didelė, daugiausiai 1 MB"];
+        return;
+      }
       flower.photo = files[0].name;
-      const response = await axios.post("/flowers/", flower, {
-        withCredentials: true
-      });
-      await upload();
+    }
+    try {
+      await addLoadingNotification(
+        "Pridedama...",
+        (async () => {
+          await axios.post("/flowers/", flower, {
+            withCredentials: true
+          });
+          if (hasFile) {
+            await upload();
+          }
+        })()
+      );
+      addNotification("Gėlė sėkmingai pridėta", AppNotificationType.SUCCESS);
       navigate("/");
     } catch (e) {
       if (isAxiosError(e)) {
@@ -54,11 +78,13 @@
             errors = e.response.data.errors.map(
               error => `${error.field} ${error.defaultMessage}`
             );
+            return; // Avoid showing error message
           } else if (e.response.status === 500) {
             errors = [`Internal server error: ${e.response.data.message}`];
           }
         }
       }
+      addNotification("Nepavyko pridėti gėlės", AppNotificationType.DANGER);
     }
   }
 </script>
@@ -98,21 +124,33 @@
       min={1}
       name="expirydate"
     /><br /><br />
-    <label>Nuotrauka</label>
+    <label for="fileUpload">Nuotrauka</label>
     <br />
     <div class="container">
       <div class="button-wrap">
-        <label class="button add" for="fileUpload">Pridėti</label>
+        <button
+          class="button add"
+          type="button"
+          on:click={() => {
+            document.getElementById("fileUpload")?.click();
+          }}>Pridėti</button
+        >
         <input
           id="fileUpload"
           type="file"
           multiple={false}
           bind:files
           accept="image/*"
+          style="display:none;"
         />
+        {#if !files}
+          Nuotrauka nepasirinkta
+        {:else}
+          Nuotrauka: {files[0].name}
+        {/if}
       </div>
     </div>
-    <br /><br />
+    <br />
     <button class="button save">Sukurti</button>
     {#each errors as error}
       <p class="error">
@@ -136,23 +174,10 @@
     justify-content: flex-start;
     width: 100%;
   }
-  input[type="file"] {
-    position: absolute;
-    z-index: -1;
-    top: 12px;
-    left: 38px;
-    font-size: 17px;
-  }
-  .button-wrap {
-    position: relative;
-  }
+
   .button {
     margin-top: 10px;
     margin-left: 0;
     width: 85px;
-  }
-
-  .save {
-    width: 130px;
   }
 </style>
