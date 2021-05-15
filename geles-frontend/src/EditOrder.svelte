@@ -3,7 +3,7 @@
   import { server_url } from "./index";
   import axios from "axios";
   import { Link } from "svelte-routing";
-import { bind, text } from "svelte/internal";
+  import { bind, text } from "svelte/internal";
 
   export let id: string;
 
@@ -47,7 +47,6 @@ import { bind, text } from "svelte/internal";
     return flower.quantity * flowerFromId(flower.id).price;
   }
 
-
   // Run code on component mount (once)
   onMount(() => {
     axios
@@ -60,7 +59,6 @@ import { bind, text } from "svelte/internal";
       editDto.contactPhone = order.contactPhone;
       recalcSum();
     });
-
   });
 
   function handleDelete(fl: OrderFlower) {
@@ -74,24 +72,26 @@ import { bind, text } from "svelte/internal";
     recalcSum();
   }
 
+  function mapOrderData(resp) {
+    order = resp.data;
+    editDto.orderFlowers = order.orderFlowers;
+    editDto.address = order.address;
+    editDto.contactPhone = order.contactPhone;
+    recalcSum();
+  }
+
   function handleUpdate() {
     axios
       .put(`/orders/${id}/edit`, editDto, { withCredentials: true })
-      .then(resp => {
-        order = resp.data;
-        editDto.orderFlowers = order.orderFlowers;
-        editDto.address = order.address;
-        editDto.contactPhone = order.contactPhone;
-        recalcSum();
-      });
+      .then(resp => mapOrderData(resp));
   }
 
   function handlePay() {
-    axios.post(`/orders/${id}/pay`);
+    axios.post(`/orders/${id}/pay`).then(rsp => mapOrderData(rsp));
   }
 
   function handleCancel() {
-    axios.post(`/orders/${id}/cancel`);
+    axios.post(`/orders/${id}/cancel`).then(rsp => mapOrderData(rsp));
   }
 
   function orderStatusString(status: any): string {
@@ -112,7 +112,11 @@ import { bind, text } from "svelte/internal";
   }
 </script>
 
-<h2>Užsakymas nr <strong>{order.id}</strong> Būsena : {orderStatusString(order.orderStatus)} </h2>
+<h2>
+  Užsakymas nr <strong>{order.id}</strong> Būsena : {orderStatusString(
+    order.orderStatus
+  )}
+</h2>
 <table>
   <tr>
     <th colspan="2">Gėlė</th>
@@ -120,7 +124,7 @@ import { bind, text } from "svelte/internal";
     <th>Vnt. kaina</th>
     <th>Suma</th>
     {#if order.orderStatus == "UNPAID"}
-    <th >Veiksmai</th>
+      <th>Veiksmai</th>
     {/if}
   </tr>
   {#each editDto.orderFlowers as flower (flower.id)}
@@ -141,71 +145,59 @@ import { bind, text } from "svelte/internal";
       <td>{flowerFromId(flower.id).name}</td>
       <td>
         {#if order.orderStatus == "UNPAID"}
-        <input
-          type="number"
-          bind:value={flower.quantity}
-          min="1"
-          max="100"
-          size="5"
-          on:input={e => {
-            recalcSum();
-          }}
-        />
+          <input
+            type="number"
+            bind:value={flower.quantity}
+            min="1"
+            max="100"
+            size="5"
+            on:input={e => {
+              recalcSum();
+            }}
+          />
         {:else}
-        {flower.quantity}
+          {flower.quantity}
         {/if}
       </td>
       <td class="number">{flowerFromId(flower.id).price} €</td>
       <td class="number">{rowSum(flower).toFixed(2)}€</td>
       {#if order.orderStatus == "UNPAID"}
-      <td>
-        <button on:click={() => handleDelete(flower)}>Pašalinti</button>
-      </td>
+        <td>
+          <button on:click={() => handleDelete(flower)}>Pašalinti</button>
+        </td>
       {/if}
     </tr>
   {/each}
 </table>
 
-
 {#if order.orderStatus == "UNPAID"}
-<label for="adress">Adresas</label>
-<input
-id="address"
-  type="text"
-  bind:value={editDto.address} />
-<br/>
-<label for="phone">Telefonas</label>
+  <label for="adress">Adresas</label>
+  <input id="address" type="text" bind:value={editDto.address} />
+  <br />
+  <label for="phone">Telefonas</label>
 
-<input
-  type="text"
-  id="phone"
-  bind:value={editDto.contactPhone} />
-<br/>
+  <input type="text" id="phone" bind:value={editDto.contactPhone} />
+  <br />
 {:else}
-<div>
-  Adresas : {order.address}
-</div>
-<div>
-  Telefonas : {order.contactPhone}
-</div>
+  <div>
+    Adresas : {order.address}
+  </div>
+  <div>
+    Telefonas : {order.contactPhone}
+  </div>
 {/if}
 
 {#if order.orderStatus == "UNPAID"}
-<button class="savebutton" on:click={() => handleUpdate()}>
-  Išsaugoti pakeitimus
-</button>
-<button class="paybutton" on:click={() => handlePay()}>
-  Apmokėti
-</button>
+  <button class="savebutton" on:click={() => handleUpdate()}>
+    Išsaugoti pakeitimus
+  </button>
+  <button class="paybutton" on:click={() => handlePay()}> Apmokėti </button>
 {/if}
-<button class="paybutton" on:click={() => handleCancel()}>
-  Atšaukti
-</button>
+{#if order.orderStatus != "CANCELED" && order.orderStatus != "DELIVERED"}
+  <button class="paybutton" on:click={() => handleCancel()}> Atšaukti </button>
+{/if}
 
 <style>
-  .flowerincart-list {
-    margin-left: 40px;
-  }
 
   h2 {
     color: #000000;
@@ -247,22 +239,5 @@ id="address"
     margin: 8px;
     /* Weird bug with table cell height */
     margin-bottom: 4px;
-  }
-
-  .outsidecart {
-    background-color: white;
-    margin-right: 5px;
-  }
-
-  .savetemplatecontainer {
-    margin-top: 20px;
-  }
-
-  .flowercart {
-    margin-bottom: 80px;
-  }
-
-  .templatename {
-    text-align: left;
   }
 </style>
