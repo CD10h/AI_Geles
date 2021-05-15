@@ -10,4 +10,6 @@ public class UserDTO {
     private String photo;
 
     private boolean isAdmin;
+
+    private Integer cartId;
 }

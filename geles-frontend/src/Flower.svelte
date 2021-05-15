@@ -37,13 +37,6 @@
     });
   }
 
-  async function getCartId() {
-    const response = await axios.get<Cart>("/users/cart/", {
-      withCredentials: true
-    });
-    cartId = response.data.id;
-  }
-
   async function handleFavoriteChange() {
     await axios.put(
       `/flowers/${flower.id}/favorite`,
@@ -66,8 +59,8 @@
 
   onMount(() => {
     getFlower();
-    if (isLoggedIn) {
-      getCartId();
+    if ($user) {
+      cartId = $user.cartId;
     }
   });
 </script>

@@ -27,8 +27,8 @@
   let flowers: Flower[] = [];
   let cartTemplates: CartTemplate[] = [];
 
-  async function getCartId() {
-    const response = await axios.get<Cart>("/users/cart/", {
+  async function getCart() {
+    const response = await axios.get<Cart>("/carts/", {
       withCredentials: true
     });
     cart = response.data;
@@ -144,10 +144,10 @@
   }
 
   // Run code on component mount (once)
-  onMount(() => {
-    getFlowers()
-      .then(() => getCartId())
-      .then(() => getCartTemplates());
+  onMount(async () => {
+    await getFlowers();
+    getCart();
+    getCartTemplates();
   });
 </script>
 

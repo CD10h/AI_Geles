@@ -22,8 +22,8 @@
     cartId: +cartId
   };
 
-  async function getCartId() {
-    const response = await axios.get<Cart>("/users/cart/", {
+  async function getCart() {
+    const response = await axios.get<Cart>("/carts/", {
       withCredentials: true
     });
     cart = response.data;
@@ -80,7 +80,7 @@
 
   // Run code on component mount (once)
   onMount(() => {
-    getFlowers().then(() => getCartId());
+    getFlowers().then(() => getCart());
   });
 </script>
 

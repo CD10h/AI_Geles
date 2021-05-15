@@ -40,6 +40,8 @@ public class UserController {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
         }
 
+        user.setIsAdmin(false);
+
         Cart cart = new Cart();
         cartRepository.save(cart);
         user.setCart(cart);
@@ -54,19 +56,7 @@ public class UserController {
         return new ResponseEntity<>(convertToDTO(user), HttpStatus.OK);
     }
 
-    @Authorized
-    @GetMapping("/cart")
-    public ResponseEntity<CartDTO> getCart()
-    {
-        User user = currentUser.get();
-        return ResponseEntity.ok(convertToDTO(user.getCart()));
-    }
-
     private UserDTO convertToDTO(User user) { return modelMapper.map(user, UserDTO.class); }
 
     private User convertFromDTO(UserAddDTO userAddDTO) { return modelMapper.map(userAddDTO, User.class); }
-
-    private CartDTO convertToDTO(Cart cart) { return modelMapper.map(cart, CartDTO.class); }
-
-    private Cart convertFromDTO(CartDTO cartDTO) { return modelMapper.map(cartDTO, Cart.class); }
 }
