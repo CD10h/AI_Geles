@@ -35,6 +35,18 @@ public class CartController {
     }
 
     @Authorized
+    @GetMapping("/") // /carts/10
+    public ResponseEntity<CartDTO> getCart() {
+        var id = currentUser.get().getCart().getId();
+        var cart = cartRepository.findById(id);
+        if (cart.isEmpty()) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        } else {
+            return ResponseEntity.ok(convertToDTO(cart.get()));
+        }
+    }
+
+    @Authorized
     @GetMapping("/{id}") // /carts/10
     public ResponseEntity<CartDTO> getCart(@PathVariable Long id) {
         var cart = cartRepository.findById(id);

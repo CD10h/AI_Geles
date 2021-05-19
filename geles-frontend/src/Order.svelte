@@ -22,8 +22,8 @@
     cartId: +cartId
   };
 
-  async function getCartId() {
-    const response = await axios.get<Cart>("/users/cart/", {
+  async function getCart() {
+    const response = await axios.get<Cart>("/carts/", {
       withCredentials: true
     });
     cart = response.data;
@@ -80,77 +80,89 @@
 
   // Run code on component mount (once)
   onMount(() => {
-    getFlowers().then(() => getCartId());
+    getFlowers().then(() => getCart());
   });
 </script>
 
-<h2>Užsakymas</h2>
-<table class="table">
-  <tr>
-    <th>Gėlė</th>
-    <th>Kiekis</th>
-    <th>Vnt. kaina</th>
-    <th>Suma</th>
-  </tr>
-  {#each cart.flowersInCart as flowerInCart (flowerInCart.id)}
+<div class="pagecontent">
+  <h2>Užsakymas</h2>
+  <table class="table">
     <tr>
-      <td>{flowerInCart.name}</td>
-      <td align="right">{flowerInCart.amount}</td>
-      <td align="right">{flowerInCart.price} €</td>
-      <td align="right">{flowerInCart.sum?.toFixed(2)} €</td>
+      <th>Gėlė</th>
+      <th>Kiekis</th>
+      <th>Vnt. kaina</th>
+      <th>Suma</th>
     </tr>
-  {/each}
-  <tr>
-    <td align="right" colspan="3"><strong>Viso</strong></td>
-    <td align="right">
-      {cart.flowersInCart
-        .reduce((prevValue, flowerInCart) => prevValue + flowerInCart.sum, 0)
-        .toFixed(2)} €
-    </td>
-  </tr>
-</table>
-<form
-  on:submit={e => {
-    e.preventDefault();
-    handleSubmit();
-  }}
->
-  <Input
-    label="Pristatymo adresas"
-    bind:value={order.address}
-    type="text"
-    name="address"
-  /><br />
-  <Input
-    label="Kontaktinis telefonas"
-    bind:value={order.contactPhone}
-    type="text"
-    name="contactPhone"
-  /><br />
-  <button>Užsakyti</button>
-  {#each errors as error}
-    <p class="error">
-      <i class="mdi mdi-alert-circle" />
-      {error.slice(0, 1).toUpperCase()}{error.slice(1)}
-    </p>
-  {/each}
-</form>
+    {#each cart.flowersInCart as flowerInCart (flowerInCart.id)}
+      <tr>
+        <td>{flowerInCart.name}</td>
+        <td align="right">{flowerInCart.amount}</td>
+        <td align="right">{flowerInCart.price} €</td>
+        <td align="right">{flowerInCart.sum?.toFixed(2)} €</td>
+      </tr>
+    {/each}
+    <tr>
+      <td class="total" align="right" colspan="3"><strong>Viso</strong></td>
+      <td align="right">
+        {cart.flowersInCart
+          .reduce((prevValue, flowerInCart) => prevValue + flowerInCart.sum, 0)
+          .toFixed(2)} €
+      </td>
+    </tr>
+  </table>
+  <form
+    on:submit={e => {
+      e.preventDefault();
+      handleSubmit();
+    }}
+  >
+    <Input
+      label="Pristatymo adresas"
+      bind:value={order.address}
+      type="text"
+      name="address"
+    /><br />
+    <Input
+      label="Kontaktinis telefonas"
+      bind:value={order.contactPhone}
+      type="text"
+      name="contactPhone"
+    /><br />
+    <button class="button save">Užsakyti</button>
+    {#each errors as error}
+      <p class="error">
+        <i class="mdi mdi-alert-circle" />
+        {error.slice(0, 1).toUpperCase()}{error.slice(1)}
+      </p>
+    {/each}
+  </form>
+</div>
 
 <style>
-  table {
-    margin-bottom: 20px;
-  }
-
   table,
   th,
   td {
-    border: 1px solid black;
+    border: 2px solid #8ebf42;
     border-collapse: collapse;
+  }
+
+  table {
+    background-color: #d2ebb1d3;
+    border: 4px solid #8ebf42;
+    margin-bottom: 10px;
   }
 
   th,
   td {
     padding: 4px 8px;
+  }
+
+  td {
+    text-align: center;
+  }
+
+  .total {
+    text-align: center;
   }
 
   .error {
@@ -162,5 +174,9 @@
   .error .mdi {
     font-size: 24px;
     margin-right: 8px;
+  }
+
+  .button {
+    margin: 0;
   }
 </style>

@@ -3,8 +3,7 @@
   import Input from "../Input.svelte";
   import { isAxiosError } from "../util";
   import axios from "axios";
-
-  export let onLogin: () => void;
+  import { user } from "../stores";
 
   let loginFields = {
     username: "",
@@ -18,7 +17,10 @@
       await axios.post("/auth/login/", loginFields, {
         withCredentials: true
       });
-      onLogin();
+      const response = await axios.get<User>("/users/", {
+        withCredentials: true
+      });
+      user.set(response.data);
       navigate("/");
     } catch (e) {
       if (isAxiosError(e)) {
@@ -32,35 +34,37 @@
   }
 </script>
 
-<h2>Prisijungti</h2>
-<form
-  on:submit={e => {
-    e.preventDefault();
-    handleSubmit();
-  }}
->
-  <Input
-    label="Vartotojo vardas"
-    bind:value={loginFields.username}
-    name="username"
-    type="text"
-    autocomplete="nickname"
-  /><br /><br />
-  <Input
-    label="Slaptažodis"
-    bind:value={loginFields.password}
-    name="password"
-    type="password"
-    autocomplete="current-password"
-  /><br /><br />
-  <button>Prisijungti</button>
-  {#if error}
-    <p class="error">
-      <i class="mdi mdi-alert-circle" />
-      {error.slice(0, 1).toUpperCase()}{error.slice(1)}
-    </p>
-  {/if}
-</form>
+<div class="pagecontent">
+  <h2>Prisijungti</h2>
+  <form
+    on:submit={e => {
+      e.preventDefault();
+      handleSubmit();
+    }}
+  >
+    <Input
+      label="Vartotojo vardas"
+      bind:value={loginFields.username}
+      name="username"
+      type="text"
+      autocomplete="nickname"
+    /><br /><br />
+    <Input
+      label="Slaptažodis"
+      bind:value={loginFields.password}
+      name="password"
+      type="password"
+      autocomplete="current-password"
+    /><br /><br />
+    <button class="button">Prisijungti</button>
+    {#if error}
+      <p class="error">
+        <i class="mdi mdi-alert-circle" />
+        {error.slice(0, 1).toUpperCase()}{error.slice(1)}
+      </p>
+    {/if}
+  </form>
+</div>
 
 <style>
   .error {
@@ -72,5 +76,9 @@
   .error .mdi {
     font-size: 24px;
     margin-right: 8px;
+  }
+
+  .button {
+    margin-left: 0;
   }
 </style>
