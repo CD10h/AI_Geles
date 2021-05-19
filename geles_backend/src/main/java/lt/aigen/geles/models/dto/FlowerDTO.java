@@ -29,17 +29,20 @@ public class FlowerDTO {
 
     private String photo;
 
+    private Integer version;
+
     public FlowerDTO() {
 
     }
 
-    public FlowerDTO(Object id, Object name, Object price, Object description, Object daysToExpire, Object photo) {
+    public FlowerDTO(Object id, Object name, Object price, Object description, Object daysToExpire, Object photo, Object version) {
         this.id = (Long)id;
         this.name = (String)name;
         this.price = (Double)price;
         this.description = (String)description;
         this.daysToExpire = (Integer)daysToExpire;
         this.photo = (String)photo;
+        this.version = (Integer)version;
     }
 }
 
