@@ -29,12 +29,4 @@ public class DevConfiguration implements WebMvcConfigurer {
         modelMapper.getConfiguration().setMatchingStrategy(MatchingStrategies.LOOSE);
         return modelMapper;
     }
-
-    //Storage Service bean add for uploading files
-    @Bean
-    CommandLineRunner init(StorageService storageService) {
-        return (args) -> {
-            storageService.init();
-        };
-    }
 }
