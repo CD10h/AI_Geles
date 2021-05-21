@@ -1,11 +1,7 @@
 package lt.aigen.geles;
 
-import lt.aigen.geles.models.Order;
-import lt.aigen.geles.models.dto.OrderDTO;
-import lt.aigen.geles.uploadingfiles.StorageService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
-import org.springframework.boot.CommandLineRunner;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;

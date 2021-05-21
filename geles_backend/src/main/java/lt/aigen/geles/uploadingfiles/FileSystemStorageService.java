@@ -1,6 +1,5 @@
 package lt.aigen.geles.uploadingfiles;
 
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -22,28 +21,28 @@ public class FileSystemStorageService implements StorageService {
 
     public FileSystemStorageService(StorageProperties properties) {
         this.rootLocation = Paths.get(properties.getLocation());
+        try {
+            Files.createDirectories(rootLocation);
+        } catch (IOException e) {
+            throw new StorageException("Could not initialize storage", e);
+        }
     }
 
     @Override
-    public void store(MultipartFile file) {
+    public void saveMultipartFile(MultipartFile file) {
         try {
             if (file.isEmpty()) {
                 throw new StorageException("Failed to store empty file.");
             }
-            Path destinationFile = this.rootLocation.resolve(
-                    Paths.get(file.getOriginalFilename()))
-                    .normalize().toAbsolutePath();
+            Path destinationFile = this.rootLocation.resolve(Paths.get(file.getName()).normalize().toAbsolutePath());
             if (!destinationFile.getParent().equals(this.rootLocation.toAbsolutePath())) {
                 // This is a security check
-                throw new StorageException(
-                        "Cannot store file outside current directory.");
+                throw new StorageException("Cannot store file outside current directory.");
             }
             try (InputStream inputStream = file.getInputStream()) {
-                Files.copy(inputStream, destinationFile,
-                        StandardCopyOption.REPLACE_EXISTING);
+                Files.copy(inputStream, destinationFile, StandardCopyOption.REPLACE_EXISTING);
             }
-        }
-        catch (IOException e) {
+        } catch (IOException e) {
             throw new StorageException("Failed to store file.", e);
         }
     }
@@ -66,15 +65,5 @@ public class FileSystemStorageService implements StorageService {
     @Override
     public void deleteFile(String filename) throws IOException {
         FileSystemUtils.deleteRecursively(rootLocation.resolve(filename));
-    }
-
-    @Override
-    public void init() {
-        try {
-            Files.createDirectories(rootLocation);
-        }
-        catch (IOException e) {
-            throw new StorageException("Could not initialize storage", e);
-        }
     }
 }
