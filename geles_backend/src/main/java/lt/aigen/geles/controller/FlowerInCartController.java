@@ -11,11 +11,10 @@ import lt.aigen.geles.repositories.FlowerRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -46,6 +45,7 @@ public class FlowerInCartController {
     }
 
     @Authorized
+    @Transactional
     @PostMapping("/")
     public ResponseEntity<FlowerInCartDTO> postFlowerInCart(@RequestBody @Validated FlowerInCartDTO flowerInCartDTO) {
         long flower_id = flowerInCartDTO.getFlowerId();
@@ -57,7 +57,6 @@ public class FlowerInCartController {
             int amount = flowerInCartDTO.getAmount();
             amount += f.getAmount();
             if(f.getFlower().getId() == flower_id) {
-                System.out.println(flower_id);
                 flowerInCartDTO.setAmount(amount);
                 flowerInCartRepository.deleteById(f.getId());
                 break;
