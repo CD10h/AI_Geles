@@ -5,6 +5,7 @@
   import { fly } from "svelte/transition";
 
   export let notifications: AppNotification[];
+  export let onClick: (id: number) => boolean;
 
   function getNotificationIcon(type: AppNotificationType) {
     switch (type) {
@@ -49,8 +50,13 @@
     <div
       class="notification {!loading
         ? getNotificationBackgroundColor(type)
-        : ''} {getNotificationColor(type)}"
+        : 'theme-primary-light-bg'} {getNotificationColor(type)}"
       transition:fly={{ x: 500 }}
+      on:click={() => {
+        if (!loading) {
+          onClick(id);
+        }
+      }}
     >
       {#if !loading}
         <i class="mdi {getNotificationIcon(type)}" />
@@ -71,7 +77,7 @@
 
 <style>
   .notifications {
-    position: absolute;
+    position: fixed;
     top: 16px;
     right: 16px;
     z-index: 100;
@@ -81,11 +87,14 @@
 
   .notification {
     width: 300px;
-    border: 1px solid black;
+    border: 1px solid rgb(0, 0, 0);
     padding: 8px 16px;
     border-radius: 4px;
     display: flex;
     align-items: center;
+    cursor: pointer;
+    -webkit-user-select: none;
+    -moz-user-select: none;
   }
 
   .notification:not(:last-child) {

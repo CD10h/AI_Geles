@@ -4,7 +4,8 @@
   import { onMount } from "svelte";
 
   import axios from "axios";
-  import { isLoggedIn } from "./isLoggedIn";
+  import noPhoto from "./assets/no-image.jfif";
+  import { user } from "./stores";
 
   // Variable to hold fetched list
   export let flowers: Flower[];
@@ -19,8 +20,10 @@
   }
 
   let cartId = 0;
-
   let amount = 1;
+
+  $: isLoggedIn = !!$user;
+  $: isAdmin = $user && $user.admin;
 
   async function handleDelete(id: number, name: string) {
     if (window.confirm(`Ar tikrai norite ištrinti gėlę ${name}?`)) {
@@ -48,16 +51,9 @@
     });
   }
 
-  async function getCartId() {
-    const response = await axios.get<Cart>("/users/cart/", {
-      withCredentials: true
-    });
-    cartId = response.data.id;
-  }
-
   onMount(() => {
-    if ($isLoggedIn) {
-      getCartId();
+    if ($user) {
+      cartId = $user.cartId;
     }
   });
 </script>
@@ -69,14 +65,24 @@
   -->
   {#each flowers as flower (flower.id)}
     <div class="flower-list-item">
-      <Link to="/flower/{flower.id}">
-        <img
-          class="flower-list-item-photo"
-          src={`${server_url}/static/${flower.photo}`}
-          alt={flower.name}
-        />
-      </Link>
-      {#if $isLoggedIn}
+      <div class="flower-list-item-photo-container">
+        <Link to="/flower/{flower.id}" class="link-wrapper">
+          {#if flower.photo}
+            <img
+              class="flower-list-item-photo"
+              src={`${server_url}/static/flowers/${flower.photo}`}
+              alt={flower.name}
+            />
+          {:else}
+            <img
+              class="flower-list-item-photo"
+              src={noPhoto}
+              alt="Nėra nuotraukos"
+            />
+          {/if}
+        </Link>
+      </div>
+      {#if isLoggedIn && !isAdmin}
         <div
           class="flower-list-item-favorite"
           on:click={() => handleFavoriteChange(flower)}
@@ -93,14 +99,18 @@
       <p class="flower-list-item-description">
         {flower.description}
       </p>
-      {#if owner}
-        <Link to="/update/{flower.id}">Redaguoti</Link>
-        <button on:click={() => handleDelete(flower.id, flower.name)}
-          >Ištrinti</button
+      {#if isAdmin}
+        <Link to="/update/{flower.id}" class="button edit">Redaguoti</Link>
+        <button
+          class="button delete"
+          on:click={() => handleDelete(flower.id, flower.name)}
         >
+          Ištrinti
+        </button>
       {/if}
-      {#if $isLoggedIn}
+      {#if isLoggedIn && !isAdmin}
         <input
+          class="numberinput"
           type="number"
           min="1"
           max="100"
@@ -108,7 +118,10 @@
           value="1"
           size="7"
         />
-        <button on:click={() => handleToCart(flower.id, amount)}>+</button>
+        <button
+          class="button add"
+          on:click={() => handleToCart(flower.id, amount)}>Į krepšelį</button
+        >
       {/if}
     </div>
   {/each}
@@ -118,8 +131,6 @@
   .flower-list {
     display: flex;
     flex-wrap: wrap;
-    margin: 0 -16px;
-    padding: 0 16px;
   }
 
   .flower-list-item {
@@ -130,6 +141,8 @@
     max-width: 300px;
     flex-basis: calc(25% - 48px);
     position: relative;
+    background-color: rgb(245, 253, 223);
+    border-radius: 4px;
   }
 
   .flower-list-item-name {
@@ -146,12 +159,13 @@
     display: -webkit-box;
     -webkit-line-clamp: 4;
     -webkit-box-orient: vertical;
+    min-height: 76px;
     /* text-align: justify; */
   }
 
   .flower-list-item-favorite {
-    background-color: white;
-    border: 1px solid grey;
+    background-color: rgb(245, 253, 223);
+    border: 1px solid black;
     width: 48px;
     height: 48px;
     position: absolute;
