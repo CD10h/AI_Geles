@@ -3,7 +3,7 @@
   import axios from "axios";
 
   import Catalogue from "./Catalogue.svelte";
-  import { isLoggedIn } from "./isLoggedIn";
+  import { user } from "./stores";
   import {
     mapFlowersToWithFavorite,
     mapFlowerToWithFavorite
@@ -11,6 +11,8 @@
 
   // Variable to hold fetched list
   let flowers: Flower[] = [];
+
+  $: isLoggedIn = !!$user;
 
   async function getFlowers() {
     // Download data from server
@@ -20,7 +22,7 @@
         withCredentials: true
       }
     );
-    if ($isLoggedIn) {
+    if (isLoggedIn) {
       const favoriteResponse = await axios.get<number[]>("/flowers/favorite", {
         withCredentials: true
       });

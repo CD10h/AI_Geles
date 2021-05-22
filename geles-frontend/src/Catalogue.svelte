@@ -5,7 +5,7 @@
 
   import axios from "axios";
   import noPhoto from "./assets/no-image.jfif";
-  import { isLoggedIn } from "./isLoggedIn";
+  import { user } from "./stores";
 
   // Variable to hold fetched list
   export let flowers: Flower[];
@@ -20,8 +20,10 @@
   }
 
   let cartId = 0;
-
   let amount = 1;
+
+  $: isLoggedIn = !!$user;
+  $: isAdmin = $user && $user.admin;
 
   async function handleDelete(id: number, name: string) {
     if (window.confirm(`Ar tikrai norite ištrinti gėlę ${name}?`)) {
@@ -49,16 +51,9 @@
     });
   }
 
-  async function getCartId() {
-    const response = await axios.get<Cart>("/users/cart/", {
-      withCredentials: true
-    });
-    cartId = response.data.id;
-  }
-
   onMount(() => {
-    if ($isLoggedIn) {
-      getCartId();
+    if ($user) {
+      cartId = $user.cartId;
     }
   });
 </script>
@@ -87,7 +82,7 @@
           {/if}
         </Link>
       </div>
-      {#if $isLoggedIn}
+      {#if isLoggedIn && !isAdmin}
         <div
           class="flower-list-item-favorite"
           on:click={() => handleFavoriteChange(flower)}
@@ -104,14 +99,16 @@
       <p class="flower-list-item-description">
         {flower.description}
       </p>
-      {#if owner && $isLoggedIn}
+      {#if isAdmin}
         <Link to="/update/{flower.id}" class="button edit">Redaguoti</Link>
         <button
           class="button delete"
-          on:click={() => handleDelete(flower.id, flower.name)}>Ištrinti</button
+          on:click={() => handleDelete(flower.id, flower.name)}
         >
+          Ištrinti
+        </button>
       {/if}
-      {#if $isLoggedIn}
+      {#if isLoggedIn && !isAdmin}
         <input
           class="numberinput"
           type="number"

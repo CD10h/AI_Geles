@@ -4,7 +4,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import lombok.Getter;
 import lombok.Setter;
 import org.hibernate.annotations.Type;
-import org.springframework.lang.Nullable;
 
 import javax.validation.constraints.*;
 
@@ -51,6 +50,7 @@ public class User implements Serializable {
     private List<Order> orders = new ArrayList<>();
 
     @NotBlank
+    @NotNull
     @Column(columnDefinition = "boolean default false")
     private Boolean isAdmin;
 

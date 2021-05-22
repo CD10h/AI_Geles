@@ -3,8 +3,7 @@
   import Input from "../Input.svelte";
   import { isAxiosError } from "../util";
   import axios from "axios";
-
-  export let onLogin: () => void;
+  import { user } from "../stores";
 
   let loginFields = {
     username: "",
@@ -18,7 +17,10 @@
       await axios.post("/auth/login/", loginFields, {
         withCredentials: true
       });
-      onLogin();
+      const response = await axios.get<User>("/users/", {
+        withCredentials: true
+      });
+      user.set(response.data);
       navigate("/");
     } catch (e) {
       if (isAxiosError(e)) {

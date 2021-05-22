@@ -1,7 +1,6 @@
 package lt.aigen.geles.controller;
 
 import lt.aigen.geles.models.Login;
-import lt.aigen.geles.models.User;
 import lt.aigen.geles.repositories.UserRepository;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -34,20 +33,15 @@ public class AuthController {
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
 
-        // create a cookie
-        Cookie isAuthCookie = new Cookie("auth", "true");
         Cookie userCookie = new Cookie("user", login.getUsername());
 
         int expiry = 7 * 24 * 60 * 60; // 1 week
-        isAuthCookie.setMaxAge(expiry);
-        isAuthCookie.setPath("/");
 
         userCookie.setMaxAge(expiry);
         userCookie.setHttpOnly(true);
         userCookie.setPath("/");
 
         // add cookie to response
-        response.addCookie(isAuthCookie);
         response.addCookie(userCookie);
 
         return new ResponseEntity<>(HttpStatus.OK);
@@ -56,19 +50,15 @@ public class AuthController {
     @PostMapping("/logout")
     public ResponseEntity<?> logout(HttpServletResponse response) {
         // create a cookie
-        Cookie isAuthCookie = new Cookie("auth", "");
         Cookie userCookie = new Cookie("user", "");
 
         int expiry = 0;
-        isAuthCookie.setMaxAge(expiry);
-        isAuthCookie.setPath("/");
 
         userCookie.setMaxAge(expiry);
         userCookie.setHttpOnly(true);
         userCookie.setPath("/");
 
         // add cookie to response
-        response.addCookie(isAuthCookie);
         response.addCookie(userCookie);
 
         return new ResponseEntity<>(HttpStatus.OK);

@@ -5,7 +5,8 @@ interface Flower {
   photo?: string;
   description: string;
   daysToExpire: number;
-  favorite: boolean;
+  favorite?: boolean;
+  version: number;
 }
 
 interface Cart {
