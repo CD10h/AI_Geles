@@ -5,6 +5,7 @@ import lt.aigen.geles.components.CurrentUser;
 import lt.aigen.geles.models.dto.*;
 import lt.aigen.geles.models.Flower;
 import lt.aigen.geles.repositories.FlowerRepository;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -14,8 +15,6 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.time.LocalDate;
-import java.time.Period;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -83,12 +82,19 @@ public class FlowerController {
     @Authorized(admin = true)
     @PutMapping("/{id}")
     ResponseEntity<FlowerDTO> updateFlower(@RequestBody @Validated FlowerDTO flowerDTO, @PathVariable Long id) {
-        if (flowerRepository.findById(id).isEmpty()) {
+        var flower = flowerRepository.findById(id);
+
+        if (flower.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         var newFlower = convertFromDTO(flowerDTO);
         newFlower.setId(id);
-        return ResponseEntity.ok(convertToDTO(flowerRepository.save(newFlower)));
+        try {
+            flowerRepository.save(newFlower);
+        } catch(OptimisticLockingFailureException e) {
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+        return ResponseEntity.ok(convertToDTO(newFlower));
     }
 
     @Authorized(admin = true)
