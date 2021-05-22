@@ -136,7 +136,6 @@
     } else {
       enable = order.orderStatus == OrderStatus.UNPAID;
     }
-    console.log(enable);
     return enable;
   }
 
@@ -151,6 +150,25 @@
     recalcSum();
   }
 
+  function handleError(reason: any) {
+    let errString: string = "";
+    if (reason.response) {
+      errString =
+        reason.response.data +
+        " " +
+        reason.response.status +
+        " " +
+        reason.response.headers;
+    } else if (reason.request) {
+      let errString = reason.request;
+    } else {
+      // Something happened in setting up the request that triggered an Error
+      let errString = reason;
+    }
+    console.log("Error", reason);
+    addNotification(errString, AppNotificationType.DANGER);
+  }
+
   async function getOrderData() {
     let resp = await axios.get(`/orders/${id}`, { withCredentials: true });
     order = resp.data;
@@ -162,29 +180,40 @@
   }
 
   function handleUpdate() {
-    axios.put(`/orders/${id}/edit`, editDto).then(getOrderData);
+    axios.put(`/orders/${id}/edit`, editDto)
+    .then(getOrderData)
+    .then(() => addNotification("Užsakymas atnaujintas",AppNotificationType.SUCCESS))
+    .catch(handleError);
   }
 
   function handlePay() {
     axios
       .post(`/orders/${id}/pay`, { version: order.version })
-      .then(getOrderData);
+      .then(getOrderData)
+      .then(() => addNotification("Užsakymas apmokėtas",AppNotificationType.SUCCESS))
+      .catch(handleError);
   }
 
   function handleCancel() {
     axios
       .post(`/orders/${id}/cancel`, { version: order.version })
-      .then(getOrderData);
+      .then(getOrderData)
+      .then(() => addNotification("Užsakymas atšauktas",AppNotificationType.SUCCESS))
+      .catch(handleError);
   }
   function handleConfirmOrder() {
     axios
       .post(`/orders/${id}/confirm`, { version: order.version })
-      .then(getOrderData);
+      .then(getOrderData)
+      .then(() => addNotification("Užsakymas patvirtintas",AppNotificationType.SUCCESS))
+      .catch(handleError);
   }
   function handleConfirmDelivered() {
     axios
       .post(`/orders/${id}/confirmDelivery`, { version: order.version })
-      .then(getOrderData);
+      .then(getOrderData)
+      .then(() => addNotification("Užsakymo pristatymas patvirtintas",AppNotificationType.SUCCESS))
+      .catch(handleError);
   }
 
   function formatDate(date: any) {
@@ -226,9 +255,7 @@
   });
 </script>
 
-<h2>
-  Užsakymas
-</h2>
+<h2>Užsakymas</h2>
 <div class="row">
   <div class="column">
     <div class="flowers-table">
@@ -374,7 +401,7 @@
           {formatDate(order.createdDate)}
         </div>
       </div>
-      
+
       {#if isAdmin}
         <div class="editorder-inputrow">
           <div style="padding-top:40px;padding-bottom:40px;">
@@ -464,7 +491,7 @@
   .column {
     flex-basis: 50%;
   }
-  .flowers-table{
+  .flowers-table {
     width: min-content;
   }
 
