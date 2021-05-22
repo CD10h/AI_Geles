@@ -58,7 +58,7 @@ public class UserController {
         return new ResponseEntity<>(convertToDTO(user), HttpStatus.OK);
     }
 
-    @Authorized
+    @Authorized(admin = true)
     @GetMapping("/{id}")
     public ResponseEntity<UserDTO> getSingleUserAdmin(@PathVariable Long id) {
         var maybeUser = userRepository.findById(id);
