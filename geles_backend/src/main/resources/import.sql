@@ -7,7 +7,7 @@ INSERT INTO users (username, password, cart_id) VALUES ('emilis', 'password123',
 INSERT INTO users (username, password, cart_id) VALUES ('titas', '12345678', 2);
 INSERT INTO users (username, password, cart_id) VALUES ('simonas', '12345678', 3);
 INSERT INTO users (username, password, cart_id) VALUES ('justas', '12345678', 4);
-INSERT INTO users (username, password, is_admin, cart_id) VALUES ('admin', '12345678', true, 5);
+INSERT INTO users (username, password, is_admin, cart_id) VALUES ('admin', 'admin123', true, 5);
 INSERT INTO flower (name, price, photo, description, days_to_expire) VALUES ('Frezija', 1.00, 'frezija.jfif', 'Vilkdalginių (Iridaceae) šeimos daugiamečių svogūninių augalų gentis. Kilusi iš Kapo regiono pievų (Pietų Afrikos Respublika), dabar auginamos visame pasaulyje kaip dekoratyvinės gėlės.',  7);
 INSERT INTO flower (name, price, photo, description,  days_to_expire) VALUES ('Gerbera', 1.90, 'gerbera.jfif', 'Astrinių (Asteraceae) šeimos augalų gentis. Natūraliai auga Pietų Amerikoje, Afrikoje, Madagaskare ir tropikinėje Azijoje.',  4);
 INSERT INTO flower (name, price, photo, description,  days_to_expire) VALUES ('Gvazdikas', 1.50, 'gvazdikas.jfif', 'Gvazdikinių (Caryophyllaceae) šeimos augalų gentis, kuriai priklauso žoliniai augalai bei krūmokšniai. Jų stiebai turi sustorėjusius bamblius. Lapai siauri, linijiški arba lancetiški. Žiedai sukrauti žiedynuose. Vaisius – vienalizdė dėžutė, kuri atsidaro 4 sąvaromis. Daugiausia daugiamečiai augalai, keletas rūšių vienmečių ir dvimečių.',  5);

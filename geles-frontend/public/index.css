@@ -98,11 +98,20 @@ body {
   pointer-events: none;
 }
 
-.button:active {
+.button:active{
   box-shadow: 0 0 4px 2px rgba(0, 0, 0, 0.3) inset;
   position: relative;
   top: 1px;
 }
+
+.button:disabled,button[disabled] {
+  background-color: gray;
+  background-image: none;
+  filter: none;
+  color: white;
+}
+
+
 
 .add:before {
   content: "\271A";

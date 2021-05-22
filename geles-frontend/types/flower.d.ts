@@ -42,6 +42,7 @@ interface Order {
   orderFlowers: OrderFlower[];
   readonly userId: number;
   orderStatus: OrderStatus;
+  version: number;
 }
 
 interface OrderAdd {

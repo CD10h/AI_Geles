@@ -24,7 +24,7 @@ public class FlowerInOrder {
     @JoinColumn(name = "order_id")
     private Order order;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.REFRESH)
     @NotNull
     @JoinColumn(name = "flower_id")
     private Flower flower;

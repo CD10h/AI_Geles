@@ -1,25 +1,29 @@
 <script>
   import { onMount } from "svelte";
+  import { user } from "./stores";
   import { server_url } from "./index";
   import axios from "axios";
   import { Link } from "svelte-routing";
   import { bind, text } from "svelte/internal";
   import { OrderStatus } from "./enums";
+  import { version } from "chai";
 
   export let id: string;
+  $: isAdmin = $user && $user.admin;
 
   interface OrderEdit {
     orderFlowers: OrderFlower[];
     address: string;
     contactPhone: string;
+    version: number;
   }
 
   enum OrderEditButton {
     SAVE,
     PAY,
-    CANCEL
-  };
-
+    CANCEL,
+    ADMIN_CONFIRMPAY
+  }
 
   let order: Omit<Order, "id" | "userId"> = {
     createdDate: "",
@@ -27,22 +31,42 @@
     address: "",
     contactPhone: "",
     orderFlowers: [],
-    orderStatus: OrderStatus.CANCELED
+    orderStatus: OrderStatus.CANCELED,
+    version: 0
   };
 
   let editDto: OrderEdit = {
     orderFlowers: [],
     contactPhone: "",
-    address: ""
+    address: "",
+    version: 0
   };
 
+  let editedUser: User = {
+    id: 0,
+    username: "",
+    photo: null,
+    admin: false,
+    cartId: 0
+  };
   let flowers: Flower[];
   let orderTotal: number = 0;
 
   function flowerFromId(id: number): Flower {
-
-    console.log({id:id,flowers: flowers});
     return flowers.find(f => f.id == id) as Flower;
+  }
+
+  async function verifyLogin() {
+    let oldUser: User | null;
+    try {
+      const response = await axios.get<User>("/users/", {
+        withCredentials: true
+      });
+      oldUser = response.data;
+    } catch (e) {
+      oldUser = null;
+    }
+    user.set(oldUser);
   }
 
   function recalcSum() {
@@ -54,6 +78,13 @@
       .reduce((a, b) => a + b, 0);
   }
 
+  async function loadUser() {
+    let userRes = await axios.get(`/users/${order.userId}`, {
+      withCredentials: true
+    });
+    editedUser = userRes.data;
+  }
+
   function rowSum(flower: OrderFlower) {
     return flower.quantity * flowerFromId(flower.flowerId).price;
   }
@@ -62,35 +93,43 @@
     status: OrderStatus,
     button: OrderEditButton
   ): boolean {
+    let enableButton: boolean = false;
     switch (button) {
       case OrderEditButton.SAVE:
-        return order.orderStatus != "UNPAID";
+        if (isAdmin) {
+          enableButton =
+            status != OrderStatus.CANCELED && status != OrderStatus.DELIVERED;
+        } else {
+          enableButton = status == OrderStatus.UNPAID;
+        }
+        break;
       case OrderEditButton.CANCEL:
-        return (
-          order.orderStatus == OrderStatus.CANCELED ||
-          order.orderStatus == OrderStatus.DELIVERED
-        );
+        enableButton =
+        status != OrderStatus.CANCELED &&
+        status != OrderStatus.DELIVERED;
+        break;
       case OrderEditButton.PAY:
-        return order.orderStatus != "UNPAID";
+        enableButton = status == OrderStatus.UNPAID;
+        break;
+      case OrderEditButton.ADMIN_CONFIRMPAY:
+        enableButton = status == OrderStatus.PAID;
+        break;
     }
+    return !enableButton;
   }
 
-  // Run code on component mount (once)
-  onMount(async () => {
-    await axios.get(`/flowers/`, { withCredentials: true }).then(resp => {
-      flowers = resp.data;
-      console.log(resp.data);
-    });
-    axios.get(`/orders/${id}`, { withCredentials: true }).then(resp => {
-      order = resp.data;
-      console.log(resp);
-      editDto.orderFlowers = order.orderFlowers;
-      editDto.address = order.address;
-      editDto.contactPhone = order.contactPhone;
-      
-      recalcSum();
-    });
-  });
+  function EnableOrderEdits():boolean {
+    let enable :boolean = false;
+    if (isAdmin) {
+      enable =
+            status != OrderStatus.CANCELED && status != OrderStatus.DELIVERED;
+        } else {
+          enable = status == OrderStatus.UNPAID;
+        }
+      return enable;
+  }
+
+  
 
   function handleDelete(fl: OrderFlower) {
     let index = editDto.orderFlowers.indexOf(fl);
@@ -103,26 +142,30 @@
     recalcSum();
   }
 
-  function mapOrderData(resp: any) {
+  async function getOrderData() {
+    let resp = await axios.get(`/orders/${id}`, { withCredentials: true })
     order = resp.data;
     editDto.orderFlowers = order.orderFlowers;
     editDto.address = order.address;
     editDto.contactPhone = order.contactPhone;
+    editDto.version = order.version;
     recalcSum();
   }
 
   function handleUpdate() {
     axios
-      .put(`/orders/${id}/edit`, editDto, { withCredentials: true })
-      .then(resp => mapOrderData(resp));
+      .put(`/orders/${id}/edit`, editDto,).then(getOrderData);
   }
 
   function handlePay() {
-    axios.post(`/orders/${id}/pay`).then(rsp => mapOrderData(rsp));
+    axios.post(`/orders/${id}/pay`, {version: order.version}).then(getOrderData);
   }
 
   function handleCancel() {
-    axios.post(`/orders/${id}/cancel`).then(rsp => mapOrderData(rsp));
+    axios.post(`/orders/${id}/cancel`, {version: order.version}).then(getOrderData);
+  }
+  function handleConfirmOrder() {
+    axios.post(`/orders/${id}/confirm`, {version: order.version}).then(getOrderData);
   }
 
   function orderStatusString(status: any): string {
@@ -141,6 +184,17 @@
         return "???????";
     }
   }
+
+
+  // Run code on component mount (once)
+  onMount(async () => {
+    await axios.get(`/flowers/`).then(resp => {
+      flowers = resp.data;
+    });
+    await getOrderData();
+    await verifyLogin();
+    if (isAdmin) await loadUser();
+  });
 </script>
 
 <h2>
@@ -229,9 +283,17 @@
   </div>
   <div class="column">
     <div class="editorder-inputs">
+      {#if isAdmin}
+        <div class="editorder-inputrow" style="height: 30px;">
+          <label for="user">Vartotojas</label>
+          <div id="user" class="editorder-textoutput">
+            {editedUser.username}
+          </div>
+        </div>
+      {/if}
       <div class="editorder-inputrow">
         <label for="adress">Adresas</label>
-        {#if order.orderStatus == "UNPAID"}
+        {#if EnableOrderEdits()}
           <input
             class="editorder-textinput"
             id="address"
@@ -239,12 +301,14 @@
             bind:value={editDto.address}
           />
         {:else}
-          <div  id="address" class="editorder-textoutput">{order.address}</div>
+          <div id="address" class="editorder-textoutput">
+            {order.address}
+          </div>
         {/if}
       </div>
       <div class="editorder-inputrow">
         <label for="phone">Telefonas</label>
-        {#if order.orderStatus == "UNPAID"}
+        {#if EnableOrderEdits()}
           <input
             class="editorder-textinput"
             type="text"
@@ -252,12 +316,31 @@
             bind:value={editDto.contactPhone}
           />
         {:else}
-          <div  id="phone" class="editorder-textoutput">
+          <div id="phone" class="editorder-textoutput">
             Telefonas : {order.contactPhone}
           </div>
         {/if}
       </div>
-      <br />
+      {#if isAdmin}
+        <div class="editorder-inputrow">
+          <div style="padding-top:40px;">
+            <strong>Administratoriaus funkcijos</strong>
+          </div>
+        </div>
+        <div class="editorder-inputrow">
+          <button
+            id="confirmPayment"
+            class="button cancelbutton"
+            disabled={DisableButton(
+              order.orderStatus,
+              OrderEditButton.ADMIN_CONFIRMPAY
+            )}
+            on:click={() => handleConfirmOrder()}
+          >
+            Patvirtinti apomokėjimą
+          </button>
+        </div>
+      {/if}
     </div>
   </div>
 </div>
@@ -311,9 +394,6 @@
 
   .column {
     flex: 50%;
-  }
-  .button {
-    background-color: #8ebf42;
   }
 
   .editorder-inputs {

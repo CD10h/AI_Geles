@@ -1,9 +1,19 @@
 <script>
   import { onMount } from "svelte";
+  import { user } from "./stores";
   import axios from "axios";
   import { Link } from "svelte-routing";
   import { OrderStatus } from "./enums";
   //import {Order, Flower} from "../types/flower";
+
+  $: isAdmin = $user && $user.admin;
+
+  enum SortBy {
+    ORDER_ID,
+    ORDER_DATE,
+    ORDER_STATUS,
+    ORDER_USER
+  }
 
   const orderStatusSortingOrder = {
     [OrderStatus.UNPAID]: 1,
@@ -13,20 +23,35 @@
     [OrderStatus.CANCELED]: 5
   } as const;
 
-  enum SortBy {
-    ORDER_ID,
-    ORDER_DATE,
-    ORDER_STATUS
-  }
+  let users: User[] = [];
 
   let flowers: Flower[] = [];
   let orders: Order[] = [];
+
+ 
 
   async function getFlowers() {
     // Download data from server
     const response = await axios.get("/flowers/");
     flowers = response.data;
   }
+
+  function userFromId(id: number): User {
+    return users.find(f => f.id == id) as User;
+  }
+  async function verifyLogin() {
+    let oldUser: User | null;
+    try {
+      const response = await axios.get<User>("/users/", {
+        withCredentials: true
+      });
+      oldUser = response.data;
+    } catch (e) {
+      oldUser = null;
+    }
+    user.set(oldUser);
+  }
+
 
   function mapFlowersInOrder(data: any) {
     return data.map((flowerInCart: any) => {
@@ -59,20 +84,6 @@
     if (response.status == 403) alert("Apmokėti neleidžiama. :(");
   }
 
-  async function getOrders() {
-    console.log("Getting orders");
-    const response = await axios.get(`/orders/`, {
-      withCredentials: true
-    });
-
-    orders = response.data;
-    orders.sort(
-      (a, b) =>
-        orderStatusSortingOrder[a.orderStatus] -
-        orderStatusSortingOrder[b.orderStatus]
-    );
-    console.log(orders);
-  }
   function formatDate(date: any) {
     var d = new Date(date),
       month = "" + (d.getMonth() + 1),
@@ -125,23 +136,47 @@
     }
   }
 
+  async function getOrders() {
+    const response = await axios.get<Order[]>(`/orders/`, {
+      withCredentials: true
+    });
+    console.log(response.data);
+
+    orders = response.data;
+    sort(SortBy.ORDER_ID);
+  }
+  async function loadUsers() {
+    let usersRes = await axios.get(`/users/all/`, { withCredentials: true });
+    users = usersRes.data;
+  }
   // Run code on component mount (once)
-  onMount(() => {
-    getOrders();
+  onMount(async () => {
+    await verifyLogin();
+    if (isAdmin) await loadUsers();
+    await getOrders();
   });
 </script>
 
 <div class="order-list">
-  <h2>Mano užsakymai</h2>
+  {#if isAdmin}
+    <h2>Visi užsakymai</h2>
+  {:else}
+    <h2>Mano užsakymai</h2>
+  {/if}
   {#if orders.length > 0}
     <table class="orders-table">
       <tr>
         <th on:click={() => sort(SortBy.ORDER_ID)}>
-          <div style="cursor:pointer;">Užsakymo ID</div></th
-        >
-        <th on:click={() => sort(SortBy.ORDER_DATE)}
-          ><div style="cursor:pointer;">Užsakymo data</div></th
-        >
+          <div style="cursor:pointer;">Užsakymo ID</div>
+        </th>
+        <th on:click={() => sort(SortBy.ORDER_DATE)}>
+          <div style="cursor:pointer;">Užsakymo data</div>
+        </th>
+        {#if isAdmin}
+          <th on:click={() => sort(SortBy.ORDER_USER)}>
+            <div style="cursor:pointer;">Vartotojas</div>
+          </th>
+        {/if}
         <th>Kiekis</th>
         <th>Suma</th>
         <th on:click={() => sort(SortBy.ORDER_STATUS)}
@@ -161,6 +196,11 @@
           <td>
             {formatDate(order.createdDate)}
           </td>
+          {#if isAdmin}
+            <td>
+              {userFromId(order.userId).username}
+            </td>
+          {/if}
           <td>
             {order.orderFlowers.reduce(
               (acc, flower) => acc + flower.quantity,

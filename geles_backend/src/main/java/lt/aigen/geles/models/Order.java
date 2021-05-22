@@ -73,4 +73,8 @@ public class Order implements Serializable {
         @JsonProperty("DELIVERED") DELIVERED,
         @JsonProperty("CANCELED") CANCELED
     }
+
+    @Version
+    @Column(columnDefinition = "integer default 0")
+    private Integer version;
 }

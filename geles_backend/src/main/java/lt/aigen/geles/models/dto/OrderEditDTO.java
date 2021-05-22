@@ -13,4 +13,5 @@ public class OrderEditDTO {
     private List<FlowerInOrderDTO> orderFlowers;
     private String address;
     private String contactPhone;
+    private Integer version;
 }

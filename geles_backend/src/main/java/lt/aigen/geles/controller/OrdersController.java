@@ -5,17 +5,13 @@ import lt.aigen.geles.components.CurrentUser;
 import lt.aigen.geles.models.FlowerInOrder;
 import lt.aigen.geles.models.Order;
 import lt.aigen.geles.models.User;
-import lt.aigen.geles.models.dto.FlowerInOrderDTO;
-import lt.aigen.geles.models.dto.OrderAddDTO;
-import lt.aigen.geles.models.dto.OrderDTO;
-import lt.aigen.geles.models.dto.OrderEditDTO;
-import lt.aigen.geles.repositories.CartRepository;
-import lt.aigen.geles.repositories.FlowerInCartRepository;
-import lt.aigen.geles.repositories.FlowerInOrderRepository;
-import lt.aigen.geles.repositories.OrderRepository;
+import lt.aigen.geles.models.dto.*;
+import lt.aigen.geles.repositories.*;
 import org.modelmapper.ModelMapper;
+import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
@@ -30,14 +26,16 @@ public class OrdersController {
     private final OrderRepository orderRepository;
     private final FlowerInCartRepository flowerInCartRepository;
     private final FlowerInOrderRepository flowerInOrderRepository;
+    private final FlowerRepository flowerRepository;
     private final CurrentUser currentUser;
     private final ModelMapper modelMapper;
 
-    public OrdersController(CartRepository cartRepository, OrderRepository orderRepository, FlowerInCartRepository flowerInCartRepository, FlowerInOrderRepository flowerInOrderRepository, CurrentUser currentUser, ModelMapper modelMapper) {
+    public OrdersController(CartRepository cartRepository, OrderRepository orderRepository, FlowerInCartRepository flowerInCartRepository, FlowerInOrderRepository flowerInOrderRepository, FlowerRepository flowerRepository, CurrentUser currentUser, ModelMapper modelMapper) {
         this.cartRepository = cartRepository;
         this.orderRepository = orderRepository;
         this.flowerInCartRepository = flowerInCartRepository;
         this.flowerInOrderRepository = flowerInOrderRepository;
+        this.flowerRepository = flowerRepository;
         this.currentUser = currentUser;
         this.modelMapper = modelMapper;
         modelMapper.typeMap(Order.class, OrderDTO.class).addMapping((order -> 0.0), OrderDTO::setTotalOrderPrice); //HACK
@@ -106,7 +104,7 @@ public class OrdersController {
     @Authorized
     @Transactional
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteOrder(@PathVariable Long id) {
+    public ResponseEntity<Object> deleteOrder(@PathVariable Long id, @RequestBody VersionDTO version)  {
         var user = currentUser.get();
         var orderOpt = orderRepository.findById(id);
         if (orderOpt.isEmpty())
@@ -114,6 +112,9 @@ public class OrdersController {
         var order = orderOpt.get();
         if ( !user.getIsAdmin() && !doesOrderBelongToUser(order, user))
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        //check manually because DTO does not map to order
+        if (!orderVersionValid(order, version.getVersion()))
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         orderRepository.delete(order);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -121,7 +122,7 @@ public class OrdersController {
 
     @Authorized
     @PostMapping("/{id}/pay")
-    public ResponseEntity<OrderDTO> payForOrder(@PathVariable Long id) {
+    public ResponseEntity<OrderDTO> payForOrder(@PathVariable Long id, @RequestBody VersionDTO version)  {
         var user = currentUser.get();
         var orderOpt = orderRepository.findById(id);
         if (orderOpt.isEmpty())
@@ -132,23 +133,31 @@ public class OrdersController {
         if (order.getOrderStatus() != Order.OrderStatus.UNPAID)
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         order.setOrderStatus(Order.OrderStatus.PAID);
+        //check manually because DTO does not map to order
+        if (!orderVersionValid(order, version.getVersion()))
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         orderRepository.save(order);
         return new ResponseEntity<>(convertToDTO(order), HttpStatus.OK);
     }
 
     @Authorized
     @PostMapping("/{id}/cancel")
-    public ResponseEntity<OrderDTO> cancelOrder(@PathVariable Long id) {
+    public ResponseEntity<OrderDTO> cancelOrder(@PathVariable Long id, @RequestBody VersionDTO version) {
         var user = currentUser.get();
         var orderOpt = orderRepository.findById(id);
         if (orderOpt.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         var order = orderOpt.get();
-        if (!doesOrderBelongToUser(order, user))
+        if (!user.getIsAdmin() && !doesOrderBelongToUser(order, user))
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        if (order.getOrderStatus() == Order.OrderStatus.DELIVERED)
+        if (order.getOrderStatus().equals(Order.OrderStatus.DELIVERED) ||
+                order.getOrderStatus().equals(Order.OrderStatus.CANCELED) )
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         order.setOrderStatus(Order.OrderStatus.CANCELED);
+
+        //check manually because DTO does not map to order
+        if (!orderVersionValid(order, version.getVersion()))
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         orderRepository.save(order);
         return new ResponseEntity<>(convertToDTO(order), HttpStatus.OK);
     }
@@ -160,53 +169,75 @@ public class OrdersController {
         var orderOpt = orderRepository.findById(id);
         if (orderOpt.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        var user = currentUser.get();
         var order = orderOpt.get();
-        if (!order.getOrderStatus().equals(Order.OrderStatus.UNPAID) &&
-                !order.getOrderStatus().equals(Order.OrderStatus.PAID)) {
+        if (order.getOrderStatus().equals(Order.OrderStatus.CANCELED) ||
+                order.getOrderStatus().equals(Order.OrderStatus.DELIVERED)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
+        //admin can edit confirmed and paid-for orders
+        if (!user.getIsAdmin() && !order.getOrderStatus().equals(Order.OrderStatus.UNPAID))
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+
+        //check manually because DTO does not map to order exactly
+        if (!orderVersionValid(order, orderEditDTO.getVersion()))
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
 
         var flowerInOrderDTOs = orderEditDTO.getOrderFlowers();
-        if (flowerInOrderDTOs.isEmpty())
-        {
+        if (flowerInOrderDTOs.isEmpty()) {
             orderRepository.delete(order);
             return new ResponseEntity<>(HttpStatus.NO_CONTENT);
         }
 
         var newFlowersInOrder = new ArrayList<FlowerInOrder>();
-        for (var flowerInOrder :  flowerInOrderDTOs ) {
+        for (var flowerInOrder : flowerInOrderDTOs) {
             var f = convertFromDTO(flowerInOrder);
+            //TODO: Check if flower exists?
+            var flower = flowerRepository.findById(flowerInOrder.getFlowerId());
+            f.setFlower(flower.get());
             f.setOrder(order);
             newFlowersInOrder.add(f);
         }
-        //flowerInOrderRepository.saveAll(newFlowersInOrder);
+
         order.getOrderProducts().clear();
         order.getOrderProducts().addAll(newFlowersInOrder);
         order.setAddress(orderEditDTO.getAddress());
         order.setContactPhone(orderEditDTO.getContactPhone());
         order.setOrderStatus(Order.OrderStatus.UNPAID);
-        orderRepository.save(order);
+
+        try {
+            flowerInOrderRepository.saveAll(newFlowersInOrder);
+            orderRepository.save(order);
+        } catch (OptimisticLockingFailureException e) {
+            //is this needed as order is checked above?
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+
         return new ResponseEntity<>(convertToDTO(order), HttpStatus.OK);
 
     }
 
     @Authorized(admin = true)
     @PostMapping("/{id}/confirm")
-    public ResponseEntity<?> confirmOrder(@PathVariable Long id) {
+    public ResponseEntity<?> confirmOrder(@PathVariable Long id, @RequestBody VersionDTO version)  {
         var orderOpt = orderRepository.findById(id);
         if (orderOpt.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         var order = orderOpt.get();
+        if (!orderVersionValid(order, version.getVersion()))
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
         if (!order.getOrderStatus().equals(Order.OrderStatus.UNPAID) &&
                 !order.getOrderStatus().equals(Order.OrderStatus.PAID)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
+
+
         order.setOrderStatus(Order.OrderStatus.CONFIRMED);
         orderRepository.save(order);
         return new ResponseEntity<>(convertToDTO(order), HttpStatus.OK);
     }
 
-    public OrderDTO convertToDTO(Order order) {
+    private OrderDTO convertToDTO(Order order) {
         var r = modelMapper.map(order, OrderDTO.class);
         r.setTotalOrderPrice(orderRepository.getOrderPrice(order));
         return r;
@@ -228,4 +259,10 @@ public class OrdersController {
     {
         return order != null && user != null && order.getUser().getId().equals(user.getId());
     }
+
+    private boolean orderVersionValid(Order order, Integer version)
+    {
+        return order != null && version != null && version.equals(order.getVersion());
+    }
+
 }

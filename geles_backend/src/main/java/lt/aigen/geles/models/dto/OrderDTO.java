@@ -22,4 +22,8 @@ public class OrderDTO {
     private String contactPhone;
 
     private Order.OrderStatus orderStatus;
+
+    private Long userId;
+    private Integer version;
+
 }
