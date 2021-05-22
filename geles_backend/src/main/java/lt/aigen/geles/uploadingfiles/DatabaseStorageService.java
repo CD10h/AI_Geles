@@ -2,7 +2,6 @@ package lt.aigen.geles.uploadingfiles;
 
 import lt.aigen.geles.models.File;
 import lt.aigen.geles.repositories.FileRepository;
-import org.springframework.context.annotation.Primary;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -10,8 +9,7 @@ import javax.validation.ConstraintViolationException;
 import java.io.IOException;
 import java.util.Base64;
 
-@Service
-@Primary
+@Service("databaseStorage")
 public class DatabaseStorageService implements StorageService {
     private FileRepository fileRepository;
 

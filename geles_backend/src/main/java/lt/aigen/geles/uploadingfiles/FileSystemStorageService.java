@@ -1,5 +1,7 @@
 package lt.aigen.geles.uploadingfiles;
 
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -15,7 +17,8 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Base64;
 
-@Service
+@Primary
+@Service("fileSystemStorage")
 public class FileSystemStorageService implements StorageService {
     private final Path rootLocation;
 
