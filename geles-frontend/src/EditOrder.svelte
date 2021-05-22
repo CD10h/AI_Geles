@@ -4,6 +4,7 @@
   import axios from "axios";
   import { Link } from "svelte-routing";
   import { bind, text } from "svelte/internal";
+  import { OrderStatus } from "./enums";
 
   export let id: string;
 
@@ -13,12 +14,20 @@
     contactPhone: string;
   }
 
-  let order: Omit<Order, "id" | "userId" | "orderStatus"> = {
+  enum OrderEditButton {
+    SAVE,
+    PAY,
+    CANCEL
+  };
+
+
+  let order: Omit<Order, "id" | "userId"> = {
     createdDate: "",
     totalOrderPrice: 0,
     address: "",
     contactPhone: "",
-    orderFlowers: []
+    orderFlowers: [],
+    orderStatus: OrderStatus.CANCELED
   };
 
   let editDto: OrderEdit = {
@@ -31,6 +40,8 @@
   let orderTotal: number = 0;
 
   function flowerFromId(id: number): Flower {
+
+    console.log({id:id,flowers: flowers});
     return flowers.find(f => f.id == id) as Flower;
   }
 
@@ -38,25 +49,45 @@
     orderTotal = order.orderFlowers
       .map(
         flowerInOrder =>
-          flowerFromId(flowerInOrder.id).price * flowerInOrder.quantity
+          flowerFromId(flowerInOrder.flowerId).price * flowerInOrder.quantity
       )
       .reduce((a, b) => a + b, 0);
   }
 
   function rowSum(flower: OrderFlower) {
-    return flower.quantity * flowerFromId(flower.id).price;
+    return flower.quantity * flowerFromId(flower.flowerId).price;
+  }
+
+  function DisableButton(
+    status: OrderStatus,
+    button: OrderEditButton
+  ): boolean {
+    switch (button) {
+      case OrderEditButton.SAVE:
+        return order.orderStatus != "UNPAID";
+      case OrderEditButton.CANCEL:
+        return (
+          order.orderStatus == OrderStatus.CANCELED ||
+          order.orderStatus == OrderStatus.DELIVERED
+        );
+      case OrderEditButton.PAY:
+        return order.orderStatus != "UNPAID";
+    }
   }
 
   // Run code on component mount (once)
-  onMount(() => {
-    axios
-      .get(`/flowers/`, { withCredentials: true })
-      .then(resp => (flowers = resp.data));
+  onMount(async () => {
+    await axios.get(`/flowers/`, { withCredentials: true }).then(resp => {
+      flowers = resp.data;
+      console.log(resp.data);
+    });
     axios.get(`/orders/${id}`, { withCredentials: true }).then(resp => {
       order = resp.data;
+      console.log(resp);
       editDto.orderFlowers = order.orderFlowers;
       editDto.address = order.address;
       editDto.contactPhone = order.contactPhone;
+      
       recalcSum();
     });
   });
@@ -72,7 +103,7 @@
     recalcSum();
   }
 
-  function mapOrderData(resp) {
+  function mapOrderData(resp: any) {
     order = resp.data;
     editDto.orderFlowers = order.orderFlowers;
     editDto.address = order.address;
@@ -117,88 +148,121 @@
     order.orderStatus
   )}
 </h2>
-<table>
-  <tr>
-    <th colspan="2">Gėlė</th>
-    <th>Kiekis</th>
-    <th>Vnt. kaina</th>
-    <th>Suma</th>
-    {#if order.orderStatus == "UNPAID"}
-      <th>Veiksmai</th>
-    {/if}
-  </tr>
-  {#each editDto.orderFlowers as flower (flower.id)}
-    <tr>
-      <div class="imagecontainer">
-        {#if flowerFromId(flower.id).photo != null}
-          <img
-            class="flower-list-item-photo"
-            src={`${server_url}/static/flowers/${
-              flowerFromId(flower.id).photo
-            }`}
-            alt={flowerFromId(flower.id).name}
-            width="80"
-            height="80"
-          />
+<div class="row">
+  <div class="column">
+    <table>
+      <tr>
+        <th colspan="2">Gėlė</th>
+        <th>Kiekis</th>
+        <th>Vnt. kaina</th>
+        <th>Suma</th>
+        {#if order.orderStatus == "UNPAID"}
+          <th>Veiksmai</th>
         {/if}
-      </div>
-      <td>{flowerFromId(flower.id).name}</td>
-      <td>
+      </tr>
+      {#each editDto.orderFlowers as flower (flower.id)}
+        <tr>
+          <div class="imagecontainer">
+            {#if flowerFromId(flower.flowerId).photo != null}
+              <img
+                class="flower-list-item-photo"
+                src={`${server_url}/static/flowers/${
+                  flowerFromId(flower.flowerId).photo
+                }`}
+                alt={flowerFromId(flower.flowerId).name}
+                width="80"
+                height="80"
+              />
+            {/if}
+          </div>
+          <td>{flowerFromId(flower.flowerId).name}</td>
+          <td>
+            {#if order.orderStatus == "UNPAID"}
+              <input
+                type="number"
+                bind:value={flower.quantity}
+                min="1"
+                max="100"
+                size="5"
+                on:input={e => {
+                  recalcSum();
+                }}
+              />
+            {:else}
+              {flower.quantity}
+            {/if}
+          </td>
+          <td class="number">{flowerFromId(flower.flowerId).price} €</td>
+          <td class="number">{rowSum(flower).toFixed(2)} €</td>
+          {#if order.orderStatus == "UNPAID"}
+            <td>
+              <button on:click={() => handleDelete(flower)}>Pašalinti</button>
+            </td>
+          {/if}
+        </tr>
+      {/each}
+    </table>
+    <div class="row buttonsrow">
+      <button
+        class="button savebutton"
+        disabled={DisableButton(order.orderStatus, OrderEditButton.SAVE)}
+        on:click={() => handleUpdate()}
+      >
+        Išsaugoti pakeitimus
+      </button>
+      <button
+        class="button paybutton"
+        disabled={DisableButton(order.orderStatus, OrderEditButton.PAY)}
+        on:click={() => handlePay()}
+      >
+        Apmokėti
+      </button>
+
+      <button
+        class="button cancelbutton"
+        disabled={DisableButton(order.orderStatus, OrderEditButton.CANCEL)}
+        on:click={() => handleCancel()}
+      >
+        Atšaukti
+      </button>
+    </div>
+  </div>
+  <div class="column">
+    <div class="editorder-inputs">
+      <div class="editorder-inputrow">
+        <label for="adress">Adresas</label>
         {#if order.orderStatus == "UNPAID"}
           <input
-            type="number"
-            bind:value={flower.quantity}
-            min="1"
-            max="100"
-            size="5"
-            on:input={e => {
-              recalcSum();
-            }}
+            class="editorder-textinput"
+            id="address"
+            type="text"
+            bind:value={editDto.address}
           />
         {:else}
-          {flower.quantity}
+          <div  id="address" class="editorder-textoutput">{order.address}</div>
         {/if}
-      </td>
-      <td class="number">{flowerFromId(flower.id).price} €</td>
-      <td class="number">{rowSum(flower).toFixed(2)}€</td>
-      {#if order.orderStatus == "UNPAID"}
-        <td>
-          <button on:click={() => handleDelete(flower)}>Pašalinti</button>
-        </td>
-      {/if}
-    </tr>
-  {/each}
-</table>
-
-{#if order.orderStatus == "UNPAID"}
-  <label for="adress">Adresas</label>
-  <input id="address" type="text" bind:value={editDto.address} />
-  <br />
-  <label for="phone">Telefonas</label>
-
-  <input type="text" id="phone" bind:value={editDto.contactPhone} />
-  <br />
-{:else}
-  <div>
-    Adresas : {order.address}
+      </div>
+      <div class="editorder-inputrow">
+        <label for="phone">Telefonas</label>
+        {#if order.orderStatus == "UNPAID"}
+          <input
+            class="editorder-textinput"
+            type="text"
+            id="phone"
+            bind:value={editDto.contactPhone}
+          />
+        {:else}
+          <div  id="phone" class="editorder-textoutput">
+            Telefonas : {order.contactPhone}
+          </div>
+        {/if}
+      </div>
+      <br />
+    </div>
   </div>
-  <div>
-    Telefonas : {order.contactPhone}
-  </div>
-{/if}
-
-{#if order.orderStatus == "UNPAID"}
-  <button class="savebutton" on:click={() => handleUpdate()}>
-    Išsaugoti pakeitimus
-  </button>
-  <button class="paybutton" on:click={() => handlePay()}> Apmokėti </button>
-{/if}
-{#if order.orderStatus != "CANCELED" && order.orderStatus != "DELIVERED"}
-  <button class="paybutton" on:click={() => handleCancel()}> Atšaukti </button>
-{/if}
+</div>
 
 <style>
-
   h2 {
     color: #000000;
     font-size: 24px;
@@ -239,5 +303,36 @@
     margin: 8px;
     /* Weird bug with table cell height */
     margin-bottom: 4px;
+  }
+
+  .row {
+    display: flex;
+  }
+
+  .column {
+    flex: 50%;
+  }
+  .button {
+    background-color: #8ebf42;
+  }
+
+  .editorder-inputs {
+    display: table;
+  }
+  .editorder-inputrow {
+    display: table-row;
+  }
+  .editorder-textinput {
+    display: table-cell;
+    margin-left: 30px;
+  }
+
+  .editorder-textoutput {
+    display: table-cell;
+    padding-left: 30px;
+  }
+
+  label {
+    display: table-cell;
   }
 </style>

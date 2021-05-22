@@ -2,12 +2,21 @@
   import { onMount } from "svelte";
   import axios from "axios";
   import { Link } from "svelte-routing";
-import Order from "./Order.svelte";
+  import { OrderStatus } from "./enums";
+  //import {Order, Flower} from "../types/flower";
 
-  interface CartTemplate {
-    id: number;
-    name: string;
-    flowersInCart: FlowerInCart[];
+  const orderStatusSortingOrder = {
+    [OrderStatus.UNPAID]: 1,
+    [OrderStatus.PAID]: 2,
+    [OrderStatus.CONFIRMED]: 3,
+    [OrderStatus.DELIVERED]: 4,
+    [OrderStatus.CANCELED]: 5
+  } as const;
+
+  enum SortBy {
+    ORDER_ID,
+    ORDER_DATE,
+    ORDER_STATUS
   }
 
   let flowers: Flower[] = [];
@@ -44,9 +53,10 @@ import Order from "./Order.svelte";
   }
 
   async function handlePay(order: Order) {
-    const response = await axios.post(`/orders/${order.id}/pay`, {withCredentals: true});
-    if (response.status == 403)
-        alert('Apmokėti neleidžiama. :(')
+    const response = await axios.post(`/orders/${order.id}/pay`, {
+      withCredentals: true
+    });
+    if (response.status == 403) alert("Apmokėti neleidžiama. :(");
   }
 
   async function getOrders() {
@@ -55,26 +65,25 @@ import Order from "./Order.svelte";
       withCredentials: true
     });
 
-    orders = response.data.map((order: Order) => {
-      //cartTemplate.flowersInCart = mapFlowersInCart(cartTemplate.flowersInCart);
-      return order;
-    });
+    orders = response.data;
+    orders.sort(
+      (a, b) =>
+        orderStatusSortingOrder[a.orderStatus] -
+        orderStatusSortingOrder[b.orderStatus]
+    );
     console.log(orders);
   }
-  function formatDate(date) {
+  function formatDate(date: any) {
     var d = new Date(date),
-        month = '' + (d.getMonth() + 1),
-        day = '' + d.getDate(),
-        year = d.getFullYear();
+      month = "" + (d.getMonth() + 1),
+      day = "" + d.getDate(),
+      year = d.getFullYear();
 
-    if (month.length < 2) 
-        month = '0' + month;
-    if (day.length < 2) 
-        day = '0' + day;
+    if (month.length < 2) month = "0" + month;
+    if (day.length < 2) day = "0" + day;
 
-    return [year, month, day].join('-');
-}
-
+    return [year, month, day].join("-");
+  }
 
   function orderStatusString(status: any): string {
     switch (status) {
@@ -92,6 +101,30 @@ import Order from "./Order.svelte";
         return "???????";
     }
   }
+
+  function sort(sortingOrder: SortBy) {
+    switch (sortingOrder) {
+      case SortBy.ORDER_DATE:
+        orders = orders.sort(
+          (a: Order, b: Order) =>
+            +new Date(a.createdDate) - +new Date(b.createdDate)
+        );
+        break;
+      case SortBy.ORDER_ID:
+        orders = orders.sort((a: Order, b: Order) => a.id - b.id);
+        break;
+      case SortBy.ORDER_STATUS:
+        orders = orders.sort(
+          (a, b) =>
+            orderStatusSortingOrder[a.orderStatus] -
+            orderStatusSortingOrder[b.orderStatus]
+        );
+        break;
+      default:
+        throw "Unknown sorting order :(";
+    }
+  }
+
   // Run code on component mount (once)
   onMount(() => {
     getOrders();
@@ -103,32 +136,51 @@ import Order from "./Order.svelte";
   {#if orders.length > 0}
     <table class="orders-table">
       <tr>
-        <th>Užsakymo ID</th>
-        <th>Užsakymo data</th>
+        <th on:click={() => sort(SortBy.ORDER_ID)}>
+          <div style="cursor:pointer;">Užsakymo ID</div></th
+        >
+        <th on:click={() => sort(SortBy.ORDER_DATE)}
+          ><div style="cursor:pointer;">Užsakymo data</div></th
+        >
         <th>Kiekis</th>
         <th>Suma</th>
-        <th>Statusas</th>
+        <th on:click={() => sort(SortBy.ORDER_STATUS)}
+          ><div style="cursor:pointer;">Statusas</div></th
+        >
         <th>Veiksmai</th>
       </tr>
-      {#each orders as order (order.id)}
-        <tr>
+      {#each orders as order, i (order.id)}
+        <tr
+          class="order-row {order.orderStatus === OrderStatus.UNPAID
+            ? 'order-row-unpaid'
+            : ''} {i % 2 === 0 ? 'order-row-grey' : ''}"
+        >
           <td>
             {order.id}
           </td>
           <td>
-            { formatDate(order.createdDate) }
+            {formatDate(order.createdDate)}
           </td>
           <td>
-            {order.orderFlowers.length}
+            {order.orderFlowers.reduce(
+              (acc, flower) => acc + flower.quantity,
+              0
+            )}
           </td>
           <td>
-            {order.totalOrderPrice.toFixed(2)}
+            {order.totalOrderPrice.toFixed(2)} €
           </td>
           <td>
-            {orderStatusString(order.orderStatus)}
+            <span
+              class={order.orderStatus === OrderStatus.UNPAID
+                ? "order-cell-unpaid"
+                : ""}
+            >
+              {orderStatusString(order.orderStatus)}
+            </span>
           </td>
           <td>
-            <a href="{'/editOrder/' + order.id}"> Daugiau info</a>
+            <Link to={"/editOrder/" + order.id}>Daugiau info</Link>
           </td>
         </tr>
       {/each}
@@ -142,13 +194,31 @@ import Order from "./Order.svelte";
   .order-list {
     margin-left: 40px;
     margin-right: 40px;
-
   }
 
+  .orders-table {
+    width: 100%;
+  }
 
-.orders-table {
-  width: 100%;
-}
+  /* .order-row {
+    opacity: 1;
+  }
+
+  .order-row-grey {
+    opacity: 0.75;
+  } */
+
+  .order-row-unpaid {
+    background-color: red;
+  }
+
+  /* .order-row:hover {
+    opacity: 0.75;
+  } */
+
+  .order-cell-unpaid {
+    font-weight: bold;
+  }
 
   h2 {
     color: #000000;
@@ -184,11 +254,5 @@ import Order from "./Order.svelte";
 
   td input {
     background-color: white;
-  }
-
-  img {
-    margin: 8px;
-    /* Weird bug with table cell height */
-    margin-bottom: 4px;
   }
 </style>

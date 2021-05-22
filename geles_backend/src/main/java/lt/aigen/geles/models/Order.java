@@ -1,6 +1,7 @@
 package lt.aigen.geles.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.Setter;
@@ -66,10 +67,10 @@ public class Order implements Serializable {
     }
 
     public enum OrderStatus {
-        UNPAID,
-        PAID,
-        CONFIRMED,
-        DELIVERED,
-        CANCELED
+        @JsonProperty("UNPAID") UNPAID,
+        @JsonProperty("PAID") PAID,
+        @JsonProperty("CONFIRMED") CONFIRMED,
+        @JsonProperty("DELIVERED") DELIVERED,
+        @JsonProperty("CANCELED") CANCELED
     }
 }

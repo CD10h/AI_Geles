@@ -77,6 +77,7 @@ public class CartController {
             flowerInCart = flowerInCartRepository.save(flowerInCart);
             flowersInCart.add(flowerInCart);
             System.out.println(flowerInCart);
+
         }
 
         newCart.setFlowersInCart(flowersInCart);
