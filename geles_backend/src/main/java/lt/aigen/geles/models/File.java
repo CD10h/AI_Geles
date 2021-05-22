@@ -18,6 +18,5 @@ public class File {
     private String name;
 
     @Lob
-    @Column(columnDefinition="bytea")
     private byte[] data;
 }

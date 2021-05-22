@@ -44,3 +44,14 @@ INSERT INTO public.flower_in_order (quantity, flower_id, order_id) VALUES (20, 1
 INSERT INTO public.flower_in_order (quantity, flower_id, order_id) VALUES (10, 10, 2);
 INSERT INTO public.flower_in_order (quantity, flower_id, order_id) VALUES (1337, 10, 2);
 INSERT INTO public.flower_in_order (quantity, flower_id, order_id) VALUES (10, 10, 2);
+INSERT INTO file (name, data) VALUES ('frezija.jfif', lo_import('F:\PSK\AI_Geles\geles_backend\static\flowers\frezija.jfif'));
+INSERT INTO file (name, data) VALUES ('gerbera.jfif', lo_import('F:\PSK\AI_Geles\geles_backend\static\flowers\gerbera.jfif'));
+INSERT INTO file (name, data) VALUES ('gvazdikas.jfif', lo_import('F:\PSK\AI_Geles\geles_backend\static\flowers\gvazdikas.jfif'));
+INSERT INTO file (name, data) VALUES ('hiacintas.jfif', lo_import('F:\PSK\AI_Geles\geles_backend\static\flowers\hiacintas.jfif'));
+INSERT INTO file (name, data) VALUES ('kalija.jfif', lo_import('F:\PSK\AI_Geles\geles_backend\static\flowers\kalija.jfif'));
+INSERT INTO file (name, data) VALUES ('kardelis.jfif', lo_import('F:\PSK\AI_Geles\geles_backend\static\flowers\kardelis.jfif'));
+INSERT INTO file (name, data) VALUES ('lelija.jfif', lo_import('F:\PSK\AI_Geles\geles_backend\static\flowers\lelija.jfif'));
+INSERT INTO file (name, data) VALUES ('narcizas.jfif', lo_import('F:\PSK\AI_Geles\geles_backend\static\flowers\narcizas.jfif'));
+INSERT INTO file (name, data) VALUES ('orchideja.jfif', lo_import('F:\PSK\AI_Geles\geles_backend\static\flowers\orchideja.jfif'));
+INSERT INTO file (name, data) VALUES ('roze.jfif', lo_import('F:\PSK\AI_Geles\geles_backend\static\flowers\roze.jfif'));
+INSERT INTO file (name, data) VALUES ('tulpe.jfif', lo_import('F:\PSK\AI_Geles\geles_backend\static\flowers\tulpe.jfif'));

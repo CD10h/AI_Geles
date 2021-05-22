@@ -33,7 +33,7 @@ public class FileController {
         return new ResponseEntity<>(HttpStatus.OK);
     }
 
-    @PostMapping("/{filename}")
+    @GetMapping("/{filename}")
     public ResponseEntity<String> getFile(@PathVariable String filename) {
         try {
             return new ResponseEntity<>(storageService.getFileAsBase64(filename), HttpStatus.OK);

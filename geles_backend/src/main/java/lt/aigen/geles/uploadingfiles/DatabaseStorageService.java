@@ -2,7 +2,9 @@ package lt.aigen.geles.uploadingfiles;
 
 import lt.aigen.geles.models.File;
 import lt.aigen.geles.repositories.FileRepository;
+import org.apache.tika.Tika;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.ConstraintViolationException;
@@ -24,7 +26,7 @@ public class DatabaseStorageService implements StorageService {
         }
 
         var file = new File();
-        file.setName(multipartFile.getName());
+        file.setName(multipartFile.getResource().getFilename());
         try {
             file.setData(multipartFile.getBytes());
             fileRepository.save(file);
@@ -36,12 +38,18 @@ public class DatabaseStorageService implements StorageService {
     }
 
     @Override
+    @Transactional
     public String getFileAsBase64(String filename) throws StorageFileNotFoundException {
         var file = fileRepository.findByName(filename);
+
         if (file.isEmpty()) {
             throw new StorageFileNotFoundException("File not found: " + filename);
         }
-        return Base64.getEncoder().encodeToString(file.get().getData());
+
+        Tika tika = new Tika();
+        String mimeType = tika.detect(file.get().getData());
+
+        return "data:" + mimeType + ";base64," + Base64.getEncoder().encodeToString(file.get().getData());
     }
 
     @Override

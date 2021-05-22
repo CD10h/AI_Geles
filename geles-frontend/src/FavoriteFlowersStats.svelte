@@ -3,6 +3,7 @@
   import { server_url } from "./index";
   import axios from "axios";
   import { Link } from "svelte-routing";
+  import { getPhoto } from "./photo";
 
   interface FavoriteFlowers {
     id: number;
@@ -38,13 +39,15 @@
           <td>
             <div class="imagecontainer">
               {#if flower.photo != null}
-                <img
-                  class="flower-list-item-photo"
-                  src={`${server_url}/static/flowers/${flower.photo}`}
-                  alt={flower.name}
-                  width="80"
-                  height="80"
-                />
+                {#await getPhoto(flower.photo) then image}
+                  <img
+                    class="flower-list-item-photo"
+                    src={image.data}
+                    alt={flower.name}
+                    width="80"
+                    height="80"
+                  />
+                {/await}
               {/if}
             </div>
           </td>

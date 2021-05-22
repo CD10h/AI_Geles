@@ -4,6 +4,7 @@
   import axios from "axios";
   import { Link } from "svelte-routing";
   import Input from "./Input.svelte";
+  import { getPhoto } from "./photo";
 
   interface CartTemplate {
     id: number;
@@ -167,13 +168,15 @@
           <tr>
             <div class="imagecontainer">
               {#if flowerInCart.photo != null}
-                <img
-                  class="flower-list-item-photo"
-                  src={`${server_url}/static/flowers/${flowerInCart.photo}`}
-                  alt={flowerInCart.name}
-                  width="80"
-                  height="80"
-                />
+                {#await getPhoto(flowerInCart.photo) then image}
+                  <img
+                    class="flower-list-item-photo"
+                    src={image.data}
+                    alt={flowerInCart.name}
+                    width="80"
+                    height="80"
+                  />
+                {/await}
               {/if}
             </div>
             <td>{flowerInCart.name}</td>

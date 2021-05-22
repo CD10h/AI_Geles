@@ -6,6 +6,9 @@
   import axios from "axios";
   import noPhoto from "./assets/no-image.jfif";
   import { user } from "./stores";
+  import { get } from "svelte/store";
+  import Flower from "./Flower.svelte";
+  import { getPhoto } from "./photo";
 
   // Variable to hold fetched list
   export let flowers: Flower[];
@@ -68,11 +71,13 @@
       <div class="flower-list-item-photo-container">
         <Link to="/flower/{flower.id}" class="link-wrapper">
           {#if flower.photo}
-            <img
-              class="flower-list-item-photo"
-              src={`${server_url}/static/flowers/${flower.photo}`}
-              alt={flower.name}
-            />
+            {#await getPhoto(flower.photo) then image}
+              <img
+                class="flower-list-item-photo"
+                src={image.data}
+                alt={flower.name}
+              />
+            {/await}
           {:else}
             <img
               class="flower-list-item-photo"

@@ -1,6 +1,6 @@
 package lt.aigen.geles.uploadingfiles;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+import org.apache.tika.Tika;
 import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -37,7 +37,7 @@ public class FileSystemStorageService implements StorageService {
             if (file.isEmpty()) {
                 throw new StorageException("Failed to store empty file.");
             }
-            Path destinationFile = this.rootLocation.resolve(Paths.get(file.getName()).normalize().toAbsolutePath());
+            Path destinationFile = this.rootLocation.resolve(Paths.get(rootLocation + "/" + file.getResource().getFilename()).normalize().toAbsolutePath());
             if (!destinationFile.getParent().equals(this.rootLocation.toAbsolutePath())) {
                 // This is a security check
                 throw new StorageException("Cannot store file outside current directory.");
@@ -56,7 +56,10 @@ public class FileSystemStorageService implements StorageService {
             Path file = rootLocation.resolve(filename);
             Resource resource = new UrlResource(file.toUri());
             if (resource.exists() || resource.isReadable()) {
-                return Base64.getEncoder().encodeToString(resource.getInputStream().readAllBytes());
+                Tika tika = new Tika();
+                String mimeType = tika.detect(resource.getInputStream());
+
+                return "data:" + mimeType + ";base64," + Base64.getEncoder().encodeToString(resource.getInputStream().readAllBytes());
             } else {
                 throw new StorageFileNotFoundException("Could not read file: " + filename);
             }
