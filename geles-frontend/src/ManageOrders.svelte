@@ -24,17 +24,7 @@
   } as const;
 
   let users: User[] = [];
-
-  let flowers: Flower[] = [];
   let orders: Order[] = [];
-
- 
-
-  async function getFlowers() {
-    // Download data from server
-    const response = await axios.get("/flowers/");
-    flowers = response.data;
-  }
 
   function userFromId(id: number): User {
     return users.find(f => f.id == id) as User;
@@ -52,37 +42,6 @@
     user.set(oldUser);
   }
 
-
-  function mapFlowersInOrder(data: any) {
-    return data.map((flowerInCart: any) => {
-      const flower = flowers.find(
-        flower => flower.id === flowerInCart.flowerId
-      );
-      if (!flower) {
-        return flowerInCart;
-      }
-      return {
-        ...flowerInCart,
-        name: flower.name,
-        price: flower.price,
-        sum: flower.price * flowerInCart.amount,
-        photo: flower.photo
-      };
-    });
-  }
-
-  async function handleDelete(order: Order) {
-    const response = await axios.delete(`/orders/${order.id}`, {
-      withCredentials: true
-    });
-  }
-
-  async function handlePay(order: Order) {
-    const response = await axios.post(`/orders/${order.id}/pay`, {
-      withCredentals: true
-    });
-    if (response.status == 403) alert("Apmokėti neleidžiama. :(");
-  }
 
   function formatDate(date: any) {
     var d = new Date(date),
@@ -130,6 +89,9 @@
             orderStatusSortingOrder[a.orderStatus] -
             orderStatusSortingOrder[b.orderStatus]
         );
+        break;
+      case SortBy.ORDER_USER:
+        orders = orders.sort((a: Order, b:Order) =>(userFromId(a.userId).username > userFromId(b.userId).username ? -1 : 1));
         break;
       default:
         throw "Unknown sorting order :(";

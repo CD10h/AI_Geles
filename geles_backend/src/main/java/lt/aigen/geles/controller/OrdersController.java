@@ -128,7 +128,7 @@ public class OrdersController {
         if (orderOpt.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         var order = orderOpt.get();
-        if (!doesOrderBelongToUser(order, user))
+        if (!user.getIsAdmin() && !doesOrderBelongToUser(order, user))
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
         if (order.getOrderStatus() != Order.OrderStatus.UNPAID)
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
@@ -233,6 +233,24 @@ public class OrdersController {
 
 
         order.setOrderStatus(Order.OrderStatus.CONFIRMED);
+        orderRepository.save(order);
+        return new ResponseEntity<>(convertToDTO(order), HttpStatus.OK);
+    }
+
+    @Authorized(admin = true)
+    @PostMapping("/{id}/confirmDelivery")
+    public ResponseEntity<?> confirmOrderDelivered(@PathVariable Long id, @RequestBody VersionDTO version)  {
+        var orderOpt = orderRepository.findById(id);
+        if (orderOpt.isEmpty())
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        var order = orderOpt.get();
+        if (!orderVersionValid(order, version.getVersion()))
+            return new ResponseEntity<>(HttpStatus.CONFLICT);
+        if (!order.getOrderStatus().equals(Order.OrderStatus.CONFIRMED)) {
+            return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
+        order.setOrderStatus(Order.OrderStatus.DELIVERED);
         orderRepository.save(order);
         return new ResponseEntity<>(convertToDTO(order), HttpStatus.OK);
     }

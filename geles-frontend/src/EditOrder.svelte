@@ -3,10 +3,16 @@
   import { user } from "./stores";
   import { server_url } from "./index";
   import axios from "axios";
+  import { getContext } from "svelte";
+  import { notificationContextKey } from "./contexts";
+
   import { Link } from "svelte-routing";
   import { bind, text } from "svelte/internal";
   import { OrderStatus } from "./enums";
-  import { version } from "chai";
+  import { AppNotificationType } from "./enums";
+
+  const { addLoadingNotification, addNotification } =
+    getContext<AppNotificationContext>(notificationContextKey);
 
   export let id: string;
   $: isAdmin = $user && $user.admin;
@@ -22,7 +28,8 @@
     SAVE,
     PAY,
     CANCEL,
-    ADMIN_CONFIRMPAY
+    ADMIN_CONFIRMPAY,
+    ADMIN_CONFIRMDELIVERED
   }
 
   let order: Omit<Order, "id" | "userId"> = {
@@ -89,7 +96,7 @@
     return flower.quantity * flowerFromId(flower.flowerId).price;
   }
 
-  function DisableButton(
+  function disableButton(
     status: OrderStatus,
     button: OrderEditButton
   ): boolean {
@@ -105,8 +112,7 @@
         break;
       case OrderEditButton.CANCEL:
         enableButton =
-        status != OrderStatus.CANCELED &&
-        status != OrderStatus.DELIVERED;
+          status != OrderStatus.CANCELED && status != OrderStatus.DELIVERED;
         break;
       case OrderEditButton.PAY:
         enableButton = status == OrderStatus.UNPAID;
@@ -114,22 +120,25 @@
       case OrderEditButton.ADMIN_CONFIRMPAY:
         enableButton = status == OrderStatus.PAID;
         break;
+      case OrderEditButton.ADMIN_CONFIRMDELIVERED:
+        enableButton = status == OrderStatus.CONFIRMED;
+        break;
     }
     return !enableButton;
   }
 
-  function EnableOrderEdits():boolean {
-    let enable :boolean = false;
+  function EnableOrderEdits(): boolean {
+    let enable: boolean = false;
     if (isAdmin) {
       enable =
-            status != OrderStatus.CANCELED && status != OrderStatus.DELIVERED;
-        } else {
-          enable = status == OrderStatus.UNPAID;
-        }
-      return enable;
+        order.orderStatus != OrderStatus.CANCELED &&
+        order.orderStatus != OrderStatus.DELIVERED;
+    } else {
+      enable = order.orderStatus == OrderStatus.UNPAID;
+    }
+    console.log(enable);
+    return enable;
   }
-
-  
 
   function handleDelete(fl: OrderFlower) {
     let index = editDto.orderFlowers.indexOf(fl);
@@ -143,7 +152,7 @@
   }
 
   async function getOrderData() {
-    let resp = await axios.get(`/orders/${id}`, { withCredentials: true })
+    let resp = await axios.get(`/orders/${id}`, { withCredentials: true });
     order = resp.data;
     editDto.orderFlowers = order.orderFlowers;
     editDto.address = order.address;
@@ -153,21 +162,42 @@
   }
 
   function handleUpdate() {
-    axios
-      .put(`/orders/${id}/edit`, editDto,).then(getOrderData);
+    axios.put(`/orders/${id}/edit`, editDto).then(getOrderData);
   }
 
   function handlePay() {
-    axios.post(`/orders/${id}/pay`, {version: order.version}).then(getOrderData);
+    axios
+      .post(`/orders/${id}/pay`, { version: order.version })
+      .then(getOrderData);
   }
 
   function handleCancel() {
-    axios.post(`/orders/${id}/cancel`, {version: order.version}).then(getOrderData);
+    axios
+      .post(`/orders/${id}/cancel`, { version: order.version })
+      .then(getOrderData);
   }
   function handleConfirmOrder() {
-    axios.post(`/orders/${id}/confirm`, {version: order.version}).then(getOrderData);
+    axios
+      .post(`/orders/${id}/confirm`, { version: order.version })
+      .then(getOrderData);
+  }
+  function handleConfirmDelivered() {
+    axios
+      .post(`/orders/${id}/confirmDelivery`, { version: order.version })
+      .then(getOrderData);
   }
 
+  function formatDate(date: any) {
+    var d = new Date(date),
+      month = "" + (d.getMonth() + 1),
+      day = "" + d.getDate(),
+      year = d.getFullYear();
+
+    if (month.length < 2) month = "0" + month;
+    if (day.length < 2) day = "0" + day;
+
+    return [year, month, day].join("-");
+  }
   function orderStatusString(status: any): string {
     switch (status) {
       case "UNPAID":
@@ -185,7 +215,6 @@
     }
   }
 
-
   // Run code on component mount (once)
   onMount(async () => {
     await axios.get(`/flowers/`).then(resp => {
@@ -198,87 +227,87 @@
 </script>
 
 <h2>
-  Užsakymas nr <strong>{order.id}</strong> Būsena : {orderStatusString(
-    order.orderStatus
-  )}
+  Užsakymas
 </h2>
 <div class="row">
   <div class="column">
-    <table>
-      <tr>
-        <th colspan="2">Gėlė</th>
-        <th>Kiekis</th>
-        <th>Vnt. kaina</th>
-        <th>Suma</th>
-        {#if order.orderStatus == "UNPAID"}
-          <th>Veiksmai</th>
-        {/if}
-      </tr>
-      {#each editDto.orderFlowers as flower (flower.id)}
+    <div class="flowers-table">
+      <table>
         <tr>
-          <div class="imagecontainer">
-            {#if flowerFromId(flower.flowerId).photo != null}
-              <img
-                class="flower-list-item-photo"
-                src={`${server_url}/static/flowers/${
-                  flowerFromId(flower.flowerId).photo
-                }`}
-                alt={flowerFromId(flower.flowerId).name}
-                width="80"
-                height="80"
-              />
-            {/if}
-          </div>
-          <td>{flowerFromId(flower.flowerId).name}</td>
-          <td>
-            {#if order.orderStatus == "UNPAID"}
-              <input
-                type="number"
-                bind:value={flower.quantity}
-                min="1"
-                max="100"
-                size="5"
-                on:input={e => {
-                  recalcSum();
-                }}
-              />
-            {:else}
-              {flower.quantity}
-            {/if}
-          </td>
-          <td class="number">{flowerFromId(flower.flowerId).price} €</td>
-          <td class="number">{rowSum(flower).toFixed(2)} €</td>
+          <th colspan="2">Gėlė</th>
+          <th>Kiekis</th>
+          <th>Vnt. kaina</th>
+          <th>Suma</th>
           {#if order.orderStatus == "UNPAID"}
-            <td>
-              <button on:click={() => handleDelete(flower)}>Pašalinti</button>
-            </td>
+            <th>Veiksmai</th>
           {/if}
         </tr>
-      {/each}
-    </table>
-    <div class="row buttonsrow">
-      <button
-        class="button savebutton"
-        disabled={DisableButton(order.orderStatus, OrderEditButton.SAVE)}
-        on:click={() => handleUpdate()}
-      >
-        Išsaugoti pakeitimus
-      </button>
-      <button
-        class="button paybutton"
-        disabled={DisableButton(order.orderStatus, OrderEditButton.PAY)}
-        on:click={() => handlePay()}
-      >
-        Apmokėti
-      </button>
+        {#each editDto.orderFlowers as flower (flower.id)}
+          <tr>
+            <div class="imagecontainer">
+              {#if flowerFromId(flower.flowerId).photo != null}
+                <img
+                  class="flower-list-item-photo"
+                  src={`${server_url}/static/flowers/${
+                    flowerFromId(flower.flowerId).photo
+                  }`}
+                  alt={flowerFromId(flower.flowerId).name}
+                  width="80"
+                  height="80"
+                />
+              {/if}
+            </div>
+            <td>{flowerFromId(flower.flowerId).name}</td>
+            <td>
+              {#if order.orderStatus == "UNPAID"}
+                <input
+                  type="number"
+                  bind:value={flower.quantity}
+                  min="1"
+                  max="100"
+                  size="5"
+                  on:input={e => {
+                    recalcSum();
+                  }}
+                />
+              {:else}
+                {flower.quantity}
+              {/if}
+            </td>
+            <td class="number">{flowerFromId(flower.flowerId).price} €</td>
+            <td class="number">{rowSum(flower).toFixed(2)} €</td>
+            {#if order.orderStatus == "UNPAID"}
+              <td>
+                <button on:click={() => handleDelete(flower)}>Pašalinti</button>
+              </td>
+            {/if}
+          </tr>
+        {/each}
+      </table>
+      <div class="row buttonsrow">
+        <button
+          class="button savebutton"
+          disabled={disableButton(order.orderStatus, OrderEditButton.SAVE)}
+          on:click={() => handleUpdate()}
+        >
+          Išsaugoti pakeitimus
+        </button>
+        <button
+          class="button paybutton"
+          disabled={disableButton(order.orderStatus, OrderEditButton.PAY)}
+          on:click={() => handlePay()}
+        >
+          Apmokėti
+        </button>
 
-      <button
-        class="button cancelbutton"
-        disabled={DisableButton(order.orderStatus, OrderEditButton.CANCEL)}
-        on:click={() => handleCancel()}
-      >
-        Atšaukti
-      </button>
+        <button
+          class="button cancelbutton"
+          disabled={disableButton(order.orderStatus, OrderEditButton.CANCEL)}
+          on:click={() => handleCancel()}
+        >
+          Atšaukti
+        </button>
+      </div>
     </div>
   </div>
   <div class="column">
@@ -291,6 +320,18 @@
           </div>
         </div>
       {/if}
+      <div class="editorder-inputrow">
+        <label for="orderId">Užsakymo ID</label>
+        <div id="orderId" class="editorder-textoutput">
+          <strong>{order.id}</strong>
+        </div>
+      </div>
+      <div class="editorder-inputrow">
+        <label for="orderStatus">Užsakymo Būsena</label>
+        <div id="orderStatus" class="editorder-textoutput">
+          {orderStatusString(order.orderStatus)}
+        </div>
+      </div>
       <div class="editorder-inputrow">
         <label for="adress">Adresas</label>
         {#if EnableOrderEdits()}
@@ -317,27 +358,51 @@
           />
         {:else}
           <div id="phone" class="editorder-textoutput">
-            Telefonas : {order.contactPhone}
+            {order.contactPhone}
           </div>
         {/if}
       </div>
+      <div class="editorder-inputrow">
+        <label for="totalsum"> Bendra užsakymo suma</label>
+        <div id="totalsum" class="editorder-textoutput">
+          {orderTotal.toFixed(2)} &euro;
+        </div>
+      </div>
+      <div class="editorder-inputrow">
+        <label for="orderDate">Užsakymo data</label>
+        <div id="orderDate" class="editorder-textoutput">
+          {formatDate(order.createdDate)}
+        </div>
+      </div>
+      
       {#if isAdmin}
         <div class="editorder-inputrow">
-          <div style="padding-top:40px;">
+          <div style="padding-top:40px;padding-bottom:40px;">
             <strong>Administratoriaus funkcijos</strong>
           </div>
         </div>
         <div class="editorder-inputrow">
           <button
-            id="confirmPayment"
-            class="button cancelbutton"
-            disabled={DisableButton(
+            class="button"
+            disabled={disableButton(
               order.orderStatus,
               OrderEditButton.ADMIN_CONFIRMPAY
             )}
             on:click={() => handleConfirmOrder()}
           >
-            Patvirtinti apomokėjimą
+            Patvirtinti apmokėjimą
+          </button>
+        </div>
+        <div class="editorder-inputrow">
+          <button
+            class="button"
+            disabled={disableButton(
+              order.orderStatus,
+              OrderEditButton.ADMIN_CONFIRMDELIVERED
+            )}
+            on:click={() => handleConfirmDelivered()}
+          >
+            Patvirtinti užsakymo užbaigimą (pristatymą/atsiėmimą)
           </button>
         </div>
       {/if}
@@ -360,6 +425,7 @@
   }
 
   table {
+    width: 100%;
     background-color: #d9d9d9;
     border: 4px solid #8ebf42;
     margin-bottom: 10px;
@@ -368,6 +434,9 @@
   th,
   td {
     padding: 4px 8px;
+  }
+  th {
+    margin: auto;
   }
 
   td {
@@ -393,7 +462,10 @@
   }
 
   .column {
-    flex: 50%;
+    flex-basis: 50%;
+  }
+  .flowers-table{
+    width: min-content;
   }
 
   .editorder-inputs {
