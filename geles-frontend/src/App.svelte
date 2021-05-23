@@ -89,11 +89,10 @@
           {/if}
           
           <Route path="/orders" component={ManageOrders} />
-          <Route path="/editOrder/:id" component={EditOrder}/>
+          <Route path="/order/edit/:id" component={EditOrder}/>
         {/if}
         <Route component={NotFound} />
       </div>
     </Router>
   {/if}
-      
 </NotificationContext>

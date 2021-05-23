@@ -25,7 +25,7 @@ interface FlowerInCart {
   photo: string;
 }
 
-enum OrderStatus {
+ declare enum OrderStatus {
   UNPAID = "UNPAID",
   PAID = "PAID",
   CONFIRMED = "CONFIRMED",

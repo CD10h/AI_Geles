@@ -2,20 +2,19 @@
   import { onMount } from "svelte";
   import { user } from "./stores";
   import { server_url } from "./index";
+  import {OrderStatus} from "./enums"
   import axios from "axios";
   import { getContext } from "svelte";
   import { notificationContextKey } from "./contexts";
-
-  import { Link } from "svelte-routing";
-  import { bind, text } from "svelte/internal";
-  import { OrderStatus } from "./enums";
   import { AppNotificationType } from "./enums";
 
-  const { addLoadingNotification, addNotification } =
-    getContext<AppNotificationContext>(notificationContextKey);
+  const { addNotification } = getContext<AppNotificationContext>(
+    notificationContextKey
+  );
 
   export let id: string;
   $: isAdmin = $user && $user.admin;
+  $: if (isAdmin) loadUser();
 
   interface OrderEdit {
     orderFlowers: OrderFlower[];
@@ -32,16 +31,7 @@
     ADMIN_CONFIRMDELIVERED
   }
 
-  let order: Omit<Order, "id" | "userId"> = {
-    createdDate: "",
-    totalOrderPrice: 0,
-    address: "",
-    contactPhone: "",
-    orderFlowers: [],
-    orderStatus: OrderStatus.CANCELED,
-    version: 0
-  };
-
+  let order: Order;
   let editDto: OrderEdit = {
     orderFlowers: [],
     contactPhone: "",
@@ -49,40 +39,18 @@
     version: 0
   };
 
-  let editedUser: User = {
-    id: 0,
-    username: "",
-    photo: null,
-    admin: false,
-    cartId: 0
-  };
+  let editedUser: User;
   let flowers: Flower[];
   let orderTotal: number = 0;
 
-  function flowerFromId(id: number): Flower {
-    return flowers.find(f => f.id == id) as Flower;
-  }
-
-  async function verifyLogin() {
-    let oldUser: User | null;
-    try {
-      const response = await axios.get<User>("/users/", {
-        withCredentials: true
-      });
-      oldUser = response.data;
-    } catch (e) {
-      oldUser = null;
-    }
-    user.set(oldUser);
+  function flowerFromId(id: number) {
+    const f = flowers.find(f => f.id == id);
+    if (f == null) throw new Error("Flower not found");
+    return f;
   }
 
   function recalcSum() {
-    orderTotal = order.orderFlowers
-      .map(
-        flowerInOrder =>
-          flowerFromId(flowerInOrder.flowerId).price * flowerInOrder.quantity
-      )
-      .reduce((a, b) => a + b, 0);
+    orderTotal = order.orderFlowers.map(rowSum).reduce((a, b) => a + b, 0);
   }
 
   async function loadUser() {
@@ -96,10 +64,7 @@
     return flower.quantity * flowerFromId(flower.flowerId).price;
   }
 
-  function disableButton(
-    status: OrderStatus,
-    button: OrderEditButton
-  ): boolean {
+  function disableButton(status: OrderStatus, button: OrderEditButton) {
     let enableButton: boolean = false;
     switch (button) {
       case OrderEditButton.SAVE:
@@ -153,19 +118,14 @@
   function handleError(reason: any) {
     let errString: string = "";
     if (reason.response) {
-      errString =
-        reason.response.data +
-        " " +
-        reason.response.status +
-        " " +
-        reason.response.headers;
+      errString = "Error: HTTP Status " + reason.response.status;
     } else if (reason.request) {
-      let errString = reason.request;
+      errString = reason.request;
     } else {
       // Something happened in setting up the request that triggered an Error
-      let errString = reason;
+      errString = reason;
     }
-    console.log("Error", reason);
+    console.error(reason);
     addNotification(errString, AppNotificationType.DANGER);
   }
 
@@ -179,44 +139,60 @@
     recalcSum();
   }
 
-  function handleUpdate() {
-    axios.put(`/orders/${id}/edit`, editDto)
-    .then(getOrderData)
-    .then(() => addNotification("Užsakymas atnaujintas",AppNotificationType.SUCCESS))
-    .catch(handleError);
+  async function handleUpdate() {
+    try {
+      await axios.put(`/orders/${id}/edit`, editDto);
+      await getOrderData();
+      addNotification("Užsakymas atnaujintas", AppNotificationType.SUCCESS);
+    } catch (err) {
+      handleError(err);
+    }
   }
 
-  function handlePay() {
-    axios
-      .post(`/orders/${id}/pay`, { version: order.version })
-      .then(getOrderData)
-      .then(() => addNotification("Užsakymas apmokėtas",AppNotificationType.SUCCESS))
-      .catch(handleError);
+  async function handlePay() {
+    try {
+      await axios.post(`/orders/${id}/pay`, { version: order.version });
+      await getOrderData();
+      addNotification("Užsakymas apmokėtas", AppNotificationType.SUCCESS);
+    } catch (err) {
+      handleError(err);
+    }
   }
 
-  function handleCancel() {
-    axios
-      .post(`/orders/${id}/cancel`, { version: order.version })
-      .then(getOrderData)
-      .then(() => addNotification("Užsakymas atšauktas",AppNotificationType.SUCCESS))
-      .catch(handleError);
+  async function handleCancel() {
+    try {
+      await axios.post(`/orders/${id}/cancel`, { version: order.version });
+      await getOrderData();
+      addNotification("Užsakymas atšauktas", AppNotificationType.SUCCESS);
+    } catch (err) {
+      handleError(err);
+    }
   }
-  function handleConfirmOrder() {
-    axios
-      .post(`/orders/${id}/confirm`, { version: order.version })
-      .then(getOrderData)
-      .then(() => addNotification("Užsakymas patvirtintas",AppNotificationType.SUCCESS))
-      .catch(handleError);
+  async function handleConfirmOrder() {
+    try {
+      await axios.post(`/orders/${id}/confirm`, { version: order.version });
+      await getOrderData();
+      addNotification("Užsakymas patvirtintas", AppNotificationType.SUCCESS);
+    } catch (err) {
+      handleError(err);
+    }
   }
-  function handleConfirmDelivered() {
-    axios
-      .post(`/orders/${id}/confirmDelivery`, { version: order.version })
-      .then(getOrderData)
-      .then(() => addNotification("Užsakymo pristatymas patvirtintas",AppNotificationType.SUCCESS))
-      .catch(handleError);
+  async function handleConfirmDelivered() {
+    try {
+      await axios.post(`/orders/${id}/confirmDelivery`, {
+        version: order.version
+      });
+      await getOrderData();
+      addNotification(
+        "Užsakymo pristatymas patvirtintas",
+        AppNotificationType.SUCCESS
+      );
+    } catch (err) {
+      handleError(err);
+    }
   }
 
-  function formatDate(date: any) {
+  function formatDate(date: string) {
     var d = new Date(date),
       month = "" + (d.getMonth() + 1),
       day = "" + d.getDate(),
@@ -227,7 +203,7 @@
 
     return [year, month, day].join("-");
   }
-  function orderStatusString(status: any): string {
+  function orderStatusString(status: string) {
     switch (status) {
       case "UNPAID":
         return "Neapmokėta";
@@ -246,15 +222,16 @@
 
   // Run code on component mount (once)
   onMount(async () => {
-    await axios.get(`/flowers/`).then(resp => {
-      flowers = resp.data;
-    });
+    console.log("Id " + id)
+    const response = await axios.get(`/flowers/`);
+    flowers = response.data;
     await getOrderData();
-    await verifyLogin();
-    if (isAdmin) await loadUser();
   });
 </script>
 
+{#if order == null}
+<h2>Kraunama....</h2>
+{:else}
 <h2>Užsakymas</h2>
 <div class="row">
   <div class="column">
@@ -293,9 +270,7 @@
                   min="1"
                   max="100"
                   size="5"
-                  on:input={e => {
-                    recalcSum();
-                  }}
+                  on:input={recalcSum}
                 />
               {:else}
                 {flower.quantity}
@@ -313,24 +288,24 @@
       </table>
       <div class="row buttonsrow">
         <button
-          class="button savebutton"
+          class="button"
           disabled={disableButton(order.orderStatus, OrderEditButton.SAVE)}
-          on:click={() => handleUpdate()}
+          on:click={handleUpdate}
         >
           Išsaugoti pakeitimus
         </button>
         <button
-          class="button paybutton"
+          class="button"
           disabled={disableButton(order.orderStatus, OrderEditButton.PAY)}
-          on:click={() => handlePay()}
+          on:click={handlePay}
         >
           Apmokėti
         </button>
 
         <button
-          class="button cancelbutton"
+          class="button"
           disabled={disableButton(order.orderStatus, OrderEditButton.CANCEL)}
-          on:click={() => handleCancel()}
+          on:click={handleCancel}
         >
           Atšaukti
         </button>
@@ -415,7 +390,7 @@
               order.orderStatus,
               OrderEditButton.ADMIN_CONFIRMPAY
             )}
-            on:click={() => handleConfirmOrder()}
+            on:click={handleConfirmOrder}
           >
             Patvirtinti apmokėjimą
           </button>
@@ -427,7 +402,7 @@
               order.orderStatus,
               OrderEditButton.ADMIN_CONFIRMDELIVERED
             )}
-            on:click={() => handleConfirmDelivered()}
+            on:click={handleConfirmDelivered}
           >
             Patvirtinti užsakymo užbaigimą (pristatymą/atsiėmimą)
           </button>
@@ -436,7 +411,7 @@
     </div>
   </div>
 </div>
-
+{/if }
 <style>
   h2 {
     color: #000000;

@@ -24,6 +24,7 @@ public class FlowerInOrder {
     @JoinColumn(name = "order_id")
     private Order order;
 
+    @ManyToOne
     @NotNull
     @JoinColumn(name = "flower_id")
     private Flower flower;

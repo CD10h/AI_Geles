@@ -2,17 +2,17 @@
   import { onMount } from "svelte";
   import { user } from "./stores";
   import axios from "axios";
+  import {OrderStatus} from "./enums"
   import { Link } from "svelte-routing";
-  import { OrderStatus } from "./enums";
-  //import {Order, Flower} from "../types/flower";
 
   $: isAdmin = $user && $user.admin;
+  $: if (isAdmin) loadUsers();
 
   enum SortBy {
-    ORDER_ID,
-    ORDER_DATE,
-    ORDER_STATUS,
-    ORDER_USER
+    ID,
+    DATE,
+    STATUS,
+    USER
   }
 
   const orderStatusSortingOrder = {
@@ -29,21 +29,8 @@
   function userFromId(id: number): User {
     return users.find(f => f.id == id) as User;
   }
-  async function verifyLogin() {
-    let oldUser: User | null;
-    try {
-      const response = await axios.get<User>("/users/", {
-        withCredentials: true
-      });
-      oldUser = response.data;
-    } catch (e) {
-      oldUser = null;
-    }
-    user.set(oldUser);
-  }
-
-
-  function formatDate(date: any) {
+  
+  function formatDate(date: string) {
     var d = new Date(date),
       month = "" + (d.getMonth() + 1),
       day = "" + d.getDate(),
@@ -55,17 +42,17 @@
     return [year, month, day].join("-");
   }
 
-  function orderStatusString(status: any): string {
+  function orderStatusString(status: OrderStatus) {
     switch (status) {
-      case "UNPAID":
+      case OrderStatus.UNPAID:
         return "Neapmokėta";
-      case "PAID":
+      case OrderStatus.PAID:
         return "Apmokėtas";
-      case "CONFIRMED":
+      case OrderStatus.CONFIRMED:
         return "Patvirtintas";
-      case "DELIVERED":
+      case OrderStatus.DELIVERED:
         return "Pristatytas";
-      case "CANCELED":
+      case OrderStatus.CANCELED:
         return "Atšauktas";
       default:
         return "???????";
@@ -74,23 +61,23 @@
 
   function sort(sortingOrder: SortBy) {
     switch (sortingOrder) {
-      case SortBy.ORDER_DATE:
+      case SortBy.DATE:
         orders = orders.sort(
           (a: Order, b: Order) =>
             +new Date(a.createdDate) - +new Date(b.createdDate)
         );
         break;
-      case SortBy.ORDER_ID:
+      case SortBy.ID:
         orders = orders.sort((a: Order, b: Order) => a.id - b.id);
         break;
-      case SortBy.ORDER_STATUS:
+      case SortBy.STATUS:
         orders = orders.sort(
           (a, b) =>
             orderStatusSortingOrder[a.orderStatus] -
             orderStatusSortingOrder[b.orderStatus]
         );
         break;
-      case SortBy.ORDER_USER:
+      case SortBy.USER:
         orders = orders.sort((a: Order, b:Order) =>(userFromId(a.userId).username > userFromId(b.userId).username ? -1 : 1));
         break;
       default:
@@ -102,19 +89,18 @@
     const response = await axios.get<Order[]>(`/orders/`, {
       withCredentials: true
     });
-    console.log(response.data);
 
     orders = response.data;
-    sort(SortBy.ORDER_ID);
+    sort(SortBy.ID);
   }
+  
   async function loadUsers() {
     let usersRes = await axios.get(`/users/all/`, { withCredentials: true });
     users = usersRes.data;
   }
+
   // Run code on component mount (once)
   onMount(async () => {
-    await verifyLogin();
-    if (isAdmin) await loadUsers();
     await getOrders();
   });
 </script>
@@ -128,20 +114,20 @@
   {#if orders.length > 0}
     <table class="orders-table">
       <tr>
-        <th on:click={() => sort(SortBy.ORDER_ID)}>
+        <th on:click={() => sort(SortBy.ID)}>
           <div style="cursor:pointer;">Užsakymo ID</div>
         </th>
-        <th on:click={() => sort(SortBy.ORDER_DATE)}>
+        <th on:click={() => sort(SortBy.DATE)}>
           <div style="cursor:pointer;">Užsakymo data</div>
         </th>
         {#if isAdmin}
-          <th on:click={() => sort(SortBy.ORDER_USER)}>
+          <th on:click={() => sort(SortBy.USER)}>
             <div style="cursor:pointer;">Vartotojas</div>
           </th>
         {/if}
         <th>Kiekis</th>
         <th>Suma</th>
-        <th on:click={() => sort(SortBy.ORDER_STATUS)}
+        <th on:click={() => sort(SortBy.STATUS)}
           ><div style="cursor:pointer;">Statusas</div></th
         >
         <th>Veiksmai</th>
@@ -182,7 +168,7 @@
             </span>
           </td>
           <td>
-            <Link to={"/editOrder/" + order.id}>Daugiau info</Link>
+            <Link to={`/order/edit/${order.id}`}>Daugiau info</Link>
           </td>
         </tr>
       {/each}

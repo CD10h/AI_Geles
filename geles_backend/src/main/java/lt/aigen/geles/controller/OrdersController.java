@@ -11,7 +11,6 @@ import org.modelmapper.ModelMapper;
 import org.springframework.dao.OptimisticLockingFailureException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.*;
 
 import javax.transaction.Transactional;
@@ -82,8 +81,9 @@ public class OrdersController {
     @GetMapping("/")
     public ResponseEntity<List<OrderDTO>> getOrders() {
         var user = currentUser.get();
-        if (user.getIsAdmin()) // ;)
+        if (user.getIsAdmin()) { // ;)
             return new ResponseEntity<>(orderRepository.findAll().stream().map(this::convertToDTO).collect(Collectors.toList()), HttpStatus.OK);
+        }
         var orders = orderRepository.findAllByUser(user).stream().map(this::convertToDTO).collect(Collectors.toList());
         return new ResponseEntity<>(orders, HttpStatus.OK);
     }
@@ -96,25 +96,29 @@ public class OrdersController {
         if (orderOpt.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         var order = orderOpt.get();
-        if ( !user.getIsAdmin() && !doesOrderBelongToUser(order, user))
+        if (!user.getIsAdmin() && !doesOrderBelongToUser(order, user)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         return new ResponseEntity<>(convertToDTO(order), HttpStatus.OK);
     }
 
     @Authorized
     @Transactional
     @DeleteMapping("/{id}")
-    public ResponseEntity<Object> deleteOrder(@PathVariable Long id, @RequestBody VersionDTO version)  {
+    public ResponseEntity<Object> deleteOrder(@PathVariable Long id, @RequestBody VersionDTO version) {
         var user = currentUser.get();
         var orderOpt = orderRepository.findById(id);
-        if (orderOpt.isEmpty())
+        if (orderOpt.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         var order = orderOpt.get();
-        if ( !user.getIsAdmin() && !doesOrderBelongToUser(order, user))
+        if (!user.getIsAdmin() && !doesOrderBelongToUser(order, user)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         //check manually because DTO does not map to order
-        if (!orderVersionValid(order, version.getVersion()))
+        if (!orderVersionValid(order, version.getVersion())) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
         orderRepository.delete(order);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
@@ -122,20 +126,24 @@ public class OrdersController {
 
     @Authorized
     @PostMapping("/{id}/pay")
-    public ResponseEntity<OrderDTO> payForOrder(@PathVariable Long id, @RequestBody VersionDTO version)  {
+    public ResponseEntity<OrderDTO> payForOrder(@PathVariable Long id, @RequestBody VersionDTO version) {
         var user = currentUser.get();
         var orderOpt = orderRepository.findById(id);
-        if (orderOpt.isEmpty())
+        if (orderOpt.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         var order = orderOpt.get();
-        if (!user.getIsAdmin() && !doesOrderBelongToUser(order, user))
+        if (!user.getIsAdmin() && !doesOrderBelongToUser(order, user)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
-        if (order.getOrderStatus() != Order.OrderStatus.UNPAID)
+        }
+        if (order.getOrderStatus() != Order.OrderStatus.UNPAID) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
         order.setOrderStatus(Order.OrderStatus.PAID);
         //check manually because DTO does not map to order
-        if (!orderVersionValid(order, version.getVersion()))
+        if (!orderVersionValid(order, version.getVersion())) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
         orderRepository.save(order);
         return new ResponseEntity<>(convertToDTO(order), HttpStatus.OK);
     }
@@ -145,19 +153,24 @@ public class OrdersController {
     public ResponseEntity<OrderDTO> cancelOrder(@PathVariable Long id, @RequestBody VersionDTO version) {
         var user = currentUser.get();
         var orderOpt = orderRepository.findById(id);
-        if (orderOpt.isEmpty())
+        if (orderOpt.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         var order = orderOpt.get();
-        if (!user.getIsAdmin() && !doesOrderBelongToUser(order, user))
+        if (!user.getIsAdmin() && !doesOrderBelongToUser(order, user)) {
             return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
+        }
         if (order.getOrderStatus().equals(Order.OrderStatus.DELIVERED) ||
-                order.getOrderStatus().equals(Order.OrderStatus.CANCELED) )
+                order.getOrderStatus().equals(Order.OrderStatus.CANCELED)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
+        }
+
         order.setOrderStatus(Order.OrderStatus.CANCELED);
 
         //check manually because DTO does not map to order
-        if (!orderVersionValid(order, version.getVersion()))
+        if (!orderVersionValid(order, version.getVersion())) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
         orderRepository.save(order);
         return new ResponseEntity<>(convertToDTO(order), HttpStatus.OK);
     }
@@ -167,21 +180,25 @@ public class OrdersController {
     @Transactional
     public ResponseEntity<OrderDTO> editOrder(@PathVariable Long id, @RequestBody OrderEditDTO orderEditDTO) {
         var orderOpt = orderRepository.findById(id);
-        if (orderOpt.isEmpty())
+        if (orderOpt.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         var user = currentUser.get();
         var order = orderOpt.get();
+
         if (order.getOrderStatus().equals(Order.OrderStatus.CANCELED) ||
                 order.getOrderStatus().equals(Order.OrderStatus.DELIVERED)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
         //admin can edit confirmed and paid-for orders
-        if (!user.getIsAdmin() && !order.getOrderStatus().equals(Order.OrderStatus.UNPAID))
+        if (!user.getIsAdmin() && !order.getOrderStatus().equals(Order.OrderStatus.UNPAID)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
-
+        }
         //check manually because DTO does not map to order exactly
-        if (!orderVersionValid(order, orderEditDTO.getVersion()))
+        if (!orderVersionValid(order, orderEditDTO.getVersion())) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
+
 
         var flowerInOrderDTOs = orderEditDTO.getOrderFlowers();
         if (flowerInOrderDTOs.isEmpty()) {
@@ -219,13 +236,15 @@ public class OrdersController {
 
     @Authorized(admin = true)
     @PostMapping("/{id}/confirm")
-    public ResponseEntity<?> confirmOrder(@PathVariable Long id, @RequestBody VersionDTO version)  {
+    public ResponseEntity<?> confirmOrder(@PathVariable Long id, @RequestBody VersionDTO version) {
         var orderOpt = orderRepository.findById(id);
-        if (orderOpt.isEmpty())
+        if (orderOpt.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
         var order = orderOpt.get();
-        if (!orderVersionValid(order, version.getVersion()))
+        if (!orderVersionValid(order, version.getVersion())) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
         if (!order.getOrderStatus().equals(Order.OrderStatus.UNPAID) &&
                 !order.getOrderStatus().equals(Order.OrderStatus.PAID)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
@@ -239,13 +258,14 @@ public class OrdersController {
 
     @Authorized(admin = true)
     @PostMapping("/{id}/confirmDelivery")
-    public ResponseEntity<?> confirmOrderDelivered(@PathVariable Long id, @RequestBody VersionDTO version)  {
+    public ResponseEntity<?> confirmOrderDelivered(@PathVariable Long id, @RequestBody VersionDTO version) {
         var orderOpt = orderRepository.findById(id);
         if (orderOpt.isEmpty())
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         var order = orderOpt.get();
-        if (!orderVersionValid(order, version.getVersion()))
+        if (!orderVersionValid(order, version.getVersion())) {
             return new ResponseEntity<>(HttpStatus.CONFLICT);
+        }
         if (!order.getOrderStatus().equals(Order.OrderStatus.CONFIRMED)) {
             return new ResponseEntity<>(HttpStatus.FORBIDDEN);
         }
