@@ -1,5 +1,7 @@
 # AiGeles
 
+![Screenshot_2021-04-29-12-56-45](https://user-images.githubusercontent.com/42966588/119275373-486b5800-bc1d-11eb-837f-2b46abb88a2d.png)
+
 ## How to run project
 
 1. Install PostgreSQL 13.2
