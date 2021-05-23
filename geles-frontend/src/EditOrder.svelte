@@ -14,7 +14,7 @@
 
   export let id: string;
   $: isAdmin = $user && $user.admin;
-  $: if (isAdmin) loadUser();
+  $: if (isAdmin && order != null) loadUser();
 
   interface OrderEdit {
     orderFlowers: OrderFlower[];
@@ -39,7 +39,7 @@
     version: 0
   };
 
-  let editedUser: User;
+  let editedUserName: string = "";
   let flowers: Flower[];
   let orderTotal: number = 0;
 
@@ -57,7 +57,7 @@
     let userRes = await axios.get(`/users/${order.userId}`, {
       withCredentials: true
     });
-    editedUser = userRes.data;
+    editedUserName = userRes.data.username;
   }
 
   function rowSum(flower: OrderFlower) {
@@ -222,7 +222,6 @@
 
   // Run code on component mount (once)
   onMount(async () => {
-    console.log("Id " + id)
     const response = await axios.get(`/flowers/`);
     flowers = response.data;
     await getOrderData();
@@ -318,7 +317,7 @@
         <div class="editorder-inputrow" style="height: 30px;">
           <label for="user">Vartotojas</label>
           <div id="user" class="editorder-textoutput">
-            {editedUser.username}
+            {editedUserName}
           </div>
         </div>
       {/if}
