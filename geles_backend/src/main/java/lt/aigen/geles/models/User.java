@@ -49,7 +49,6 @@ public class User implements Serializable {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Order> orders = new ArrayList<>();
 
-    @NotBlank
     @NotNull
     @Column(columnDefinition = "boolean default false")
     private Boolean isAdmin;
