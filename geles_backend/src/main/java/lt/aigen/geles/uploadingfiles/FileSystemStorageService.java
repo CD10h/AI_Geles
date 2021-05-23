@@ -1,7 +1,6 @@
 package lt.aigen.geles.uploadingfiles;
 
 import org.apache.tika.Tika;
-import org.springframework.context.annotation.Primary;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -50,21 +49,29 @@ public class FileSystemStorageService implements StorageService {
     }
 
     @Override
-    public String getFileAsBase64(String filename) throws IOException, StorageFileNotFoundException {
+    public byte[] getFile(String filename)  {
         try {
             Path file = rootLocation.resolve(filename);
             Resource resource = new UrlResource(file.toUri());
-            if (resource.exists() || resource.isReadable()) {
-                Tika tika = new Tika();
-                String mimeType = tika.detect(resource.getInputStream());
-
-                return "data:" + mimeType + ";base64," + Base64.getEncoder().encodeToString(resource.getInputStream().readAllBytes());
-            } else {
-                throw new StorageFileNotFoundException("Could not read file: " + filename);
+            try {
+                if (resource.exists() || resource.isReadable()) {
+                    return resource.getInputStream().readAllBytes();
+                }
+            } catch (IOException e) {
             }
+            throw new StorageFileNotFoundException("Could not read file: " + filename);
         } catch (MalformedURLException e) {
             throw new StorageFileNotFoundException("Could not read file: " + filename, e);
         }
+    }
+
+    @Override
+    public String getFileAsBase64(String filename) throws IOException, StorageFileNotFoundException {
+        byte[] file = getFile(filename);
+        Tika tika = new Tika();
+        String mimeType = tika.detect(file);
+
+        return "data:" + mimeType + ";base64," + Base64.getEncoder().encodeToString(file);
     }
 
     @Override

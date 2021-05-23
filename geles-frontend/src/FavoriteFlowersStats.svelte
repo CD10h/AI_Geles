@@ -39,15 +39,13 @@
           <td>
             <div class="imagecontainer">
               {#if flower.photo != null}
-                {#await getPhoto(flower.photo) then image}
-                  <img
-                    class="flower-list-item-photo"
-                    src={image.data}
-                    alt={flower.name}
-                    width="80"
-                    height="80"
-                  />
-                {/await}
+                <img
+                  class="flower-list-item-photo"
+                  src="{server_url}/files/{flower.photo}"
+                  alt={flower.name}
+                  width="80"
+                  height="80"
+                />
               {/if}
             </div>
           </td>

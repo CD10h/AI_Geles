@@ -71,15 +71,13 @@
     <div class="photoandinfo">
       <div class="imagecontainer">
         {#if flower.photo}
-          {#await getPhoto(flower.photo) then image}
-            <img
-              class="flower-photo"
-              src={image.data}
-              alt={flower.name}
-              width="400"
-              height="400"
-            />
-          {/await}
+          <img
+            class="flower-photo"
+            src="{server_url}/files/{flower.photo}"
+            alt={flower.name}
+            width="400"
+            height="400"
+          />
         {/if}
         {#if isLoggedIn && !isAdmin}
           <div

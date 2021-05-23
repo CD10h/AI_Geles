@@ -168,15 +168,13 @@
           <tr>
             <div class="imagecontainer">
               {#if flowerInCart.photo != null}
-                {#await getPhoto(flowerInCart.photo) then image}
-                  <img
-                    class="flower-list-item-photo"
-                    src={image.data}
-                    alt={flowerInCart.name}
-                    width="80"
-                    height="80"
-                  />
-                {/await}
+                <img
+                  class="flower-list-item-photo"
+                  src="{server_url}/files/{flowerInCart.photo}"
+                  alt={flowerInCart.name}
+                  width="80"
+                  height="80"
+                />
               {/if}
             </div>
             <td>{flowerInCart.name}</td>

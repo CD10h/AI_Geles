@@ -2,7 +2,7 @@
   import { onMount } from "svelte";
   import { user } from "./stores";
   import { server_url } from "./index";
-  import {OrderStatus} from "./enums"
+  import { OrderStatus } from "./enums";
   import axios from "axios";
   import { getContext } from "svelte";
   import { notificationContextKey } from "./contexts";
@@ -203,7 +203,7 @@
 
     return [year, month, day].join("-");
   }
-  
+
   function orderStatusString(status: OrderStatus) {
     switch (status) {
       case OrderStatus.UNPAID:
@@ -230,188 +230,191 @@
 </script>
 
 {#if order == null}
-<h2>Kraunama....</h2>
+  <h2>Kraunama....</h2>
 {:else}
-<h2>Užsakymas</h2>
-<div class="row">
-  <div class="column">
-    <div class="flowers-table">
-      <table>
-        <tr>
-          <th colspan="2">Gėlė</th>
-          <th>Kiekis</th>
-          <th>Vnt. kaina</th>
-          <th>Suma</th>
-          {#if order.orderStatus == "UNPAID"}
-            <th>Veiksmai</th>
-          {/if}
-        </tr>
-        {#each editDto.orderFlowers as flower (flower.id)}
+  <h2>Užsakymas</h2>
+  <div class="row">
+    <div class="column">
+      <div class="flowers-table">
+        <table>
           <tr>
-            <div class="imagecontainer">
-              {#if flowerFromId(flower.flowerId).photo != null}
-                <img
-                  class="flower-list-item-photo"
-                  src={`${server_url}/static/flowers/${
-                    flowerFromId(flower.flowerId).photo
-                  }`}
-                  alt={flowerFromId(flower.flowerId).name}
-                  width="80"
-                  height="80"
-                />
-              {/if}
-            </div>
-            <td>{flowerFromId(flower.flowerId).name}</td>
-            <td>
-              {#if order.orderStatus == "UNPAID"}
-                <input
-                  type="number"
-                  bind:value={flower.quantity}
-                  min="1"
-                  max="100"
-                  size="5"
-                  on:input={recalcSum}
-                />
-              {:else}
-                {flower.quantity}
-              {/if}
-            </td>
-            <td class="number">{flowerFromId(flower.flowerId).price} €</td>
-            <td class="number">{rowSum(flower).toFixed(2)} €</td>
+            <th colspan="2">Gėlė</th>
+            <th>Kiekis</th>
+            <th>Vnt. kaina</th>
+            <th>Suma</th>
             {#if order.orderStatus == "UNPAID"}
-              <td>
-                <button on:click={() => handleDelete(flower)}>Pašalinti</button>
-              </td>
+              <th>Veiksmai</th>
             {/if}
           </tr>
-        {/each}
-      </table>
-      <div class="row buttonsrow">
-        <button
-          class="button"
-          disabled={disableButton(order.orderStatus, OrderEditButton.SAVE)}
-          on:click={handleUpdate}
-        >
-          Išsaugoti pakeitimus
-        </button>
-        <button
-          class="button"
-          disabled={disableButton(order.orderStatus, OrderEditButton.PAY)}
-          on:click={handlePay}
-        >
-          Apmokėti
-        </button>
+          {#each editDto.orderFlowers as flower (flower.id)}
+            <tr>
+              <div class="imagecontainer">
+                {#if flowerFromId(flower.flowerId).photo != null}
+                  <img
+                    class="flower-list-item-photo"
+                    src={`${server_url}/files/${
+                      flowerFromId(flower.flowerId).photo
+                    }`}
+                    alt={flowerFromId(flower.flowerId).name}
+                    width="80"
+                    height="80"
+                  />
+                {/if}
+              </div>
+              <td>{flowerFromId(flower.flowerId).name}</td>
+              <td>
+                {#if order.orderStatus == "UNPAID"}
+                  <input
+                    type="number"
+                    bind:value={flower.quantity}
+                    min="1"
+                    max="100"
+                    size="5"
+                    on:input={recalcSum}
+                  />
+                {:else}
+                  {flower.quantity}
+                {/if}
+              </td>
+              <td class="number">{flowerFromId(flower.flowerId).price} €</td>
+              <td class="number">{rowSum(flower).toFixed(2)} €</td>
+              {#if order.orderStatus == "UNPAID"}
+                <td>
+                  <button on:click={() => handleDelete(flower)}
+                    >Pašalinti</button
+                  >
+                </td>
+              {/if}
+            </tr>
+          {/each}
+        </table>
+        <div class="row buttonsrow">
+          <button
+            class="button"
+            disabled={disableButton(order.orderStatus, OrderEditButton.SAVE)}
+            on:click={handleUpdate}
+          >
+            Išsaugoti pakeitimus
+          </button>
+          <button
+            class="button"
+            disabled={disableButton(order.orderStatus, OrderEditButton.PAY)}
+            on:click={handlePay}
+          >
+            Apmokėti
+          </button>
 
-        <button
-          class="button"
-          disabled={disableButton(order.orderStatus, OrderEditButton.CANCEL)}
-          on:click={handleCancel}
-        >
-          Atšaukti
-        </button>
+          <button
+            class="button"
+            disabled={disableButton(order.orderStatus, OrderEditButton.CANCEL)}
+            on:click={handleCancel}
+          >
+            Atšaukti
+          </button>
+        </div>
       </div>
     </div>
-  </div>
-  <div class="column">
-    <div class="editorder-inputs">
-      {#if isAdmin}
-        <div class="editorder-inputrow" style="height: 30px;">
-          <label for="user">Vartotojas</label>
-          <div id="user" class="editorder-textoutput">
-            {editedUserName}
+    <div class="column">
+      <div class="editorder-inputs">
+        {#if isAdmin}
+          <div class="editorder-inputrow" style="height: 30px;">
+            <label for="user">Vartotojas</label>
+            <div id="user" class="editorder-textoutput">
+              {editedUserName}
+            </div>
+          </div>
+        {/if}
+        <div class="editorder-inputrow">
+          <label for="orderId">Užsakymo ID</label>
+          <div id="orderId" class="editorder-textoutput">
+            <strong>{order.id}</strong>
           </div>
         </div>
-      {/if}
-      <div class="editorder-inputrow">
-        <label for="orderId">Užsakymo ID</label>
-        <div id="orderId" class="editorder-textoutput">
-          <strong>{order.id}</strong>
+        <div class="editorder-inputrow">
+          <label for="orderStatus">Užsakymo Būsena</label>
+          <div id="orderStatus" class="editorder-textoutput">
+            {orderStatusString(order.orderStatus)}
+          </div>
         </div>
-      </div>
-      <div class="editorder-inputrow">
-        <label for="orderStatus">Užsakymo Būsena</label>
-        <div id="orderStatus" class="editorder-textoutput">
-          {orderStatusString(order.orderStatus)}
+        <div class="editorder-inputrow">
+          <label for="adress">Adresas</label>
+          {#if EnableOrderEdits()}
+            <input
+              class="editorder-textinput"
+              id="address"
+              type="text"
+              bind:value={editDto.address}
+            />
+          {:else}
+            <div id="address" class="editorder-textoutput">
+              {order.address}
+            </div>
+          {/if}
         </div>
-      </div>
-      <div class="editorder-inputrow">
-        <label for="adress">Adresas</label>
-        {#if EnableOrderEdits()}
-          <input
-            class="editorder-textinput"
-            id="address"
-            type="text"
-            bind:value={editDto.address}
-          />
-        {:else}
-          <div id="address" class="editorder-textoutput">
-            {order.address}
+        <div class="editorder-inputrow">
+          <label for="phone">Telefonas</label>
+          {#if EnableOrderEdits()}
+            <input
+              class="editorder-textinput"
+              type="text"
+              id="phone"
+              bind:value={editDto.contactPhone}
+            />
+          {:else}
+            <div id="phone" class="editorder-textoutput">
+              {order.contactPhone}
+            </div>
+          {/if}
+        </div>
+        <div class="editorder-inputrow">
+          <label for="totalsum"> Bendra užsakymo suma</label>
+          <div id="totalsum" class="editorder-textoutput">
+            {orderTotal.toFixed(2)} &euro;
+          </div>
+        </div>
+        <div class="editorder-inputrow">
+          <label for="orderDate">Užsakymo data</label>
+          <div id="orderDate" class="editorder-textoutput">
+            {formatDate(order.createdDate)}
+          </div>
+        </div>
+
+        {#if isAdmin}
+          <div class="editorder-inputrow">
+            <div style="padding-top:40px;padding-bottom:40px;">
+              <strong>Administratoriaus funkcijos</strong>
+            </div>
+          </div>
+          <div class="editorder-inputrow">
+            <button
+              class="button"
+              disabled={disableButton(
+                order.orderStatus,
+                OrderEditButton.ADMIN_CONFIRMPAY
+              )}
+              on:click={handleConfirmOrder}
+            >
+              Patvirtinti apmokėjimą
+            </button>
+          </div>
+          <div class="editorder-inputrow">
+            <button
+              class="button"
+              disabled={disableButton(
+                order.orderStatus,
+                OrderEditButton.ADMIN_CONFIRMDELIVERED
+              )}
+              on:click={handleConfirmDelivered}
+            >
+              Patvirtinti užsakymo užbaigimą (pristatymą/atsiėmimą)
+            </button>
           </div>
         {/if}
       </div>
-      <div class="editorder-inputrow">
-        <label for="phone">Telefonas</label>
-        {#if EnableOrderEdits()}
-          <input
-            class="editorder-textinput"
-            type="text"
-            id="phone"
-            bind:value={editDto.contactPhone}
-          />
-        {:else}
-          <div id="phone" class="editorder-textoutput">
-            {order.contactPhone}
-          </div>
-        {/if}
-      </div>
-      <div class="editorder-inputrow">
-        <label for="totalsum"> Bendra užsakymo suma</label>
-        <div id="totalsum" class="editorder-textoutput">
-          {orderTotal.toFixed(2)} &euro;
-        </div>
-      </div>
-      <div class="editorder-inputrow">
-        <label for="orderDate">Užsakymo data</label>
-        <div id="orderDate" class="editorder-textoutput">
-          {formatDate(order.createdDate)}
-        </div>
-      </div>
-
-      {#if isAdmin}
-        <div class="editorder-inputrow">
-          <div style="padding-top:40px;padding-bottom:40px;">
-            <strong>Administratoriaus funkcijos</strong>
-          </div>
-        </div>
-        <div class="editorder-inputrow">
-          <button
-            class="button"
-            disabled={disableButton(
-              order.orderStatus,
-              OrderEditButton.ADMIN_CONFIRMPAY
-            )}
-            on:click={handleConfirmOrder}
-          >
-            Patvirtinti apmokėjimą
-          </button>
-        </div>
-        <div class="editorder-inputrow">
-          <button
-            class="button"
-            disabled={disableButton(
-              order.orderStatus,
-              OrderEditButton.ADMIN_CONFIRMDELIVERED
-            )}
-            on:click={handleConfirmDelivered}
-          >
-            Patvirtinti užsakymo užbaigimą (pristatymą/atsiėmimą)
-          </button>
-        </div>
-      {/if}
     </div>
   </div>
-</div>
-{/if }
+{/if}
+
 <style>
   h2 {
     color: #000000;

@@ -71,13 +71,11 @@
       <div class="flower-list-item-photo-container">
         <Link to="/flower/{flower.id}" class="link-wrapper">
           {#if flower.photo}
-            {#await getPhoto(flower.photo) then image}
-              <img
-                class="flower-list-item-photo"
-                src={image.data}
-                alt={flower.name}
-              />
-            {/await}
+            <img
+              class="flower-list-item-photo"
+              src="{server_url}/files/{flower.photo}"
+              alt={flower.name}
+            />
           {:else}
             <img
               class="flower-list-item-photo"

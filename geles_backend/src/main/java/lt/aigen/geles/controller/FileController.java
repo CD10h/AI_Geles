@@ -25,9 +25,9 @@ public class FileController {
     }
 
     @GetMapping("/{filename}")
-    public ResponseEntity<String> getFile(@PathVariable String filename) {
+    public ResponseEntity<byte[]> getFile(@PathVariable String filename) {
         try {
-            return new ResponseEntity<>(storageService.getFileAsBase64(filename), HttpStatus.OK);
+            return new ResponseEntity<>(storageService.getFile(filename), HttpStatus.OK);
         } catch (IOException | StorageFileNotFoundException e) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }

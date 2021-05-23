@@ -9,5 +9,7 @@ public interface StorageService {
 
     String getFileAsBase64(String filename) throws IOException;
 
+    byte[] getFile(String filename) throws IOException;
+
     void deleteFile(String filename) throws IOException;
 }

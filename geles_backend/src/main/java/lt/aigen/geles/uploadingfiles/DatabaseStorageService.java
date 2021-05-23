@@ -39,17 +39,25 @@ public class DatabaseStorageService implements StorageService {
 
     @Override
     @Transactional
-    public String getFileAsBase64(String filename) throws StorageFileNotFoundException {
+    public byte[] getFile(String filename) throws StorageFileNotFoundException {
         var file = fileRepository.findByName(filename);
 
         if (file.isEmpty()) {
             throw new StorageFileNotFoundException("File not found: " + filename);
         }
 
-        Tika tika = new Tika();
-        String mimeType = tika.detect(file.get().getData());
+        return file.get().getData();
+    }
 
-        return "data:" + mimeType + ";base64," + Base64.getEncoder().encodeToString(file.get().getData());
+    @Override
+    @Transactional
+    public String getFileAsBase64(String filename) throws StorageFileNotFoundException {
+        byte[] file = getFile(filename);
+
+        Tika tika = new Tika();
+        String mimeType = tika.detect(file);
+
+        return "data:" + mimeType + ";base64," + Base64.getEncoder().encodeToString(file);
     }
 
     @Override
