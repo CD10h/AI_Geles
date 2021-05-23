@@ -26,7 +26,7 @@
     const formData = new FormData();
     formData.append("file", files[0]);
     try {
-      await axios.post("/file/", formData, {
+      await axios.post("/files/", formData, {
         headers: { "Content-Type": "multipart/form-data" }
       });
     } catch (e) {

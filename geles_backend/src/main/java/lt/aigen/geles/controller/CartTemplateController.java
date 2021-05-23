@@ -7,6 +7,7 @@ import lt.aigen.geles.models.dto.CartTemplateDTO;
 import lt.aigen.geles.models.dto.FlowerInCartDTO;
 import lt.aigen.geles.repositories.CartTemplateRepository;
 import lt.aigen.geles.repositories.FlowerInCartRepository;
+import lt.aigen.geles.repositories.FlowerRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,12 +25,15 @@ import java.util.stream.Collectors;
 public class CartTemplateController {
     CartTemplateRepository cartTemplateRepository;
     FlowerInCartRepository flowerInCartRepository;
+    FlowerRepository flowerRepository;
     ModelMapper modelMapper;
     CurrentUser currentUser;
 
-    public CartTemplateController(CartTemplateRepository cartTemplateRepository, FlowerInCartRepository flowerInCartRepository, ModelMapper modelMapper, CurrentUser currentUser) {
+    public CartTemplateController(CartTemplateRepository cartTemplateRepository, FlowerInCartRepository flowerInCartRepository,
+                                  FlowerRepository flowerRepository, ModelMapper modelMapper, CurrentUser currentUser) {
         this.cartTemplateRepository = cartTemplateRepository;
         this.flowerInCartRepository = flowerInCartRepository;
+        this.flowerRepository = flowerRepository;
         this.modelMapper = modelMapper;
         this.currentUser = currentUser;
     }
@@ -47,7 +51,7 @@ public class CartTemplateController {
     @Authorized
     @Transactional
     @PostMapping("/")
-    public ResponseEntity<CartTemplateDTO> postCartTemplate(@RequestBody @Validated CartTemplateDTO cartTemplateDTO, @CookieValue("user") String userCookie){
+    public ResponseEntity<CartTemplateDTO> postCartTemplate(@RequestBody @Validated CartTemplateDTO cartTemplateDTO){
 
         List<FlowerInCartDTO> flowerInCartDTOs = cartTemplateDTO.getFlowersInCart();
         List<FlowerInCart> flowersInCart = new ArrayList<>();
@@ -57,7 +61,9 @@ public class CartTemplateController {
         CartTemplate savedTemplate = cartTemplateRepository.save(cartTemplate);
 
         for(var f: flowerInCartDTOs){
+            var flower = flowerRepository.findById(f.getFlowerId());
             FlowerInCart flowerInCart = convertFromDTO(f);
+            flowerInCart.setFlower(flower.get());
             flowerInCart.setCart(null);
             flowerInCart.setCartTemplate(savedTemplate);
             flowersInCart.add(flowerInCartRepository.save(flowerInCart));

@@ -5,6 +5,7 @@
   import { user } from "./stores";
   import { mapFlowerToWithFavorite } from "./util/flower";
   import { Link, navigate } from "svelte-routing";
+  import { getPhoto } from "./photo";
 
   export let flowerId: number;
 
@@ -69,13 +70,15 @@
   {#if flower != null}
     <div class="photoandinfo">
       <div class="imagecontainer">
-        <img
-          class="flower-photo"
-          src={`${server_url}/static/flowers/${flower.photo}`}
-          alt={flower.name}
-          width="400"
-          height="400"
-        />
+        {#if flower.photo}
+          <img
+            class="flower-photo"
+            src="{server_url}/files/{flower.photo}"
+            alt={flower.name}
+            width="400"
+            height="400"
+          />
+        {/if}
         {#if isLoggedIn && !isAdmin}
           <div
             class="flower-list-item-favorite"
