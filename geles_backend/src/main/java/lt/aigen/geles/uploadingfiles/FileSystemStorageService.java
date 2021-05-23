@@ -17,7 +17,6 @@ import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
 import java.util.Base64;
 
-@Primary
 @Service("fileSystemStorage")
 public class FileSystemStorageService implements StorageService {
     private final Path rootLocation;
