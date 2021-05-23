@@ -40,11 +40,14 @@ public class User implements Serializable {
     @ManyToMany(mappedBy = "userFavorites")
     private Set<Flower> favoriteFlowers = new HashSet<>();
 
-    @OneToOne
+    @OneToOne(cascade = CascadeType.ALL, orphanRemoval = true)
     private Cart cart;
     
-    @OneToMany(mappedBy = "user")
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<CartTemplate> cartTemplates = new ArrayList<>();
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Order> orders = new ArrayList<>();
 
     @NotNull
     @Column(columnDefinition = "boolean default false")

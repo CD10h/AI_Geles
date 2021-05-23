@@ -25,11 +25,7 @@ interface FlowerInCart {
   photo: string;
 }
 
-enum OrderStatus {
-  UNPAID,
-  PAID,
-  DELIVERED
-}
+
 
 interface Order {
   readonly id: number;
@@ -40,6 +36,7 @@ interface Order {
   orderFlowers: OrderFlower[];
   readonly userId: number;
   orderStatus: OrderStatus;
+  version: number;
 }
 
 interface OrderAdd {
