@@ -11,11 +11,12 @@
   const { addNotification, addLoadingNotification } =
     getContext<AppNotificationContext>(notificationContextKey);
 
-  let flower: Omit<Flower, "id" | "favorite"> = {
+  let flower: Omit<Flower, "id"> = {
     name: "",
     price: 0,
     description: "",
-    daysToExpire: 0
+    daysToExpire: 0,
+    version: 0
   };
 
   export let id: string;
@@ -47,6 +48,17 @@
             return; // Avoid showing error message
           } else if (e.response.status === 500) {
             errors = [`Internal server error: ${e.response.data.message}`];
+          } else if (e.response.status === 409) {
+            if (
+              window.confirm(
+                "Informacija buvo pakeista kito vartotojo. Spauskite OK, jei norite pakeisti esamus duomenis įvestais. Norėdami atsinaujinti duomenis, perkraukite puslapį."
+              )
+            ) {
+              const newFlower = await getFlower();
+              flower.version = newFlower.version;
+              handleSubmit();
+            }
+            return;
           }
         }
       }
@@ -54,11 +66,15 @@
     }
   }
 
-  onMount(() => {
-    axios
-      .get(`/flowers/${id}`, { withCredentials: true })
-      .then(response => (flower = response.data));
+  onMount(async () => {
+    flower = await getFlower();
   });
+
+  async function getFlower() {
+    return (
+      await axios.get<Flower>(`/flowers/${id}`, { withCredentials: true })
+    ).data;
+  }
 </script>
 
 <div class="pagecontent">

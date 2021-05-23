@@ -3,15 +3,11 @@ package lt.aigen.geles.controller;
 import lt.aigen.geles.annotations.Authorized;
 import lt.aigen.geles.components.CurrentUser;
 import lt.aigen.geles.models.Cart;
-import lt.aigen.geles.models.Flower;
 import lt.aigen.geles.models.FlowerInCart;
-import lt.aigen.geles.models.User;
 import lt.aigen.geles.models.dto.CartDTO;
-import lt.aigen.geles.models.dto.FlowerDTO;
 import lt.aigen.geles.models.dto.FlowerInCartDTO;
 import lt.aigen.geles.repositories.CartRepository;
 import lt.aigen.geles.repositories.FlowerInCartRepository;
-import lt.aigen.geles.repositories.UserRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -22,7 +18,6 @@ import javax.transaction.Transactional;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/carts")
@@ -86,9 +81,8 @@ public class CartController {
             FlowerInCart flowerInCart = convertFromDTO(f);
             flowerInCart.setCart(newCart);
             flowerInCart.setCartTemplate(null);
-            flowerInCart = flowerInCartRepository.save(flowerInCart);
+            flowerInCartRepository.save(flowerInCart);
             flowersInCart.add(flowerInCart);
-            System.out.println(flowerInCart);
         }
 
         newCart.setFlowersInCart(flowersInCart);

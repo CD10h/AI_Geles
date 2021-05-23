@@ -73,6 +73,10 @@ public class Flower implements Serializable {
     @Min(1)
     private Integer daysToExpire;
 
+    @Version
+    @Column(columnDefinition = "integer default 0")
+    private Integer version;
+
     @ManyToMany
     @JoinTable(
         name = "user_flower",
@@ -82,13 +86,15 @@ public class Flower implements Serializable {
     )
     private Set<User> userFavorites = new HashSet<>();
 
-    public Flower(Long id, String name, Double price, String description, String photo, Integer daysToExpire) {
+    public Flower(Long id, String name, Double price, String description, String photo, Integer daysToExpire,
+                  Integer version) {
         this.id = id;
         this.name = name;
         this.price = price;
         this.description = description;
         this.photo = photo;
         this.daysToExpire = daysToExpire;
+        this.version = version;
     }
 
     @Override
