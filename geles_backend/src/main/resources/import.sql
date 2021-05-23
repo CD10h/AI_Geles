@@ -1,3 +1,5 @@
+SELECT lo_unlink(l.oid) FROM pg_largeobject_metadata l JOIN pg_roles r on l.lomowner = r.oid WHERE r.rolname = 'user1';
+VACUUM;
 INSERT INTO cart (id) VALUES (DEFAULT);
 INSERT INTO cart (id) VALUES (DEFAULT);
 INSERT INTO cart (id) VALUES (DEFAULT);

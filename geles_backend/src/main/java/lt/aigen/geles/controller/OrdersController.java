@@ -220,7 +220,9 @@ public class OrdersController {
         order.getOrderProducts().addAll(newFlowersInOrder);
         order.setAddress(orderEditDTO.getAddress());
         order.setContactPhone(orderEditDTO.getContactPhone());
-        order.setOrderStatus(Order.OrderStatus.UNPAID);
+
+        if (!user.getIsAdmin())
+            order.setOrderStatus(Order.OrderStatus.UNPAID);
 
         try {
             flowerInOrderRepository.saveAll(newFlowersInOrder);
