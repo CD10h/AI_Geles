@@ -1,6 +1,7 @@
 package lt.aigen.geles.models;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonValue;
 import lombok.Getter;
 import lombok.Setter;
@@ -30,8 +31,7 @@ public class Order implements Serializable {
 
     @NotNull
     private Date createdDate;
-
-    @OneToMany(mappedBy = "order")
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<FlowerInOrder> orderProducts = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -67,12 +67,14 @@ public class Order implements Serializable {
     }
 
     public enum OrderStatus {
-        UNPAID,
-        PAID,
-        DELIVERED;
-        @JsonValue
-        public int toValue() {
-            return ordinal();
-        }
+        @JsonProperty("UNPAID") UNPAID,
+        @JsonProperty("PAID") PAID,
+        @JsonProperty("CONFIRMED") CONFIRMED,
+        @JsonProperty("DELIVERED") DELIVERED,
+        @JsonProperty("CANCELED") CANCELED
     }
+
+    @Version
+    @Column(columnDefinition = "integer default 0")
+    private Integer version;
 }

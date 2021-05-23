@@ -1,7 +1,9 @@
 export enum OrderStatus {
-  UNPAID,
-  PAID,
-  DELIVERED
+  UNPAID = "UNPAID",
+  PAID = "PAID",
+  CONFIRMED = "CONFIRMED",
+  DELIVERED = "DELIVERED",
+  CANCELED = "CANCELED"
 }
 
 export enum AppNotificationType {
