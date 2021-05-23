@@ -203,17 +203,18 @@
 
     return [year, month, day].join("-");
   }
-  function orderStatusString(status: string) {
+  
+  function orderStatusString(status: OrderStatus) {
     switch (status) {
-      case "UNPAID":
+      case OrderStatus.UNPAID:
         return "Neapmokėta";
-      case "PAID":
+      case OrderStatus.PAID:
         return "Apmokėtas";
-      case "CONFIRMED":
+      case OrderStatus.CONFIRMED:
         return "Patvirtintas";
-      case "DELIVERED":
+      case OrderStatus.DELIVERED:
         return "Pristatytas";
-      case "CANCELED":
+      case OrderStatus.CANCELED:
         return "Atšauktas";
       default:
         return "???????";
