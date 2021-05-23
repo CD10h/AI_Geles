@@ -25,13 +25,7 @@ interface FlowerInCart {
   photo: string;
 }
 
- declare enum OrderStatus {
-  UNPAID = "UNPAID",
-  PAID = "PAID",
-  CONFIRMED = "CONFIRMED",
-  DELIVERED = "DELIVERED",
-  CANCELED = "CANCELED"
-}
+
 
 interface Order {
   readonly id: number;
