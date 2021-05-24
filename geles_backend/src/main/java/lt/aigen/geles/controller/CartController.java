@@ -8,6 +8,7 @@ import lt.aigen.geles.models.dto.CartDTO;
 import lt.aigen.geles.models.dto.FlowerInCartDTO;
 import lt.aigen.geles.repositories.CartRepository;
 import lt.aigen.geles.repositories.FlowerInCartRepository;
+import lt.aigen.geles.repositories.FlowerRepository;
 import org.modelmapper.ModelMapper;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -24,13 +25,16 @@ import java.util.Optional;
 public class CartController {
     CartRepository cartRepository;
     CurrentUser currentUser;
+    FlowerRepository flowerRepository;
     FlowerInCartRepository flowerInCartRepository;
     ModelMapper modelMapper;
 
-    public CartController(CartRepository cartRepository, CurrentUser currentUser, FlowerInCartRepository flowerInCartRepository, ModelMapper modelMapper) {
+    public CartController(CartRepository cartRepository, CurrentUser currentUser, FlowerRepository flowerRepository,
+                          FlowerInCartRepository flowerInCartRepository, ModelMapper modelMapper) {
         this.cartRepository = cartRepository;
         this.currentUser = currentUser;
         this.flowerInCartRepository = flowerInCartRepository;
+        this.flowerRepository = flowerRepository;
         this.modelMapper = modelMapper;
     }
 
@@ -78,7 +82,9 @@ public class CartController {
 
         List<FlowerInCart> flowersInCart = new ArrayList<>();
         for (var f : cartDTO.getFlowersInCart()) {
+            var flower = flowerRepository.findById(f.getFlowerId());
             FlowerInCart flowerInCart = convertFromDTO(f);
+            flowerInCart.setFlower(flower.get());
             flowerInCart.setCart(newCart);
             flowerInCart.setCartTemplate(null);
             flowerInCartRepository.save(flowerInCart);

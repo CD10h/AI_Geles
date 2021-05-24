@@ -35,6 +35,7 @@ import java.util.Set;
                         @ColumnResult(name = "description"),
                         @ColumnResult(name = "days_to_expire"),
                         @ColumnResult(name = "photo"),
+                        @ColumnResult(name = "version"),
                 })
 )
 @SqlResultSetMapping(name="mapToFlowerWithAmount",

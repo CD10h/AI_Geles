@@ -1,16 +1,18 @@
 package lt.aigen.geles;
 
-import lt.aigen.geles.models.Order;
-import lt.aigen.geles.models.dto.OrderDTO;
+import lt.aigen.geles.uploadingfiles.FileSystemStorageService;
 import lt.aigen.geles.uploadingfiles.StorageService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.convention.MatchingStrategies;
-import org.springframework.boot.CommandLineRunner;
+import org.springframework.context.ApplicationContext;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
+import org.springframework.core.env.Environment;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
+
+import java.util.Arrays;
 
 @Configuration
 @Profile("development")
@@ -30,11 +32,15 @@ public class DevConfiguration implements WebMvcConfigurer {
         return modelMapper;
     }
 
-    //Storage Service bean add for uploading files
     @Bean
-    CommandLineRunner init(StorageService storageService) {
-        return (args) -> {
-            storageService.init();
-        };
+    public StorageService storageService(ApplicationContext applicationContext,
+                                         Environment environment, FileSystemStorageService fileSystemStorageService) {
+        String serviceName = environment.getProperty("storage.service.name");
+
+        if (Arrays.asList(applicationContext.getBeanDefinitionNames()).contains(serviceName)) {
+            return applicationContext.getBean(serviceName, StorageService.class);
+        } else {
+            return fileSystemStorageService;
+        }
     }
 }
