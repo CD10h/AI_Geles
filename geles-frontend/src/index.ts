@@ -1,7 +1,7 @@
 import axios from "axios";
 import "svelte";
 
-import App from "./App.svelte";
+import AppWithContexts from "./AppWithContexts.svelte";
 
 export const server_url = "http://localhost:8080";
 axios.defaults.baseURL = server_url;
@@ -19,7 +19,7 @@ axios.interceptors.response.use(
   }
 );
 
-var app = new App({
+var app = new AppWithContexts({
   target: document.body
 });
 

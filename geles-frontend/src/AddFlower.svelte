@@ -8,8 +8,9 @@
   import { notificationContextKey } from "./contexts";
   import { AppNotificationType } from "./enums";
 
-  const { addLoadingNotification, addNotification } =
-    getContext<AppNotificationContext>(notificationContextKey);
+  const { loading, success, error } = getContext<AppNotificationContext>(
+    notificationContextKey
+  );
 
   let flower: Omit<Flower, "id" | "favorite"> = {
     name: "",
@@ -20,7 +21,7 @@
   };
 
   let errors: string[] = [];
-  let files: File[];
+  let files: FileList;
 
   async function upload() {
     const formData = new FormData();
@@ -37,10 +38,7 @@
           }
         }
       }
-      addNotification(
-        "Nepavyko pridėti nuotraukos",
-        AppNotificationType.DANGER
-      );
+      error("Nepavyko pridėti nuotraukos");
     }
   }
 
@@ -58,7 +56,7 @@
       flower.photo = files[0].name;
     }
     try {
-      await addLoadingNotification(
+      await loading(
         "Pridedama...",
         (async () => {
           await axios.post("/flowers/", flower, {
@@ -69,7 +67,7 @@
           }
         })()
       );
-      addNotification("Gėlė sėkmingai pridėta", AppNotificationType.SUCCESS);
+      success("Gėlė sėkmingai pridėta");
       navigate("/");
     } catch (e) {
       if (isAxiosError(e)) {
@@ -84,7 +82,7 @@
           }
         }
       }
-      addNotification("Nepavyko pridėti gėlės", AppNotificationType.DANGER);
+      error("Klaida pridedant gėlę");
     }
   }
 </script>

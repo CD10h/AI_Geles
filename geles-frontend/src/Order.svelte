@@ -4,6 +4,12 @@
   import { navigate } from "svelte-routing";
   import Input from "./Input.svelte";
   import { isAxiosError } from "./util";
+  import { getContext } from "svelte";
+  import { notificationContextKey } from "./contexts";
+
+  const { loading, success, error } = getContext<AppNotificationContext>(
+    notificationContextKey
+  );
 
   export let cartId: string;
 
@@ -61,7 +67,11 @@
 
   async function handleSubmit() {
     try {
-      await axios.post("/orders/", order, { withCredentials: true });
+      await loading(
+        "Užsakoma...",
+        axios.post("/orders/", order, { withCredentials: true })
+      );
+      success("Užsakyta");
       navigate("/");
     } catch (e) {
       if (isAxiosError(e)) {
@@ -70,17 +80,18 @@
             errors = e.response.data.errors.map(
               error => `${error.field} ${error.defaultMessage}`
             );
-          } else if (e.response.status === 500) {
-            errors = [`Internal server error: ${e.response.data.message}`];
+            return;
           }
         }
       }
+      error("Klaida pateikiant užsakymą");
     }
   }
 
   // Run code on component mount (once)
-  onMount(() => {
-    getFlowers().then(() => getCart());
+  onMount(async () => {
+    await getFlowers();
+    getCart();
   });
 </script>
 

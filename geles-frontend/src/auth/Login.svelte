@@ -4,29 +4,41 @@
   import { isAxiosError } from "../util";
   import axios from "axios";
   import { user } from "../stores";
+  import { getContext } from "svelte";
+  import { notificationContextKey } from "../contexts";
+
+  const { loading, success, error } = getContext<AppNotificationContext>(
+    notificationContextKey
+  );
 
   let loginFields = {
     username: "",
     password: ""
   };
 
-  let error: string = "";
-
   async function handleSubmit() {
     try {
-      await axios.post("/auth/login/", loginFields, {
-        withCredentials: true
-      });
-      const response = await axios.get<User>("/users/", {
-        withCredentials: true
-      });
-      user.set(response.data);
+      await loading(
+        "Prisijungiama...",
+        (async () => {
+          await axios.post("/auth/login/", loginFields, {
+            withCredentials: true
+          });
+          const response = await axios.get<User>("/users/", {
+            withCredentials: true
+          });
+          user.set(response.data);
+        })()
+      );
+      success("Prisijungta");
       navigate("/");
     } catch (e) {
       if (isAxiosError(e)) {
         if (e.response) {
           if (e.response.status === 400) {
-            error = "Neteisingas vartotojo vardas ar slaptažodis";
+            error("Neteisingas vartotojo vardas ar slaptažodis");
+          } else {
+            error("Klaida prisijungiant");
           }
         }
       }
@@ -57,27 +69,10 @@
       autocomplete="current-password"
     /><br /><br />
     <button class="button">Prisijungti</button>
-    {#if error}
-      <p class="error">
-        <i class="mdi mdi-alert-circle" />
-        {error.slice(0, 1).toUpperCase()}{error.slice(1)}
-      </p>
-    {/if}
   </form>
 </div>
 
 <style>
-  .error {
-    color: red;
-    display: flex;
-    align-items: center;
-  }
-
-  .error .mdi {
-    font-size: 24px;
-    margin-right: 8px;
-  }
-
   .button {
     margin-left: 0;
   }
