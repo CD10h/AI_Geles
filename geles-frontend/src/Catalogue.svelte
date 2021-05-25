@@ -1,14 +1,18 @@
 <script>
   import { server_url } from "./index";
   import { Link } from "svelte-routing";
-  import { onMount } from "svelte";
+  import { beforeUpdate, getContext, onMount } from "svelte";
+  import hash from "hash-sum";
 
   import axios from "axios";
   import noPhoto from "./assets/no-image.jfif";
   import { user } from "./stores";
-  import { get } from "svelte/store";
-  import Flower from "./Flower.svelte";
-  import { getPhoto } from "./photo";
+  import { pluralize } from "./util";
+  import { notificationContextKey } from "./contexts";
+
+  const { loading, success, error } = getContext<AppNotificationContext>(
+    notificationContextKey
+  );
 
   // Variable to hold fetched list
   export let flowers: Flower[];
@@ -17,21 +21,25 @@
   export let onFavoriteChange: ((flower: Flower) => void) | undefined =
     undefined;
 
-  interface Cart {
-    id: number;
-    flowersInCart: [];
-  }
-
-  let cartId = 0;
-  let amount = 1;
-
   $: isLoggedIn = !!$user;
   $: isAdmin = $user && $user.admin;
 
+  let cartId: number;
+  let flowersWithAmount: (Flower & { amount: number })[] = [];
+  let prevFlowerHash: string;
+
   async function handleDelete(id: number, name: string) {
     if (window.confirm(`Ar tikrai norite ištrinti gėlę ${name}?`)) {
-      await axios.delete(`${server_url}/flowers/${id}`);
-      if (onChange) onChange();
+      try {
+        await loading(
+          "Ištrinama...",
+          axios.delete(`${server_url}/flowers/${id}`)
+        );
+        success("Gėlė ištrinta");
+        if (onChange) onChange();
+      } catch (e) {
+        error("Klaida ištrinant gėlę");
+      }
     }
   }
 
@@ -52,12 +60,47 @@
       flowerId,
       cartId
     });
+    success(
+      `${pluralize(
+        "Pridėta",
+        "Pridėtos",
+        "Pridėta",
+        amount
+      )} ${amount} ${pluralize("gėlė", "gėlės", "gėlių", amount)}`
+    );
   }
 
   onMount(() => {
     if ($user) {
       cartId = $user.cartId;
     }
+  });
+
+  beforeUpdate(() => {
+    if (flowers) {
+      if (prevFlowerHash !== hash(flowers)) {
+        flowersWithAmount = flowers.map(flower => ({ ...flower, amount: 1 }));
+      } else {
+        // Check for amounts that have been set below 1
+        // Filter flowers that have amount less than one
+        const invalidAmounts = flowersWithAmount.filter(
+          flower => flower.amount < 1
+        );
+
+        // Update invalid flower amounts to 1
+        flowersWithAmount = flowersWithAmount.map(flower => ({
+          ...flower,
+          amount:
+            // If flower belongs to invalidAmounts
+            invalidAmounts.some(
+              flowerWithAmount => flowerWithAmount.id === flower.id
+            )
+              ? 1
+              : flower.amount
+        }));
+      }
+    }
+    prevFlowerHash = hash(flowers);
   });
 </script>
 
@@ -66,7 +109,7 @@
     Map each `flowers` entry as an HTML element `li` 
     When `flowers` updates, so does this block
   -->
-  {#each flowers as flower (flower.id)}
+  {#each flowersWithAmount as flower (flower.id)}
     <div class="flower-list-item">
       <div class="flower-list-item-photo-container">
         <Link to="/flower/{flower.id}" class="link-wrapper">
@@ -117,14 +160,15 @@
           type="number"
           min="1"
           max="100"
-          on:input={e => (amount = +e.currentTarget.value)}
-          value="1"
+          bind:value={flower.amount}
           size="7"
         />
         <button
           class="button add"
-          on:click={() => handleToCart(flower.id, amount)}>Į krepšelį</button
+          on:click={() => handleToCart(flower.id, flower.amount)}
         >
+          Į krepšelį
+        </button>
       {/if}
     </div>
   {/each}

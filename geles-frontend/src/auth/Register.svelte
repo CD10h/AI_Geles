@@ -1,8 +1,14 @@
 <script>
   import axios from "axios";
+  import { notificationContextKey } from "../contexts";
+  import { getContext } from "svelte";
   import { navigate } from "svelte-routing";
   import Input from "../Input.svelte";
   import { isAxiosError } from "../util";
+
+  const { loading, success, error } = getContext<AppNotificationContext>(
+    notificationContextKey
+  );
 
   let registerFields = {
     username: "",
@@ -13,7 +19,11 @@
 
   async function handleSubmit() {
     try {
-      await axios.post("/users/", registerFields);
+      await loading(
+        "Registruojamasi...",
+        axios.post("/users/", registerFields)
+      );
+      success("Užregistruota");
       navigate("/");
     } catch (e) {
       if (isAxiosError(e)) {
@@ -23,7 +33,9 @@
               error => `${error.field} ${error.defaultMessage}`
             );
           } else if (e.response.status === 409) {
-            errors = ["Username already taken"];
+            error("Vartotojas tokiu vardu jau užregistruotas");
+          } else {
+            error("Klaida registruojant vartotoją");
           }
         }
       }

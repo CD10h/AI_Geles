@@ -6,6 +6,7 @@
   },
   "dependencies": {
     "axios": "^0.21.1",
+    "hash-sum": "^2.0.0",
     "svelte": "^3.24.0",
     "svelte-router-spa": "^6.0.2",
     "svelte-routing": "^1.6.0"
@@ -17,6 +18,7 @@
     "@snowpack/web-test-runner-plugin": "^0.2.0",
     "@testing-library/svelte": "^3.0.0",
     "@types/chai": "^4.2.13",
+    "@types/hash-sum": "^1.0.0",
     "@types/mocha": "^8.2.0",
     "@types/snowpack-env": "^2.3.3",
     "@web/test-runner": "^0.12.0",

@@ -1,10 +1,14 @@
 <script>
-  import { onMount } from "svelte";
+  import { getContext, onMount } from "svelte";
   import { server_url } from "./index";
   import axios from "axios";
   import { Link } from "svelte-routing";
   import Input from "./Input.svelte";
-  import { getPhoto } from "./photo";
+  import { notificationContextKey } from "./contexts";
+
+  const { loading, success, error } = getContext<AppNotificationContext>(
+    notificationContextKey
+  );
 
   interface CartTemplate {
     id: number;
@@ -87,8 +91,23 @@
   }
 
   async function handleUpdate() {
-    const response = await axios.put(`${server_url}/carts/${cart.id}`, cart);
-    cart.flowersInCart = mapFlowersInCart(response.data.flowersInCart);
+    try {
+      await loading(
+        "Išsaugoma...",
+        (async () => {
+          const response = await axios.put(
+            `${server_url}/carts/${cart.id}`,
+            cart
+          );
+          try {
+            cart.flowersInCart = mapFlowersInCart(response.data.flowersInCart);
+          } catch (e) {}
+        })()
+      );
+      success("Pakeitimai išsaugoti");
+    } catch (e) {
+      error("Klaida išsaugant pakeitimus");
+    }
   }
 
   async function getCartTemplates() {
@@ -108,12 +127,24 @@
         name: cartTemplate.name,
         flowersInCart: cart.flowersInCart
       };
-      const response = await axios.post(`${server_url}/templates/`, template, {
-        withCredentials: true
-      });
-      getCartTemplates();
+      try {
+        await loading(
+          "Išsaugoma...",
+          (async () => {
+            await axios.post(`${server_url}/templates/`, template, {
+              withCredentials: true
+            });
+            try {
+              await getCartTemplates();
+            } catch (e) {}
+          })()
+        );
+        success("Krepšelis išsaugotas");
+      } catch (e) {
+        error("Klaida išsaugant krepšelį");
+      }
     } else {
-      cartErrors = [`Įrašykite šablono pavadinimą`];
+      cartErrors = ["Įrašykite šablono pavadinimą"];
     }
   }
 
@@ -131,8 +162,24 @@
   }
 
   async function handleDeleteTemplate(template: CartTemplate) {
-    await axios.delete(`${server_url}/templates/${template.id}`);
-    getCartTemplates();
+    try {
+      if (
+        window.confirm(`Ar tikrai norite ištrinti krepšelį ${template.name}?`)
+      ) {
+        await loading(
+          "Ištrinama...",
+          (async () => {
+            await axios.delete(`${server_url}/templates/${template.id}`);
+            try {
+              await getCartTemplates();
+            } catch (e) {}
+          })()
+        );
+        success("Krepšelis ištrintas");
+      }
+    } catch (e) {
+      error("Klaida ištrinant krepšelį");
+    }
   }
 
   function calculateSum(template: CartTemplate) {

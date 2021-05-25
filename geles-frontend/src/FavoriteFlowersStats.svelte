@@ -3,7 +3,6 @@
   import { server_url } from "./index";
   import axios from "axios";
   import { Link } from "svelte-routing";
-  import { getPhoto } from "./photo";
 
   interface FavoriteFlowers {
     id: number;

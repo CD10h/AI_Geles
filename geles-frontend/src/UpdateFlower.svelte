@@ -6,10 +6,10 @@
 
   import Input from "./Input.svelte";
   import { notificationContextKey } from "./contexts";
-  import { AppNotificationType } from "./enums";
 
-  const { addNotification, addLoadingNotification } =
-    getContext<AppNotificationContext>(notificationContextKey);
+  const { loading, success, error } = getContext<AppNotificationContext>(
+    notificationContextKey
+  );
 
   let flower: Omit<Flower, "id"> = {
     name: "",
@@ -27,16 +27,13 @@
     try {
       // Creates a loading notification, awaits the passed promise
       // and removes the notification after promise was completed
-      await addLoadingNotification(
+      await loading(
         "Redaguojama...",
         axios.put(`/flowers/${id}`, flower, {
           withCredentials: true
         })
       );
-      addNotification(
-        "Gėlė sėkmingai paredaguota",
-        AppNotificationType.SUCCESS
-      );
+      success("Gėlė sėkmingai paredaguota");
       navigate("/");
     } catch (e) {
       if (isAxiosError(e)) {
@@ -51,7 +48,7 @@
           } else if (e.response.status === 409) {
             if (
               window.confirm(
-                "Informacija buvo pakeista kito vartotojo. Spauskite OK, jei norite pakeisti esamus duomenis įvestais. Norėdami atsinaujinti duomenis, perkraukite puslapį."
+                "Informacija buvo pakeista kito vartotojo. Spauskite „Gerai“, jei norite pakeisti esamus duomenis įvestais. Norėdami atsinaujinti duomenis, perkraukite puslapį."
               )
             ) {
               const newFlower = await getFlower();
@@ -62,7 +59,7 @@
           }
         }
       }
-      addNotification("Nepavyko paredaguoti gėlės", AppNotificationType.DANGER);
+      error("Klaida redaguojant gėlę");
     }
   }
 

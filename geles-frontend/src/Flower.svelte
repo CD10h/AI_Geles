@@ -5,7 +5,6 @@
   import { user } from "./stores";
   import { mapFlowerToWithFavorite } from "./util/flower";
   import { Link, navigate } from "svelte-routing";
-  import { getPhoto } from "./photo";
 
   export let flowerId: number;
 

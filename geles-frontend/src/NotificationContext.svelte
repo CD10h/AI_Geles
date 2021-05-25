@@ -54,10 +54,33 @@
     return true;
   }
 
+  const loading = addLoadingNotification;
+
+  function success(text: string) {
+    return addNotification(text, AppNotificationType.SUCCESS);
+  }
+
+  function error(text: string) {
+    return addNotification(text, AppNotificationType.DANGER);
+  }
+
+  function warning(text: string) {
+    return addNotification(text, AppNotificationType.WARNING);
+  }
+
+  function info(text: string) {
+    return addNotification(text, AppNotificationType.INFO);
+  }
+
   let context: AppNotificationContext = {
     addNotification,
     addLoadingNotification,
-    removeNotification
+    removeNotification,
+    loading,
+    success,
+    error,
+    warning,
+    info
   };
 
   setContext(notificationContextKey, context);
