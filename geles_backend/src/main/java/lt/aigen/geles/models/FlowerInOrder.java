@@ -2,6 +2,8 @@ package lt.aigen.geles.models;
 
 import lombok.Getter;
 import lombok.Setter;
+import org.hibernate.annotations.OnDelete;
+import org.hibernate.annotations.OnDeleteAction;
 
 import javax.persistence.*;
 import javax.validation.constraints.NotNull;
@@ -25,6 +27,7 @@ public class FlowerInOrder {
     private Order order;
 
     @ManyToOne
+    @OnDelete(action = OnDeleteAction.CASCADE)
     @NotNull
     @JoinColumn(name = "flower_id")
     private Flower flower;

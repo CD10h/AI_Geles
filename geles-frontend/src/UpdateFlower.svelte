@@ -102,13 +102,6 @@
       type="text"
       name="description"
     /><br />
-    <Input
-      label="Galiojimo trukmė(dienomis)"
-      bind:value={flower.daysToExpire}
-      type="number"
-      min={1}
-      name="expirydate"
-    /><br />
     <button class="button save">Redaguoti</button>
     {#each errors as error}
       <p class="error">

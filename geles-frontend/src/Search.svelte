@@ -1,11 +1,10 @@
 <script>
   import axios from "axios";
-  import { beforeUpdate, onMount } from "svelte";
+  import { onMount } from "svelte";
 
   import Catalogue from "./Catalogue.svelte";
   import SearchBar from "./SearchBar.svelte";
   import { mapFlowersToWithFavorite } from "./util/flower";
-  import hash from "hash-sum";
 
   interface Filter {
     sort: string;
@@ -27,42 +26,33 @@
   // Variable to hold fetched list
   let flowers: Flower[] = [];
   let favoriteFlowers: number[];
-  let prevFavoriteFlowerHash: string;
 
   // Dependencies of this block are calculated by Svelte
   // Every time `query` changes, this block of code runs
   $: {
-    if (favoriteFlowers && prevFavoriteFlowerHash !== hash(favoriteFlowers)) {
-      let minPrice = filter.filters.findIndex(
-        filter => filter.name === "minPrice"
-      );
-      let maxPrice = filter.filters.findIndex(
-        filter => filter.name === "maxPrice"
-      );
+    let minPrice = filter.filters.findIndex(
+      filter => filter.name === "minPrice"
+    );
+    let maxPrice = filter.filters.findIndex(
+      filter => filter.name === "maxPrice"
+    );
 
-      if (minPrice != -1 && maxPrice != -1) {
-        if (
-          +filter.filters[minPrice].value <= +filter.filters[maxPrice].value
-        ) {
-          axios
-            .post<Omit<Flower, "favorite">[]>(
-              `/flowers/filter/?q=${query}`,
-              filter
-            )
-            .then(response => {
-              flowers = mapFlowersToWithFavorite(
-                response.data,
-                favoriteFlowers
-              );
-            });
-        }
-      } else {
-        axios.post(`/flowers/filter/?q=${query}`, filter).then(response => {
-          flowers = mapFlowersToWithFavorite(response.data, favoriteFlowers);
-        });
+    if (minPrice != -1 && maxPrice != -1) {
+      if (+filter.filters[minPrice].value <= +filter.filters[maxPrice].value) {
+        axios
+          .post<Omit<Flower, "favorite">[]>(
+            `/flowers/filter/?q=${query}`,
+            filter
+          )
+          .then(response => {
+            flowers = mapFlowersToWithFavorite(response.data, favoriteFlowers);
+          });
       }
+    } else {
+      axios.post(`/flowers/filter/?q=${query}`, filter).then(response => {
+        flowers = mapFlowersToWithFavorite(response.data, favoriteFlowers);
+      });
     }
-    prevFavoriteFlowerHash = hash(favoriteFlowers);
   }
 
   interface SortableField {

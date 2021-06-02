@@ -280,8 +280,9 @@
               <td class="number">{rowSum(flower).toFixed(2)} €</td>
               {#if order.orderStatus == "UNPAID"}
                 <td>
-                  <button on:click={() => handleDelete(flower)}
-                    >Pašalinti</button
+                  <button
+                    class="button delete"
+                    on:click={() => handleDelete(flower)}>Pašalinti</button
                   >
                 </td>
               {/if}
@@ -470,7 +471,7 @@
     flex-basis: 50%;
   }
   .flowers-table {
-    width: min-content;
+    width: fit-content;
   }
 
   .editorder-inputs {
@@ -491,5 +492,9 @@
 
   label {
     display: table-cell;
+  }
+
+  .button {
+    box-sizing: content-box;
   }
 </style>

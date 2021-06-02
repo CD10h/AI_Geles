@@ -16,7 +16,7 @@
     name: "",
     price: 0,
     description: "",
-    daysToExpire: 0,
+    daysToExpire: 1,
     photo: ""
   };
 
@@ -114,13 +114,6 @@
       bind:value={flower.description}
       type="text"
       name="description"
-    /><br />
-    <Input
-      label="Galiojimo trukmė(dienomis)"
-      bind:value={flower.daysToExpire}
-      type="number"
-      min={1}
-      name="expirydate"
     /><br />
     <label for="fileUpload">Nuotrauka</label>
     <br />

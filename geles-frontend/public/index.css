@@ -59,23 +59,20 @@ body {
   background-color: #212529;
 }
 
-
-
 .button {
   display: inline-block;
   white-space: nowrap;
   border: 1px solid #777;
   padding: 0 1.5em;
   margin: 0.3em;
-  font-weight: bold ;
+  font-weight: bold;
   font-size: 0.9em;
   text-decoration: none;
   line-height: 2em;
   border-radius: 0.2em;
 }
-.button:not([disabled])
-{
-  
+
+.button:not([disabled]) {
   background-color: #a8d16b;
   background: linear-gradient(top, #eee, #ccc);
   color: #333;
@@ -103,18 +100,15 @@ body {
   pointer-events: none;
 }
 
-.button:active:not([disabled]){
+.button:active:not([disabled]) {
   box-shadow: 0 0 4px 2px rgba(0, 0, 0, 0.3) inset;
   position: relative;
   top: 1px;
 }
 
-
 .button:disabled {
   border: 1px solid #666;
 }
-
-
 
 .add:before {
   content: "\271A";
